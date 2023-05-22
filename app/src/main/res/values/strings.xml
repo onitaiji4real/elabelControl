@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">藥庫盤點</string>
+    <string-array name="Page">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+    <string-array name="InCode">
+        <item>購買</item>
+        <item>一般收入</item>
+        <item>初期庫存量</item>
+    </string-array>
+    <string-array name="OutCode">
+        <item>退藥</item>
+        <item>一般支出</item>
+        <item>銷毀</item>
+    </string-array>
+    <style name="Spinner" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+</resources>
