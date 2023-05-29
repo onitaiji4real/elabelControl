@@ -52,6 +52,7 @@ import data.Druginfo;
 import data.Drugstore;
 import data.GlobalData;
 import data.Inventory;
+import okio.Utf8;
 
 public class CFragment extends Fragment {
     EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
@@ -189,11 +190,6 @@ public class CFragment extends Fragment {
             }
         }
 
-//        String drugAreaSetText =
-//                target_DrugStore.getStoreID() + "-"
-//                        + target_DrugStore.getAreaNo() + "-"
-//                        + target_DrugStore.getBlockNo() + "-"
-//                        + target_DrugStore.getBlockType();
 
         edtDrugStore.setText(target_DrugStore.getStoreID());
         edtAreaNo.setText(target_DrugStore.getAreaNo());
@@ -236,7 +232,6 @@ public class CFragment extends Fragment {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 /** 取得回傳*/
                 callback.onSuccess();
-
             }
         });
 
@@ -328,13 +323,15 @@ public class CFragment extends Fragment {
                 String url = "http://192.168.5.41/Update.php?";
                 try {
 
-
+                    String DBoption;
                     url = url + "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
                     url = url + "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
                     url = url + "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
                     url = url + "BlockType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
                     url = url + "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
-                    url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8");
+                    url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
+                    url = url + "DBoption=" +URLEncoder.encode("in", "UTF-8") + "&";
+                    url = url + "ElabelNumber=" +URLEncoder.encode(edtElabelNumber.getText().toString(),"UTF-8");
 
                     Log.d("DrugCode_TAG", "DrugCode: " + edtDrugCode.getText().toString());
                     Log.d("AreaNo_TAG", "AreaNo: " + edtAreaNo.getText().toString());
