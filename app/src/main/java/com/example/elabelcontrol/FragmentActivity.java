@@ -38,6 +38,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,26 +49,30 @@ public class FragmentActivity extends AppCompatActivity {
     private CFragment cFragment;
     private DFragment dFragment;
     private EFragment eFragment;
-    Button btnLogout,btnDownloadData;
+    Button btnLogout, btnDownloadData;
     GlobalData globaldata;
     List<Drugstore> Drugstores;
     String download_url = "http://192.168.5.49/download_data.php?";
     boolean getFin;
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public interface VolleyCallback{
+
+    public interface VolleyCallback {
         void onSuccess();
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity);
+        globaldata = (GlobalData) getApplicationContext();
+
         getSupportActionBar().hide(); //隱藏標題列
 
         Drugstores = new ArrayList<>();
 
         aFragment = new AFragment();
         //透過getSupportFragmentManager()，獲取FragmentManager並使用beginTransaction()開啟一個事務。最後將Fragmnet加入容器內的方法，可以使用add。
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container,aFragment,"A").commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, aFragment, "A").commit();
 
 /*
 
@@ -89,48 +94,49 @@ public class FragmentActivity extends AppCompatActivity {
         guiTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch(tab.getPosition()) {
+                switch (tab.getPosition()) {
                     case 0:
-                        if(aFragment == null)
-                        aFragment = new AFragment();
+                        if (aFragment == null)
+                            aFragment = new AFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container,aFragment,"A").commit();
+                                .replace(R.id.fl_container, aFragment, "A").commit();
                         break;
                     case 1:
-                        if(bFragment == null)
+                        if (bFragment == null)
                             bFragment = new BFragment();
                         CSVReadDrugStore();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container,bFragment,"B").commit();
+                                .replace(R.id.fl_container, bFragment, "B").commit();
 
                         break;
                     case 2:
-                        if(cFragment == null)
+                        if (cFragment == null)
                             cFragment = new CFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container,cFragment,"C").commit();
+                                .replace(R.id.fl_container, cFragment, "C").commit();
                         break;
 
                     case 3:
-                        if(dFragment == null)
+                        if (dFragment == null)
                             dFragment = new DFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container,dFragment,"D").commit();
+                                .replace(R.id.fl_container, dFragment, "D").commit();
                         break;
 
                     case 4:
-                        if(eFragment == null)
+                        if (eFragment == null)
                             eFragment = new EFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container,eFragment,"E").commit();
+                                .replace(R.id.fl_container, eFragment, "E").commit();
                         break;
                 }
             }
+
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
 
@@ -142,70 +148,31 @@ public class FragmentActivity extends AppCompatActivity {
             }
         });
         guiTabs.newTab().select();
-        btnLogout = (Button)findViewById(R.id.btnlogout);
+        btnLogout = findViewById(R.id.btnlogout);
         btnLogout.setOnClickListener(onLogout);
 
-       // btnDownloadData = (Button)findViewById(R.id.btnDownloadData);
-       // btnDownloadData.setOnClickListener(onDownload);
-
-
-    /*
-        aFragment = new AFragment();
-        //透過getSupportFragmentManager()，獲取FragmentManager並使用beginTransaction()開啟一個事務。最後將Fragmnet加入容器內的方法，可以使用add。
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container,aFragment,"A").commit();
-        btn_InventoryRecord.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(aFragment == null)
-                    aFragment = new AFragment();
-                //這裡要做到替換的效果，所以我們用replace做到取代。
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fl_container,aFragment,"A").commit();
-            }
-        });
-        bFragment = new BFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container,bFragment,"B").commit();
-        btn2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(aFragment == null)
-                    aFragment = new AFragment();
-                //這裡要做到替換的效果，所以我們用replace做到取代。
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fl_container,bFragment,"B").commit();
-            }
-        });
-        cFragment = new CFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, cFragment,"C").commit();
-        btn3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(aFragment == null)
-                    aFragment = new AFragment();
-                //這裡要做到替換的效果，所以我們用replace做到取代。
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fl_container,cFragment,"C").commit();
-            }
-        });
-        */
+        // btnDownloadData = (Button)findViewById(R.id.btnDownloadData);
+        // btnDownloadData.setOnClickListener(onDownload);
 
     }
+
     private View.OnClickListener onLogout = new View.OnClickListener() {
 
         @Override
         public void onClick(View view) {
             globaldata.setLoginUserID("");
             globaldata.setLoginUserName("");
-            startActivity(new Intent(view.getContext(),Login.class));
+            startActivity(new Intent(view.getContext(), Login.class));
 
         }
     };
-    public void CSVReadDrugStore(){
-        try{
+
+    public void CSVReadDrugStore() {
+        try {
             File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/drugstore.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/drugstore.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -232,7 +199,7 @@ public class FragmentActivity extends AppCompatActivity {
                 drugstore.setUpdateUserID(record[17]);
                 drugstore.setUpdateTime(record[18]);
                 Drugstores.add(drugstore);
-                Log.d("drugstore",record[6]);
+                Log.d("drugstore", record[6]);
             }
             reader.close();
             bFragment.Drugstores = Drugstores;
@@ -241,7 +208,8 @@ public class FragmentActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    public void hideKeyboard(){
+
+    public void hideKeyboard() {
         View view = getWindow().getCurrentFocus();
         if (view == null) {
             View decorView = getWindow().getDecorView();
@@ -284,12 +252,12 @@ public class FragmentActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 /**取得回傳*/
-               // GetFin=true;
+                // GetFin=true;
             }
         });
     }
 
-    public void getRequestWithHeaderAndBody(String url,FragmentActivity.VolleyCallback callback) {
+    public void getRequestWithHeaderAndBody(String url, FragmentActivity.VolleyCallback callback) {
 
 
         OkHttpClient client = new OkHttpClient();
@@ -307,15 +275,16 @@ public class FragmentActivity extends AppCompatActivity {
                 System.out.println("發生錯誤");
                 System.out.println(e.toString());
             }
+
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 /**取得回傳*/
-               // GetFin=true;
+                // GetFin=true;
                 callback.onSuccess();
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     System.out.println("有結果");
 
-                   // ReadElabelData(response.body().string());
+                    // ReadElabelData(response.body().string());
                     //adapter.notifyDataSetChanged();
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override

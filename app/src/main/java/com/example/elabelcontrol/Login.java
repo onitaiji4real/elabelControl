@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -42,13 +43,14 @@ import data.GlobalData;
 import data.User;
 
 public class Login extends AppCompatActivity {
-    private Button btnLogin, btnDownloadData;
+    private static final int PERMISSION_REQUEST_CODE = 1000;
+    private static final int PROGRESS_DIALOG_TYPE = 0;
+
+    private Button btnLogin, btnDownloadData,btnScan;
     private List<User> users;
     private TextView edtAccount, edtPassword, edtScannedPassword;
     private GlobalData globalData;
     private ProgressDialog progressDialog;
-
-    private static final int PROGRESS_BAR_TYPE = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +59,7 @@ public class Login extends AppCompatActivity {
 
         requestWriteExternalStoragePermission();
 
-        edtAccount = findViewById(R.id.edtAccount);
-        edtPassword = findViewById(R.id.edtPassword);
-        edtScannedPassword = findViewById(R.id.edtScannedPassword);//掃描的帳密陣列
-        btnLogin = findViewById(R.id.btnLogin);
-        btnLogin.setOnClickListener(onLoginClickListener);
-        btnDownloadData = findViewById(R.id.btnDownloadData);
-        btnDownloadData.setOnClickListener(onDownloadClickListener);
-
-        edtAccount.requestFocus();
-        //edtScannedPassword.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(edtAccount, InputMethodManager.SHOW_IMPLICIT);
-
+        initializeViews();
 
         globalData = (GlobalData) getApplicationContext();
 
@@ -79,30 +69,7 @@ public class Login extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
-
-    private void startScanning() {
-        // 啟動掃描器，等待掃描完成
-    }
-
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_SCAN_RIGHT) {
-//            // 掃描器掃描完成，獲取掃描結果
-//            String scanResult = getScanResultFromScanner(); // 自行實現方法來獲取掃描結果
-//            processScanResult(scanResult); // 處理掃描結果
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-//
-//    private void processScanResult(String scanResult) {
-//        // 使用掃描結果進行後續處理
-//        // ...
-//    }
-
 
     private void requestWriteExternalStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -110,28 +77,47 @@ public class Login extends AppCompatActivity {
             boolean permissionGranted = checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
 
             if (!permissionGranted) {
-                requestPermissions(new String[]{permission}, 1000);
+                requestPermissions(new String[]{permission}, PERMISSION_REQUEST_CODE);
             }
         }
     }
 
+    private void initializeViews() {
+        edtAccount = findViewById(R.id.edtAccount);
+        edtPassword = findViewById(R.id.edtPassword);
+//        edtScannedPassword = findViewById(R.id.edtScannedPassword);
+
+        btnLogin = findViewById(R.id.btnLogin);
+        btnLogin.setOnClickListener(view -> {
+            hideKeyboard(view.getContext());
+            String loginResult = loginCheck(edtAccount.getText().toString(), edtPassword.getText().toString());
+            if (loginResult.isEmpty()) {
+                Toast.makeText(Login.this, globalData.getLoginUserID() + " 登入成功", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(view.getContext(), FragmentActivity.class));
+            } else {
+                Toast.makeText(Login.this, loginResult, Toast.LENGTH_LONG).show();
+            }
+        });
+//        btnScan = findViewById(R.id.btnScan);
+//        btnScan.setOnClickListener(view -> {
+//            hideKeyboard(view.getContext());
+//            String scannedQRCodeData = edtScannedPassword.getText().toString();
+//            String loginResult = processScannedQRCode(scannedQRCodeData);
+//
+//            // 处理登录验证结果
+//            if (loginResult.equals("")) {
+//                Toast.makeText(Login.this, globalData.getLoginUserID() + " " + globalData.getLoginUserName() + " 登录成功", Toast.LENGTH_LONG).show();
+//                startActivity(new Intent(view.getContext(), FragmentActivity.class));
+//            } else {
+//                Toast.makeText(Login.this, loginResult, Toast.LENGTH_LONG).show();
+//            }
+//        });
 
 
 
-//    private void performLogin(String account, String password) {
-//        hideKeyboard(this);
-//
-//        String loginResult = loginCheck(account, password);
-//
-//
-//
-//        if (loginResult.equals("")) {
-//            Toast.makeText(Login.this, globalData.getLoginUserID() + " " + globalData.getLoginUserName() + " 登入成功", Toast.LENGTH_LONG).show();
-//            startActivity(new Intent(Login.this, FragmentActivity.class));
-//        } else {
-//            Toast.makeText(Login.this, loginResult, Toast.LENGTH_LONG).show();
-//        }
-//    }
+        btnDownloadData = findViewById(R.id.btnDownloadData);
+        btnDownloadData.setOnClickListener(view -> new DownloadFileTask().execute("user.csv", "codetable.csv", "drugstore.csv", "druginfo.csv"));
+    }
 
     private String loginCheck(String account, String password) {
         if (users.stream().noneMatch(user -> user.getUserID().equals(account))) {
@@ -139,32 +125,27 @@ public class Login extends AppCompatActivity {
         } else if (users.stream().noneMatch(user -> user.getUserID().equals(account) && user.getPassword().equals(password))) {
             return "密碼錯誤!! " + globalData.getLoginUserID() + " " + globalData.getLoginUserName();
         } else {
-            Optional<User> loginUser = users.stream().filter(user -> user.getUserID().equals(account) && user.getPassword().equals(password)).findFirst();
-            globalData.setLoginUserID(loginUser.get().getUserID());
-            globalData.setLoginUserName(loginUser.get().getUserName());
-
+            Optional<User> loginUser = users.stream()
+                    .filter(user -> user.getUserID().equals(account) && user.getPassword().equals(password))
+                    .findFirst();
+            loginUser.ifPresent(user -> {
+                globalData.setLoginUserID(user.getUserID());
+                globalData.setLoginUserName(user.getUserName());
+            });
             return "";
         }
     }
-
-    private String scannedLoginCheck(String[] data) {
-        String account = data[0];
-        String password = data[1];
-
-        if (users.stream().noneMatch(user -> user.getUserID().equals(account))) {
-            return "無此使用者!! " + account + " 不存在";
-        } else if (users.stream().noneMatch(user -> user.getUserID().equals(account) && user.getPassword().equals(password))) {
-            return "密碼錯誤!! " + globalData.getLoginUserID() + " " + globalData.getLoginUserName();
-        } else {
-            Optional<User> loginUser = users.stream().filter(user -> user.getUserID().equals(account) && user.getPassword().equals(password)).findFirst();
-            globalData.setLoginUserID(loginUser.get().getUserID());
-            globalData.setLoginUserName(loginUser.get().getUserName());
-
-            return "";
-        }
-    }
-
-
+//    private String processScannedQRCode(String qrCodeData) {
+//        String[] data = qrCodeData.split(",");
+//        if (data.length >= 2) {
+//            String account = data[0].trim();
+//            String password = data[1].trim();
+//            return loginCheck(account, password);
+//        } else {
+//
+//            return "QR 码数据无效 " ;
+//        }
+//    }
 
     private void openCSVUser() throws IOException {
         File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
@@ -191,40 +172,24 @@ public class Login extends AppCompatActivity {
         reader.close();
     }
 
-    private final View.OnClickListener onLoginClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            hideKeyboard(view.getContext());
-            String loginResult = loginCheck(edtAccount.getText().toString(), edtPassword.getText().toString());
-//            String sannedResult =
-            if (loginResult.equals("")) {
-                Toast.makeText(Login.this, globalData.getLoginUserID() + " " + globalData.getLoginUserName() + " 登入成功", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(view.getContext(), FragmentActivity.class));
-            } else {
-                Toast.makeText(Login.this, loginResult, Toast.LENGTH_LONG).show();
-            }
+    private void hideKeyboard(Context context) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
         }
-    };
+    }
 
-    private final View.OnClickListener onDownloadClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            new DownloadFileFromURL().execute("user.csv", "codetable.csv", "drugstore.csv", "druginfo.csv");
-        }
-    };
-
-    class DownloadFileFromURL extends AsyncTask<String, String, String> {
-
+    private class DownloadFileTask extends AsyncTask<String, String, String> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
         }
 
         @Override
-        protected String doInBackground(String... f_url) {
+        protected String doInBackground(String... fileNames) {
             int count;
             try {
-                for (String fileName : f_url) {
+                for (String fileName : fileNames) {
                     URL url = new URL(globalData.Server + fileName);
                     URLConnection connection = url.openConnection();
                     connection.connect();
@@ -259,6 +224,7 @@ public class Login extends AppCompatActivity {
             return null;
         }
 
+        @Override
         protected void onProgressUpdate(String... progress) {
             //pDialog.setProgress(Integer.parseInt(progress[0]));
         }
@@ -267,30 +233,6 @@ public class Login extends AppCompatActivity {
         protected void onPostExecute(String file_url) {
             //dismissDialog(progress_bar_type);
         }
-
-    }
-
-    @Override
-    protected ProgressDialog onCreateDialog(int id) {
-        switch (id) {
-            case PROGRESS_BAR_TYPE:
-                progressDialog = new ProgressDialog(this);
-                progressDialog.setMessage("Downloading file. Please wait...");
-                progressDialog.setIndeterminate(false);
-                progressDialog.setMax(100);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setCancelable(true);
-                progressDialog.show();
-                return progressDialog;
-            default:
-                return null;
-        }
-    }
-
-    public static void hideKeyboard(Context context) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
-        }
     }
 }
+

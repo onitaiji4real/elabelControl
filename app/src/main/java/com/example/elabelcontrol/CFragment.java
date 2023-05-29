@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,11 +29,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Callback;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+
 
 import data.DrugInOut;
 import data.Druginfo;
@@ -40,8 +54,8 @@ import data.GlobalData;
 import data.Inventory;
 
 public class CFragment extends Fragment {
-    EditText edtElabelNumber,edtDrugCode,edtDrugEnglish,edtInQty,edtDrugStore;
-    Button btnSumit,btnLight,btnGetDrugStore;
+    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
+    Button btnSumit, btnLight, btnGetDrugStore;
     GlobalData globaldata;
 
     List<Drugstore> Drugstores;
@@ -68,13 +82,22 @@ public class CFragment extends Fragment {
     String UpdateUserID;
     String UpdateTime;
     String CodeID;
+    boolean getFin;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_c, container, false);
-        globaldata = (GlobalData)getActivity().getApplicationContext();
+        globaldata = (GlobalData) getActivity().getApplicationContext();
+
         edtElabelNumber = view.findViewById(R.id.edtElabelNumber);
+        edtElabelNumber.requestFocus();//聚焦 電子紙條碼欄位
+
+        edtAreaNo = view.findViewById(R.id.edtAreaNo);
+        edtBlockNo = view.findViewById(R.id.edtBlockNo);
+        edtBlockType = view.findViewById(R.id.edtBlockType);
+
+
         edtDrugCode = view.findViewById(R.id.edtDrugCode);
         edtDrugEnglish = view.findViewById(R.id.edtDrugEnglish);
         edtDrugStore = view.findViewById(R.id.edtDrugStore);
@@ -82,6 +105,10 @@ public class CFragment extends Fragment {
 
         btnSumit = view.findViewById(R.id.btnSumit);
         btnSumit.setOnClickListener(OnSumit);
+
+        btnLight = view.findViewById(R.id.btnLight);
+        btnLight.setOnClickListener(OnLight);
+
         btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
         btnGetDrugStore.setOnClickListener(OnGetDrugStore);
 
@@ -108,6 +135,9 @@ public class CFragment extends Fragment {
         Druginfos = new ArrayList<Druginfo>();
         CSVReadDrugInfo();
 
+        labelAfterScanListener();
+
+
         return view;
     }
 
@@ -116,12 +146,108 @@ public class CFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
     }
-    public void CSVReadDrugStore(){
-        try{
+
+    private void labelAfterScanListener() {
+
+        edtElabelNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //目前不使用到
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //目前不使用到
+            }
+
+            @Override
+            public void afterTextChanged(Editable e) {
+                String input = e.toString();
+
+                if (e.length() == 12) {
+                    lsDrugInfo();
+                }
+            }
+        });
+    }
+
+    private void lsDrugInfo() {
+        String ed = edtElabelNumber.getText().toString();
+
+        Druginfo target_DrugInfo = null;
+        Drugstore target_DrugStore = null;
+        for (Drugstore drugstore : Drugstores) {
+            if (drugstore.getElabelNumber().equals(ed)) {
+                target_DrugStore = drugstore;
+                break;
+            }
+        }
+
+        for (Druginfo druginfo : Druginfos) {
+            if (druginfo.getDrugCode().equals(target_DrugStore.getDrugCode())) {
+                target_DrugInfo = druginfo;
+            }
+        }
+
+//        String drugAreaSetText =
+//                target_DrugStore.getStoreID() + "-"
+//                        + target_DrugStore.getAreaNo() + "-"
+//                        + target_DrugStore.getBlockNo() + "-"
+//                        + target_DrugStore.getBlockType();
+
+        edtDrugStore.setText(target_DrugStore.getStoreID());
+        edtAreaNo.setText(target_DrugStore.getAreaNo());
+        edtBlockNo.setText(target_DrugStore.getBlockNo());
+        edtBlockType.setText(target_DrugStore.getBlockType());
+        edtDrugCode.setText(target_DrugStore.getDrugCode());
+        edtDrugEnglish.setText(target_DrugInfo.getDrugName());
+
+        Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public interface VolleyCallback {
+        void onSuccess();
+        // 在這裡可以添加其他方法，如 onFailure 等
+    }
+
+
+    public void sendGET(String Url, final VolleyCallback callback) {
+
+        /**建立連線*/
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .build();
+        /**設置傳送需求*/
+        Request request = new Request.Builder()
+                .url(Url)
+//                .header("Cookie","")//有Cookie需求的話則可用此發送
+//                .addHeader("","")//如果API有需要header的則可使用此發送
+                .build();
+        /**設置回傳*/
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                /** 如果傳送過程有錯誤*/
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                /** 取得回傳*/
+                callback.onSuccess();
+
+            }
+        });
+
+    }
+
+    public void CSVReadDrugStore() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/drugstore.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/drugstore.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -129,7 +255,7 @@ public class CFragment extends Fragment {
             while ((record = reader.readNext()) != null) {
                 Drugstore drugstore = new Drugstore();
                 drugstore.setStoreID(record[0]);
-                Log.d("drugstore",record[6]);
+                Log.d("drugstore", record[6]);
                 drugstore.setAreaNo(record[1]);
                 drugstore.setBlockNo(record[2]);
                 drugstore.setBlockType(record[3]);
@@ -158,12 +284,12 @@ public class CFragment extends Fragment {
         }
     }
 
-    public void CSVReadDrugInfo(){
-        try{
+    public void CSVReadDrugInfo() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/druginfo.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/druginfo.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -183,19 +309,61 @@ public class CFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
     public static void hideKeyboard(Context context) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
         }
     }
+
     private View.OnClickListener OnSumit = new View.OnClickListener() {
+        /**收入*/
 
         @Override
         public void onClick(View v) {
             hideKeyboard(v.getContext());
             try {
                 exportDataToCSV();
+                String url = "http://192.168.5.41/Update.php?";
+                try {
+
+
+                    url = url + "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
+                    url = url + "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
+                    url = url + "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
+                    url = url + "BlockType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
+                    url = url + "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                    url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8");
+
+                    Log.d("DrugCode_TAG", "DrugCode: " + edtDrugCode.getText().toString());
+                    Log.d("AreaNo_TAG", "AreaNo: " + edtAreaNo.getText().toString());
+                    Log.d("BlockNo_TAG", "BlockNo: " + edtBlockNo.getText().toString());
+                    Log.d("BlockType_TAG", "BlockType: " + edtBlockType.getText().toString());
+                    Log.d("TotalQty_TAG", "TotalQty: " + edtInQty.getText().toString());
+                    Log.d("StoreID", "StoreID:" + edtDrugStore.getText().toString());
+
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                Toast.makeText(v.getContext(), url, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(view.getContext(), url, Toast.LENGTH_SHORT).show();
+                getFin = false;
+                sendGET(url, new VolleyCallback() {
+                    @Override
+                    public void onSuccess() {
+                        getFin = true;
+                    }
+                });
+                while (!getFin) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -206,23 +374,22 @@ public class CFragment extends Fragment {
         @Override
         public void onClick(View v) {
             hideKeyboard(v.getContext());
-            String ElabelNumber  = edtElabelNumber.getText().toString();
-            if(Drugstores.stream().count()==0){
+            String ElabelNumber = edtElabelNumber.getText().toString();
+            if (Drugstores.stream().count() == 0) {
                 //Log.d("Drugstores", "Drugstores 為 0");
             }
             Log.d("ElabelNumber", ElabelNumber);
-            if(Drugstores.stream().filter(drugstore ->(drugstore.getElabelNumber().equals(ElabelNumber) )).count()==0) {
+            if (Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).count() == 0) {
                 //無此條碼資料
                 Log.d("error", "無結果");
-            }
-            else {
+            } else {
                 List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).collect(Collectors.toList());
-                if(Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count()>0) {
-                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
+                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count() > 0) {
+                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
                     edtDrugEnglish.setText(MatchDruginfo.get(0).getDrugEnglish());
                 }
                 edtDrugCode.setText(MatchDrugstore.get(0).getDrugCode());
-                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID()+"-"+MatchDrugstore.get(0).getAreaNo()+"-"+MatchDrugstore.get(0).getBlockNo()+"-"+MatchDrugstore.get(0).getBlockType());
+                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID() + "-" + MatchDrugstore.get(0).getAreaNo() + "-" + MatchDrugstore.get(0).getBlockNo() + "-" + MatchDrugstore.get(0).getBlockType());
                 StoreID = MatchDrugstore.get(0).getStoreID();
                 AreaNo = MatchDrugstore.get(0).getAreaNo();
                 BlockNo = MatchDrugstore.get(0).getBlockNo();
@@ -245,7 +412,49 @@ public class CFragment extends Fragment {
         }
     };
 
-    private  Spinner.OnItemSelectedListener spnOnItemSelected = new Spinner.OnItemSelectedListener() {
+    private View.OnClickListener OnLight = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            hideKeyboard(view.getContext());
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType = MediaType.parse("application/json");
+            String labelCode = edtElabelNumber.getText().toString();
+            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"10\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+            RequestBody body = RequestBody.create(mediaType, jsonString);
+            Request request = new Request.Builder()
+                    .url("http://192.168.5.130:9003/labels/contents/led")
+                    .method("PUT", body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "*/*")
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected code " + response);
+                    } else {
+                        // Remember to run this on UI thread if you're planning to update UI
+                        view.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(view.getContext(),"toast", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+
+
+    private Spinner.OnItemSelectedListener spnOnItemSelected = new Spinner.OnItemSelectedListener() {
 
         @Override
 

@@ -9,14 +9,15 @@
     <Button
         android:id="@+id/btnDownloadData"
         android:layout_width="130dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="40dp"
+        android:layout_height="wrap_content"
         android:text="下載資料"
         android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+        app:layout_constraintHorizontal_bias="0.525"
+        app:layout_constraintStart_toEndOf="@+id/btnLogin"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4"
+        app:layout_constraintVertical_bias="0.335" />
 
     <ImageView
         android:id="@+id/imageView4"
@@ -92,10 +93,12 @@
         android:textAlignment="center"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.185"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView4" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView4"
+        app:layout_constraintVertical_bias="0.338" />
 
     <TextView
         android:id="@+id/textView7"
@@ -121,30 +124,16 @@
         android:hint="請輸入帳號"
         android:inputType="text"
         android:singleLine="false"
-        android:text="Admmin"
+        android:text="Admin"
         android:textAlignment="center"
         android:textColor="@color/wordcolor_gray"
         android:textColorHint="#B1AEAE"
         android:textSize="20sp"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@+id/imageView2"
         app:layout_constraintEnd_toEndOf="@+id/imageView2"
         app:layout_constraintStart_toStartOf="@+id/imageView2"
         app:layout_constraintTop_toTopOf="@+id/imageView2"
         tools:visibility="invisible" />
-
-    <EditText
-        android:id="@+id/edtScannedPassword"
-        android:layout_width="328dp"
-        android:layout_height="75dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:hint="在這"
-        android:inputType="textPassword"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnDownloadData" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
