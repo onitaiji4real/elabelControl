@@ -55,9 +55,11 @@ import data.Inventory;
 import okio.Utf8;
 
 public class CFragment extends Fragment {
+    Spinner spinner;
     EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
     Button btnSumit, btnLight, btnGetDrugStore;
     GlobalData globaldata;
+
 
     List<Drugstore> Drugstores;
     List<DrugInOut> DrugInOuts;
@@ -105,7 +107,7 @@ public class CFragment extends Fragment {
         edtInQty = view.findViewById(R.id.edtInQty);
 
         btnSumit = view.findViewById(R.id.btnSumit);
-        btnSumit.setOnClickListener(OnSumit);
+        btnSumit.setOnClickListener(OnSubmit);
 
         btnLight = view.findViewById(R.id.btnLight);
         btnLight.setOnClickListener(OnLight);
@@ -113,7 +115,10 @@ public class CFragment extends Fragment {
         btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
         btnGetDrugStore.setOnClickListener(OnGetDrugStore);
 
-        Spinner spinner = view.findViewById(R.id.spOutCode);
+
+        spinner = view.findViewById(R.id.spOutCode);
+
+
         ArrayAdapter<CharSequence> adapter =
                 ArrayAdapter.createFromResource(view.getContext(),
                         R.array.InCode,
@@ -206,7 +211,6 @@ public class CFragment extends Fragment {
         void onSuccess();
         // 在這裡可以添加其他方法，如 onFailure 等
     }
-
 
     public void sendGET(String Url, final VolleyCallback callback) {
 
@@ -312,7 +316,7 @@ public class CFragment extends Fragment {
         }
     }
 
-    private View.OnClickListener OnSumit = new View.OnClickListener() {
+    private View.OnClickListener OnSubmit = new View.OnClickListener() {
         /**收入*/
 
         @Override
@@ -320,7 +324,7 @@ public class CFragment extends Fragment {
             hideKeyboard(v.getContext());
             try {
                 exportDataToCSV();
-                String url = "http://192.168.5.41/Update.php?";
+                String url = "http://192.168.5.41/pda_submit.php?";
                 try {
 
                     String DBoption;
@@ -331,14 +335,23 @@ public class CFragment extends Fragment {
                     url = url + "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
                     url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
                     url = url + "DBoption=" +URLEncoder.encode("in", "UTF-8") + "&";
-                    url = url + "ElabelNumber=" +URLEncoder.encode(edtElabelNumber.getText().toString(),"UTF-8");
+                    url = url + "ElabelNumber=" +URLEncoder.encode(edtElabelNumber.getText().toString(),"UTF-8")+"&";
+                    url = url + "DrugEnglish=" +URLEncoder.encode(edtDrugEnglish.getText().toString(),"UTF-8")+"&";
+                    url = url + "spinnerText=" +URLEncoder.encode(spinner.getSelectedItem().toString(),"UTF-8")+"&";
+                    url = url + "UserID=" +URLEncoder.encode(globaldata.getLoginUserID(),"UTF-8");
 
-                    Log.d("DrugCode_TAG", "DrugCode: " + edtDrugCode.getText().toString());
-                    Log.d("AreaNo_TAG", "AreaNo: " + edtAreaNo.getText().toString());
-                    Log.d("BlockNo_TAG", "BlockNo: " + edtBlockNo.getText().toString());
-                    Log.d("BlockType_TAG", "BlockType: " + edtBlockType.getText().toString());
-                    Log.d("TotalQty_TAG", "TotalQty: " + edtInQty.getText().toString());
-                    Log.d("StoreID", "StoreID:" + edtDrugStore.getText().toString());
+
+                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
+                    Log.d("TAG", "AreaNo: " + edtAreaNo.getText().toString());
+                    Log.d("TAG", "BlockNo: " + edtBlockNo.getText().toString());
+                    Log.d("TAG", "BlockType: " + edtBlockType.getText().toString());
+                    Log.d("TAG", "TotalQty: " + edtInQty.getText().toString());
+                    Log.d("TAG", "StoreID: " + edtDrugStore.getText().toString());
+                    Log.d("TAG", "DBoption: in");
+                    Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+                    Log.d("TAG", "DrugEnglish: " + edtDrugEnglish.getText().toString());
+                    Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
+                    Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
 
 
                 } catch (UnsupportedEncodingException e) {
@@ -416,7 +429,7 @@ public class CFragment extends Fragment {
             OkHttpClient client = new OkHttpClient().newBuilder().build();
             MediaType mediaType = MediaType.parse("application/json");
             String labelCode = edtElabelNumber.getText().toString();
-            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"10\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
             RequestBody body = RequestBody.create(mediaType, jsonString);
             Request request = new Request.Builder()
                     .url("http://192.168.5.130:9003/labels/contents/led")

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">藥庫盤點</string>
+    <string name="SystemName">百國盤點系統</string>
     <string-array name="Page">
         <item>1</item>
         <item>2</item>
