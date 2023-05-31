@@ -27,11 +27,16 @@ import androidx.fragment.app.Fragment;
 import com.opencsv.CSVReader;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,14 +49,18 @@ import data.GlobalData;
 import data.Inventory;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 public class BFragment extends Fragment {
-    EditText edtElabelNumber,edtDrugCode,edtDrugEnglish,edtNumBox,edtNumRow,edtNumPill,edtDrugStore;
-    TextView txtInventoryQty,txtInventoryNum;
-    Button btnSumit,btnLight,btnGetDrugStore;
+    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtNumBox, edtNumRow, edtNumPill, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
+    TextView txtInventoryQty, txtInventoryNum, textNum;
+    private Activity activity;
+    Button btnSumit, btnLight;
     Boolean GetFin;
     Spinner SpPage;
     GridView gridLotnumber;
@@ -64,10 +73,10 @@ public class BFragment extends Fragment {
     String PageStockQty2;
     String PageEffectDate1;
     String PageEffectDate2;
-    String ElabelID,ElabelName,ElabelArticleID,ElabelDrugName,ElabelDrugCode2,ElabelDrugName2;
+    String ElabelID, ElabelName, ElabelArticleID, ElabelDrugName, ElabelDrugCode2, ElabelDrugName2;
     boolean getFin;
-    private String[] LotNumberArray ;
-    private String[] StockQtyArray ;
+    private String[] LotNumberArray;
+    private String[] StockQtyArray;
     GlobalData globaldata;
     List<Drugstore> Drugstores;
     List<Inventory> Inventorys;
@@ -97,10 +106,10 @@ public class BFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_b, container, false);
-        globaldata = (GlobalData)getActivity().getApplicationContext();
+        globaldata = (GlobalData) getActivity().getApplicationContext();
         edtElabelNumber = view.findViewById(R.id.edtElabelNumber);
-        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
-        btnGetDrugStore.setOnClickListener(onGetDrugStore);
+//        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
+        //btnGetDrugStore.setOnClickListener(onGetDrugStore);
 
         edtDrugStore = view.findViewById(R.id.edtDrugStore);
         edtDrugCode = view.findViewById(R.id.edtDrugCode);
@@ -112,39 +121,47 @@ public class BFragment extends Fragment {
         btnLight.setOnClickListener(OnLight);
         edtElabelNumber.requestFocus();
 
-        edtNumBox = view.findViewById(R.id.edtInQty);
-        edtNumRow = view.findViewById(R.id.edtNumRow);
+        textNum = view.findViewById(R.id.textNum);
+
+
+        edtAreaNo = view.findViewById(R.id.edtAreaNo);
+        edtBlockNo = view.findViewById(R.id.edtBlockNo);
+        edtBlockType = view.findViewById(R.id.edtBlockType);
+
+
+//        edtNumBox = view.findViewById(R.id.edtInQty);
+//        edtNumRow = view.findViewById(R.id.edtNumRow);
         edtNumPill = view.findViewById(R.id.edtNumPill);
         txtInventoryQty = view.findViewById(R.id.txtInventoryQty);
-        txtInventoryNum = view.findViewById(R.id.txtInventoryNum);
+//        txtInventoryNum = view.findViewById(R.id.txtInventoryNum);
 
-        edtNumBox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {}
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-                Log.d("TextChanged","TextChanged");
-                if(s.length() != 0) {
-                    try{
-                        Integer NumBox = Integer.valueOf(edtNumBox.getText().toString())*4*4;
-                        Integer NumRow = Integer.valueOf(edtNumRow.getText().toString())*4;
-                        Integer NumPill = Integer.valueOf(edtNumPill.getText().toString());
-                        Integer Sum = NumBox+NumRow+NumPill;
-                        txtInventoryQty.setText(Sum.toString());
-                    }
-                    catch (NumberFormatException ex){
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        });
+//        edtNumBox.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void afterTextChanged(Editable s) {}
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start,
+//                                          int count, int after) {
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start,
+//                                      int before, int count) {
+//                Log.d("TextChanged","TextChanged");
+//                if(s.length() != 0) {
+//                    try{
+//                        Integer NumBox = Integer.valueOf(edtNumBox.getText().toString())*4*4;
+//                        Integer NumRow = Integer.valueOf(edtNumRow.getText().toString())*4;
+//                        Integer NumPill = Integer.valueOf(edtNumPill.getText().toString());
+//                        Integer Sum = NumBox+NumRow+NumPill;
+//                        txtInventoryQty.setText(Sum.toString());
+//                    }
+//                    catch (NumberFormatException ex){
+//                        ex.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
 
         Drugstores = new ArrayList<Drugstore>();
         CSVReadDrugStore();
@@ -157,8 +174,10 @@ public class BFragment extends Fragment {
 
         String InventoryNum = String.valueOf(Inventorys.size());
         String DrugStore = String.valueOf(Drugstores.size());
-        String ShowNum = " "+InventoryNum+" / "+DrugStore;
-        txtInventoryNum.setText(ShowNum);
+        String ShowNum = " " + InventoryNum + " / " + DrugStore;
+        //txtInventoryNum.setText(ShowNum);
+
+        labelAfterScanListener();
 
         return view;
     }
@@ -173,23 +192,22 @@ public class BFragment extends Fragment {
         @Override
         public void onClick(View v) {
             hideKeyboard(v.getContext());
-            String ElabelNumber  = edtElabelNumber.getText().toString();
-            if(Drugstores.stream().count()==0){
+            String ElabelNumber = edtElabelNumber.getText().toString();
+            if (Drugstores.stream().count() == 0) {
                 //Log.d("Drugstores", "Drugstores 為 0");
             }
             Log.d("ElabelNumber", ElabelNumber);
-            if(Drugstores.stream().filter(drugstore ->(drugstore.getElabelNumber().equals(ElabelNumber) )).count()==0) {
-               //無此條碼資料
+            if (Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).count() == 0) {
+                //無此條碼資料
                 Log.d("error", "無結果");
-            }
-            else {
+            } else {
                 List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).collect(Collectors.toList());
-                if(Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count()>0) {
-                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
+                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count() > 0) {
+                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
                     edtDrugEnglish.setText(MatchDruginfo.get(0).getDrugEnglish());
                 }
                 edtDrugCode.setText(MatchDrugstore.get(0).getDrugCode());
-                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID()+"-"+MatchDrugstore.get(0).getAreaNo()+"-"+MatchDrugstore.get(0).getBlockNo()+"-"+MatchDrugstore.get(0).getBlockType());
+                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID() + "-" + MatchDrugstore.get(0).getAreaNo() + "-" + MatchDrugstore.get(0).getBlockNo() + "-" + MatchDrugstore.get(0).getBlockType());
                 StoreID = MatchDrugstore.get(0).getStoreID();
                 AreaNo = MatchDrugstore.get(0).getAreaNo();
                 BlockNo = MatchDrugstore.get(0).getBlockNo();
@@ -212,29 +230,164 @@ public class BFragment extends Fragment {
         }
     };
 
-    private View.OnClickListener OnLight = new View.OnClickListener() {
+    private void labelAfterScanListener() {
 
-        @Override
-        public void onClick(View v) {
-            /*
-            String ElabelNumber = edtElabelNumber.getText().toString();
-            String LightJsonStr = String.format("[\n" +
-                    "  {\n" +
-                    "    \"color\": \"RED\",\n" +
-                    "    \"duration\": \"30s\",\n" +
-                    "    \"labelCode\": \"%s\"\n" +
-                    "  }\n" +
-                    "]",ElabelNumber);
-            GetFin=false;
-            putRequestWithHeaderAndBody("http://192.168.219.100:9003/labels/contents/led",LightJsonStr);
-            while(!GetFin)
-            {
+        edtElabelNumber.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //目前不使用到
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                //目前不使用到
+            }
+
+            @Override
+            public void afterTextChanged(Editable e) {
+                //String input = e.toString();
+                if (e.length() == 12) {
+                    lsDrugInfo();
+                }
+            }
+        });
+    }
+
+    public void lsDrugInfo() {
+        String ed = edtElabelNumber.getText().toString();
+
+        String url = "http://192.168.5.41/pda_submit.php?";
+        try {
+            url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+            url += "DBoption=select";
+
+            Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+            Log.d("TAG", "DBoption: select");
+
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    try {
+                        String areaNo = response.getString("AreaNo");
+                        String blockNo = response.getString("BlockNo");
+                        String blockType = response.getString("BlockType");
+                        String drugCode = response.getString("DrugCode");
+                        String stockQty = response.getString("StockQty");
+                        String storeID = response.getString("StoreID");
+                        String drugenglish = response.getString("DrugName");
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textNum.setText(stockQty);
+                                edtDrugStore.setText(storeID); //卡位StoreID
+                                edtAreaNo.setText(areaNo);
+                                edtBlockNo.setText(blockNo);
+                                edtBlockType.setText(blockType);
+                                edtDrugCode.setText(drugCode);
+                                edtDrugEnglish.setText(drugenglish);
+
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            // 处理编码异常
+        }
+
+        textNum.setText(ed);
+    }
+
+    public void sendGET(String Url, final VolleyCallback callback) {
+
+        /**建立連線*/
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .build();
+        /**設置傳送需求*/
+        Request request = new Request.Builder()
+                .url(Url)
+//                .header("Cookie","")//有Cookie需求的話則可用此發送
+//                .addHeader("","")//如果API有需要header的則可使用此發送
+                .build();
+        /**設置回傳*/
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                /** 如果傳送過程有錯誤*/
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                /** 取得回傳*/
                 try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
+                    String responseData = response.body().string();
+                    JSONObject jsonObject;
+
+                    try {
+                        jsonObject = new JSONObject(responseData);
+                        callback.onSuccess(jsonObject);
+                    } catch (JSONException e) {
+                        Log.e("TAG", "Invalid JSON response: " + responseData);
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }*/
+            }
+
+        });
+    }
+
+    public interface VolleyCallback {
+
+        void onSuccess(JSONObject response);
+        // 在這裡可以添加其他方法，如 onFailure 等
+    }
+
+    private View.OnClickListener OnLight = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            hideKeyboard(view.getContext());
+            OkHttpClient client = new OkHttpClient().newBuilder().build();
+            MediaType mediaType = MediaType.parse("application/json");
+            String labelCode = edtElabelNumber.getText().toString();
+            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+            RequestBody body = RequestBody.create(mediaType, jsonString);
+            Request request = new Request.Builder()
+                    .url("http://192.168.5.130:9003/labels/contents/led")
+                    .method("PUT", body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Accept", "*/*")
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected code " + response);
+                    } else {
+                        // Remember to run this on UI thread if you're planning to update UI
+                        view.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(view.getContext(),"亮燈", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            });
         }
     };
 
@@ -255,7 +408,7 @@ public class BFragment extends Fragment {
         public void onClick(View view) {
 
             String ElabelNumber = edtElabelNumber.getText().toString();
-            String url = "http://192.168.219.100:9003/articles/label/"+ElabelNumber;
+            String url = "http://192.168.219.100:9003/articles/label/" + ElabelNumber;
             System.out.println(url);
             /*
             getRequestWithHeaderAndBody(url, FragmentActivity.VolleyCallback(){
@@ -264,8 +417,7 @@ public class BFragment extends Fragment {
                     getFin=true;
                 }
             });*/
-            while(!getFin)
-            {
+            while (!getFin) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -275,10 +427,11 @@ public class BFragment extends Fragment {
             edtDrugCode.setText(PageDrugCode);
             edtDrugEnglish.setText(PageDrugEnglish);
 
-           // hideKeyboard();
+            // hideKeyboard();
         }
     };
-    public void getRequestWithHeaderAndBody(String url,final FragmentActivity.VolleyCallback callback) {
+
+    public void getRequestWithHeaderAndBody(String url, final FragmentActivity.VolleyCallback callback) {
 
         OkHttpClient client = new OkHttpClient();
 
@@ -295,15 +448,16 @@ public class BFragment extends Fragment {
                 System.out.println("發生錯誤");
                 System.out.println(e.toString());
             }
+
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 /**取得回傳*/
-                GetFin=true;
+                GetFin = true;
                 callback.onSuccess();
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     System.out.println("有結果");
 
-                   // ReadElabelData(response.body().string());
+                    // ReadElabelData(response.body().string());
                     //adapter.notifyDataSetChanged();
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -315,12 +469,13 @@ public class BFragment extends Fragment {
             }
         });
     }
-    public void CSVReadDrugStore(){
-        try{
+
+    public void CSVReadDrugStore() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/drugstore.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/drugstore.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -328,7 +483,7 @@ public class BFragment extends Fragment {
             while ((record = reader.readNext()) != null) {
                 Drugstore drugstore = new Drugstore();
                 drugstore.setStoreID(record[0]);
-                Log.d("drugstore",record[6]);
+                Log.d("drugstore", record[6]);
                 drugstore.setAreaNo(record[1]);
                 drugstore.setBlockNo(record[2]);
                 drugstore.setBlockType(record[3]);
@@ -357,12 +512,12 @@ public class BFragment extends Fragment {
         }
     }
 
-    public void CSVReadInventory(){
-        try{
+    public void CSVReadInventory() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/inventory.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/inventory.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -394,12 +549,12 @@ public class BFragment extends Fragment {
         }
     }
 
-    public void CSVReadDrugInfo(){
-        try{
+    public void CSVReadDrugInfo() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/druginfo.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/druginfo.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -431,15 +586,16 @@ public class BFragment extends Fragment {
         }
         return result;
     }
+
     private void exportDataToCSV() throws IOException {
         String csvData = "";
         Integer count = 0;
 
         for (int i = 0; i < Inventorys.size(); i++) {
             if ((StoreID == Inventorys.get(i).getStoreID()) && (AreaNo == Inventorys.get(i).getAreaNo()) && (BlockNo == Inventorys.get(i).getBlockNo())
-            && (BlockType == Inventorys.get(i).getBlockType())) {
+                    && (BlockType == Inventorys.get(i).getBlockType())) {
                 count += 1;
-                Log.d("count",count.toString());
+                Log.d("count", count.toString());
                 SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
                 SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm:ss");
                 Calendar c = Calendar.getInstance();
