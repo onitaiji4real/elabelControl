@@ -61,6 +61,8 @@ public class CFragment extends Fragment {
     GlobalData globaldata;
 
 
+
+
     List<Drugstore> Drugstores;
     List<DrugInOut> DrugInOuts;
     List<Druginfo> Druginfos;
