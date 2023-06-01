@@ -25,6 +25,9 @@ import androidx.fragment.app.Fragment;
 
 import com.opencsv.CSVReader;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -57,8 +60,9 @@ import okio.Utf8;
 public class CFragment extends Fragment {
     Spinner spinner;
     EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
-    Button btnSumit, btnLight, btnGetDrugStore;
+    Button btnSumit, btnLight, btnGetDrugStore,btnClear;
     GlobalData globaldata;
+    TextView textNum;
 
 
 
@@ -117,6 +121,11 @@ public class CFragment extends Fragment {
         btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
         btnGetDrugStore.setOnClickListener(OnGetDrugStore);
 
+        textNum = view.findViewById(R.id.textNum);
+
+        btnClear = view.findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(onClear);
+
 
         spinner = view.findViewById(R.id.spOutCode);
 
@@ -149,25 +158,38 @@ public class CFragment extends Fragment {
         return view;
     }
 
+    private View.OnClickListener onClear = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            edtElabelNumber.setText("");
+            edtDrugStore.setText("");
+            edtAreaNo.setText("");
+            edtBlockNo.setText("");
+            edtDrugStore.setText("");
+            edtDrugEnglish.setText("");
+            edtInQty.setText("");
+            edtDrugCode.setText("");
+            edtBlockType.setText("");
+            edtElabelNumber.requestFocus();
+            hideKeyboard(v.getContext());
+        }
+    };
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
     }
 
     private void labelAfterScanListener() {
-
         edtElabelNumber.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //目前不使用到
             }
-
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //目前不使用到
             }
-
             @Override
             public void afterTextChanged(Editable e) {
                 String input = e.toString();
@@ -182,38 +204,59 @@ public class CFragment extends Fragment {
     private void lsDrugInfo() {
         String ed = edtElabelNumber.getText().toString();
 
-        Druginfo target_DrugInfo = null;
-        Drugstore target_DrugStore = null;
-        for (Drugstore drugstore : Drugstores) {
-            if (drugstore.getElabelNumber().equals(ed)) {
-                target_DrugStore = drugstore;
-                break;
-            }
+        String url = "http://192.168.5.41/pda_submit.php?";
+        try{
+            url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+            //url += "DBoption=in" + "&";
+            url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
+            url += "UserID=" + globaldata.getLoginUserID() + "&";
+            url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
+
+            Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+            Log.d("TAG", "DBoption:");
+            Log.d("TAG" , "TotalQty" +edtInQty.getText().toString());
+            Log.d("USERID", "UserID"+globaldata.getLoginUserID());
+            Log.d("spinnerText","Spinner"+spinner.getSelectedItem().toString());
+
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    try {
+                        String areaNo = response.getString("AreaNo");
+                        String blockNo = response.getString("BlockNo");
+                        String blockType = response.getString("BlockType");
+                        String drugCode = response.getString("DrugCode");
+                        String stockQty = response.getString("StockQty");
+                        String storeID = response.getString("StoreID");
+                        String drugenglish = response.getString("DrugName");
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                edtDrugStore.setText(storeID);
+                                edtAreaNo.setText(areaNo);
+                                edtBlockNo.setText(blockNo);
+                                edtBlockType.setText(blockType);
+                                edtDrugCode.setText(drugCode);
+                                edtDrugEnglish.setText(drugenglish);
+                                textNum.setText(stockQty);
+                            }
+                        });
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+        }catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+
         }
 
-        for (Druginfo druginfo : Druginfos) {
-            if (druginfo.getDrugCode().equals(target_DrugStore.getDrugCode())) {
-                target_DrugInfo = druginfo;
-            }
-        }
-
-
-        edtDrugStore.setText(target_DrugStore.getStoreID());
-        edtAreaNo.setText(target_DrugStore.getAreaNo());
-        edtBlockNo.setText(target_DrugStore.getBlockNo());
-        edtBlockType.setText(target_DrugStore.getBlockType());
-        edtDrugCode.setText(target_DrugStore.getDrugCode());
-        edtDrugEnglish.setText(target_DrugInfo.getDrugName());
 
         Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
 
     }
-
-    public interface VolleyCallback {
-        void onSuccess();
-        // 在這裡可以添加其他方法，如 onFailure 等
-    }
-
     public void sendGET(String Url, final VolleyCallback callback) {
 
         /**建立連線*/
@@ -237,11 +280,30 @@ public class CFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 /** 取得回傳*/
-                callback.onSuccess();
-            }
-        });
+                try {
+                    String responseData = response.body().string();
+                    JSONObject jsonObject;
 
+                    try {
+                        jsonObject = new JSONObject(responseData);
+                        callback.onSuccess(jsonObject);
+                    } catch (JSONException e) {
+                        Log.e("TAG", "Invalid JSON response: " + responseData);
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
+
+    public interface VolleyCallback {
+        void onSuccess(JSONObject response);
+        // 在這裡可以添加其他方法，如 onFailure 等
+    }
+
 
     public void CSVReadDrugStore() {
         try {
@@ -329,53 +391,47 @@ public class CFragment extends Fragment {
                 String url = "http://192.168.5.41/pda_submit.php?";
                 try {
 
-                    String DBoption;
-                    url = url + "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
-                    url = url + "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
-                    url = url + "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
-                    url = url + "BlockType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
-                    url = url + "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
-                    url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
-                    url = url + "DBoption=" +URLEncoder.encode("in", "UTF-8") + "&";
-                    url = url + "ElabelNumber=" +URLEncoder.encode(edtElabelNumber.getText().toString(),"UTF-8")+"&";
-                    url = url + "DrugEnglish=" +URLEncoder.encode(edtDrugEnglish.getText().toString(),"UTF-8")+"&";
-                    url = url + "spinnerText=" +URLEncoder.encode(spinner.getSelectedItem().toString(),"UTF-8")+"&";
-                    url = url + "UserID=" +URLEncoder.encode(globaldata.getLoginUserID(),"UTF-8");
 
 
-                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
-                    Log.d("TAG", "AreaNo: " + edtAreaNo.getText().toString());
-                    Log.d("TAG", "BlockNo: " + edtBlockNo.getText().toString());
-                    Log.d("TAG", "BlockType: " + edtBlockType.getText().toString());
-                    Log.d("TAG", "TotalQty: " + edtInQty.getText().toString());
-                    Log.d("TAG", "StoreID: " + edtDrugStore.getText().toString());
-                    Log.d("TAG", "DBoption: in");
-                    Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
-                    Log.d("TAG", "DrugEnglish: " + edtDrugEnglish.getText().toString());
-                    Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
-                    Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
+                    url += "DBoption=" +URLEncoder.encode("in", "UTF-8") + "&";
+                    url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                    url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
+                    url += "UserID=" + globaldata.getLoginUserID() + "&";
+                    url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
+
+
+//                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
+//                    Log.d("TAG", "AreaNo: " + edtAreaNo.getText().toString());
+//                    Log.d("TAG", "BlockNo: " + edtBlockNo.getText().toString());
+//                    Log.d("TAG", "BlockType: " + edtBlockType.getText().toString());
+//                    Log.d("TAG", "TotalQty: " + edtInQty.getText().toString());
+//                    Log.d("TAG", "StoreID: " + edtDrugStore.getText().toString());
+//                    Log.d("TAG", "DBoption: in");
+//                    Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+//                    Log.d("TAG", "DrugEnglish: " + edtDrugEnglish.getText().toString());
+//                    Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
+//                    Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
+
+                    sendGET(url, new VolleyCallback() {
+                        @Override
+                        public void onSuccess(JSONObject response) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Toast.makeText(v.getContext(),"submit",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
 
 
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
 
-                Toast.makeText(v.getContext(), url, Toast.LENGTH_SHORT).show();
-                //Toast.makeText(view.getContext(), url, Toast.LENGTH_SHORT).show();
-                getFin = false;
-                sendGET(url, new VolleyCallback() {
-                    @Override
-                    public void onSuccess() {
-                        getFin = true;
-                    }
-                });
-                while (!getFin) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                Toast.makeText(v.getContext(),"送出", Toast.LENGTH_SHORT).show();
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

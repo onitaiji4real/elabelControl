@@ -60,7 +60,7 @@ public class BFragment extends Fragment {
     EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtNumBox, edtNumRow, edtNumPill, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
     TextView txtInventoryQty, txtInventoryNum, textNum;
     private Activity activity;
-    Button btnSumit, btnLight;
+    Button btnSumit, btnLight,btnClear;
     Boolean GetFin;
     Spinner SpPage;
     GridView gridLotnumber;
@@ -133,6 +133,9 @@ public class BFragment extends Fragment {
 //        edtNumRow = view.findViewById(R.id.edtNumRow);
         edtNumPill = view.findViewById(R.id.edtNumPill);
         txtInventoryQty = view.findViewById(R.id.txtInventoryQty);
+
+        btnClear = view.findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(onClear);
 //        txtInventoryNum = view.findViewById(R.id.txtInventoryNum);
 
 //        edtNumBox.addTextChangedListener(new TextWatcher() {
@@ -181,6 +184,20 @@ public class BFragment extends Fragment {
 
         return view;
     }
+    private View.OnClickListener onClear = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            edtElabelNumber.setText("");
+            edtDrugStore.setText("");
+            edtAreaNo.setText("");
+            edtBlockType.setText("");
+            edtBlockNo.setText("");
+            edtDrugCode.setText("");
+            edtDrugEnglish.setText("");
+            textNum.setText("");
+            edtElabelNumber.requestFocus();
+        }
+    };
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
