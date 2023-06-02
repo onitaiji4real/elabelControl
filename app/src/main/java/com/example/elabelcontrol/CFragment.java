@@ -30,13 +30,10 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,8 +51,6 @@ import data.DrugInOut;
 import data.Druginfo;
 import data.Drugstore;
 import data.GlobalData;
-import data.Inventory;
-import okio.Utf8;
 
 public class CFragment extends Fragment {
     Spinner spinner;
@@ -123,7 +118,7 @@ public class CFragment extends Fragment {
 
         textNum = view.findViewById(R.id.textNum);
 
-        btnClear = view.findViewById(R.id.btnClear);
+        btnClear = view.findViewById(R.id.btnNextIndex);
         btnClear.setOnClickListener(onClear);
 
 

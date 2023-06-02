@@ -282,7 +282,7 @@
         app:layout_constraintVertical_bias="0.678" />
 
     <Button
-        android:id="@+id/btnClear"
+        android:id="@+id/btnNextIndex"
         android:layout_width="148dp"
         android:layout_height="42dp"
         android:text="下一筆(暫時)"
