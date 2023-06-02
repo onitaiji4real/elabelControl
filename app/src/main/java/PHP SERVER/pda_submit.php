@@ -1,250 +1,250 @@
 <?php
-$host = '192.168.5.41'; //数据库位置
-$name = 'root'; //帐号
-$pwd = 'myt855myt855'; //密码
-$db = 'baiguo_demo'; //数据库名称
+$host = '192.168.5.41';
+$name = 'root';
+$pwd = 'myt855myt855';
+$db = 'baiguo_demo';
 //header('Content-Type: application/json; charset=UTF-8');
-
-
 
 // 建立与MySQL数据库的连接
 $connection = mysqli_connect($host, $name, $pwd, $db) or die("Error " . mysqli_error($connection));
 mysqli_set_charset($connection, "utf8");
-ini_set('display_errors', '0');
+//ini_set('display_errors', '0');
 
+// $AreaNo = isset($_GET["AreaNo"]) ? $_GET["AreaNo"] : null;
+// $BlockNo = $_GET["BlockNo"];
+// $BlockType = $_GET["BlockType"];
+// $DrugCode = $_GET["DrugCode"];
+// $StoreID = $_GET["StoreID"];
+//$TotalQty = $_GET["TotalQty"];
 
-$AreaNo = isset($_GET["AreaNo"]) ? $_GET["AreaNo"] : null;
-$BlockNo = $_GET["BlockNo"];
-$BlockType = $_GET["BlockType"];
-$DrugCode = $_GET["DrugCode"];
-$TotalQty = $_GET["TotalQty"];
-$StoreID = $_GET["StoreID"];
-$DBoption = $_GET["DBoption"];
-$ElabelNumber = $_GET["ElabelNumber"];
-$DrugEnglish = $_GET["DrugEnglish"];
-$spinnerText = $_GET["spinnerText"];
-$UserID = $_GET["UserID"];
+//Android studio 傳送的五個GET值
+isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
+// $ElabelNumber = $_GET["ElabelNumber"];
+// $DrugEnglish = $_GET["DrugEnglish"];
+isset($_GET["UserID"]) ? $UserID = $_GET["UserID"] : null;
+isset($_GET["TotalQty"]) ? $TotalQty = $_GET["TotalQty"] : null;
+isset($_GET["spinnerText"]) ? $spinnerText = $_GET["spinnerText"] : null;
 
-// echo "AreaNo: " . $AreaNo . "<br>";
-// echo "BlockNo: " . $BlockNo . "<br>";
-// echo "BlockType: " . $BlockType . "<br>";
-// echo "DrugCode: " . $DrugCode . "<br>";
-// echo "TotalQty: " . $TotalQty . "<br>";
-// echo "StoreID: " . $StoreID . "<br>";
-// echo "DBoption: " . $DBoption . "<br>";
-// echo "ElabelNumber: " . $ElabelNumber . "<br>";
-// echo "DrugEnglish: " . $DrugEnglish . "<br>";
-// echo "spinnerText: " . $spinnerText . "<br>";
-// echo "UserID: " . $UserID . "<br>";
+if (isset($_GET["DBoption"])) {
+    $DBoption = $_GET["DBoption"];
 
-switch ($DBoption) {
-    case "in":
-        echo "DBoption = " . $DBoption . "<br>";
+    switch ($DBoption) {
 
-        //取得原先的庫存數量
-        $sql = "SELECT StockQty 
-FROM drugstock 
-WHERE AreaNo = '$AreaNo' AND BlockNo = '$BlockNo' AND DrugCode = '$DrugCode' AND StoreID = '$StoreID'";
-        $result = mysqli_query($connection, $sql);
-
-        if ($result && mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
-            $Qty = $row["StockQty"];
-
-            //庫存量與要新增的量加總
-            $SumQty = $TotalQty + $Qty;
-            //update 資料庫的數量
-            $updateSql = "UPDATE drugstock 
-            SET StockQty = '$SumQty' 
-            WHERE AreaNo = '$AreaNo' AND BlockNo = '$BlockNo' AND DrugCode = '$DrugCode' AND StoreID = '$StoreID' ";
-
-            if (mysqli_query($connection, $updateSql)) {
-                echo "Update Success";
-            } else {
-                echo "Update Fail";
+        case "GET":
+            if (isset($_GET["ElabelNumber"])) {
+                $ElabelNumber = $_GET["ElabelNumber"];
+                getJSON($ElabelNumber, $connection);
             }
-        } else {
-            echo "No results found";
-        }
+            break;
+        case "INVENTORY":
+            $DrugCode = $_GET["DrugCode"];
+            $StoreID = $_GET["StoreID"];
+            $AreaNo = $_GET["AreaNo"];
+            $BlockNo = $_GET["BlockNo"];
+            $LotNumber = $_GET["LotNumber"];
+            $InventoryQty = $_GET["InventoryQty"];
+            $UserId = $_GET["UserId"];
+            $User = $_GET["User"];
+            // $InventoryQty = $_GET["InventoryQty"];
 
-        $drugAdd_SQL = "INSERT INTO drugadd (AddTime, DrugCode, LotNumber, StoreType, StoreID, AreaNo, BlockNo, AddQty, MakerID, MakerName, Remark, UserID, DrugName, DrugEnglish, EffectDate, StockQty,CodeID,ShiftNo)
-        SELECT 
-            NOW(), 
-            ds.DrugCode, 
-            ds.LotNumber, 
-            '$BlockType', 
-            ds.StoreID, 
-            ds.AreaNo, 
-            ds.BlockNo, 
-            '$TotalQty', 
-            di.MakerID, 
-            di.MakerName, 
-            '$spinnerText', 
-            '$UserID', 
-            di.DrugName, 
-            di.DrugEnglish, 
-            ds.EffectDate, 
-            '$TotalQty',
-            'A',
-            '1'
-        FROM 
-            drugstock ds
-        JOIN 
-            druginfo di ON ds.DrugCode = di.DrugCode
-        WHERE 
-            ds.DrugCode = '$DrugCode' 
-        AND 
-            ds.StoreID = '$StoreID' 
-        AND 
-            ds.BlockNo = '$BlockNo'";
+            $StockQty = getStockQty($LotNumber, $connection);
+            $AdjQty = $InventoryQty - $StockQty;
 
-        if (mysqli_query($connection, $drugAdd_SQL)) {
-            echo "Record successfully inserted into drugadd table." . "<br>";
-        } else {
-            echo "ERROR: Could not able to execute DrugAdd" . mysqli_error($connection);
-        }
+            // $SQL = "INSERT INTO inventory 
+            //                     (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserId, User)
+            //         VALUES 
+            //         (CURDATE(), '$DrugCode', '$StoreID', '$AreaNo', '$BlockNo', '$LotNumber', '$StockQty', '$InventoryQty', '$AdjQty', '1', CURTIME(), '$UserId', '$User')";
+            // $result = mysqli_query($connection, $SQL);
 
-        break;
+            $SQL = "INSERT INTO inventory 
+                                (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserId, User)
+                    SELECT 
+                    CURDATE(),
+                    '$DrugCode',
+                        '$StoreID',
+                        '$AreaNo',
+                        '$BlockNo',
+                        '$LotNumber',
+                        '$StockQty',
+                        '$InventoryQty',
+                        '$AdjQty',
+                        IFNULL((SELECT MAX(ShiftNo) + 1 FROM inventory WHERE LotNumber = '$LotNumber'), 1),
+                        CURTIME(),
+                        '$UserId',
+                        '$User'";
 
-    case "select":
-        //echo "DBoption = " . $DBoption . "<br>";
-        // 处理 "select" 情况的逻辑
+            $result = mysqli_query($connection, $SQL);
 
-        $sql = "SELECT 
-        ed.StoreID, 
-        ed.ElabelType, 
-        ed.DrugCode, 
-        ed.DrugName, 
-        ed.DrugEnglish, 
-        ed.AreaNo, 
-        ed.BlockNo, 
-        ds.StockQty 
-        FROM elabeldrug ed 
-        INNER JOIN drugstock ds ON 
-            ed.StoreID = ds.StoreID AND 
-            ed.AreaNo = ds.AreaNo AND 
-            ed.BlockNo = ds.BlockNo AND 
-            ed.DrugCode = ds.DrugCode
-        WHERE ed.ElabelNumber = '$ElabelNumber'";
+            break;
+    }
 
 
-        $result = mysqli_query($connection, $sql);
+}
 
-        if ($result && mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
 
-            $StoreID = $row["StoreID"];
-            $ElabelType = $row["ElabelType"];
-            $DrugCode = $row["DrugCode"];
-            $DrugName = $row["DrugName"];
-            $DrugEnglish = $row["DrugEnglish"];
-            $AreaNo = $row["AreaNo"];
-            $BlockNo = $row["BlockNo"];
-            $StockQty = $row["StockQty"];
+// if (isset($_GET["ElabelNumber"])) {
+//     $ElabelNumber = $_GET["ElabelNumber"];
+//    getJSON($ElabelNumber,$connection);
 
-            // echo "StoreID: " . $StoreID . "<br>";
-            // echo "ElabelType: " . $ElabelType . "<br>";
-            // echo "DrugCode: " . $DrugCode . "<br>";
-            // echo "DrugName: " . $DrugName . "<br>";
-            // echo "DrugEnglish: " . $DrugEnglish . "<br>";
-            // echo "AreaNo: " . $AreaNo . "<br>";
-            // echo "BlockNo: " . $BlockNo . "<br>";
-            // echo "StockQty" . $StockQty."<br>";
-            // echo "以下為SELECT的json資料<br>";
-            $response = array(
-                "AreaNo" => $AreaNo,
-                "BlockNo" => $BlockNo,
-                "BlockType" => $ElabelType,
-                "DrugCode" => $DrugCode,
-                "StoreID" => $StoreID,
-                "DBoption" => $DBoption,
-                "ElabelNumber" => $ElabelNumber,
-                "DrugName" => $DrugName,
-                "DrugEnglish" => $DrugEnglish,
-                "StockQty" => $StockQty
+// }
+
+
+// isset($_GET["DBoption"]) ? $DBoptino = $_GET["DBoption"] : null;
+// if (isset($_GET["DBoption"])) {
+
+//     $DBoptino = $_GET["DBoption"];
+
+//     switch ($DBoption) {
+
+//         case "in":
+//             $response = array(
+//                 "DBoption" => $DBoption,
+//                 "AreaNo" => $AreaNo,
+//                 "BlockNo" => $BlockNo,
+//                 "BlockType" => $ElabelType,
+//                 "DrugCode" => $DrugCode,
+//                 "StoreID" => $StoreID,
+//                 "ElabelNumber" => $ElabelNumber,
+//                 "DrugName" => $DrugName,
+//                 "DrugEnglish" => $DrugEnglish,
+//                 "StockQty" => $StockQty,
+//                 "TotalQty" => $TotalQty,
+//                 "MakerID" => $MakerID,
+//                 "MakerName" => $MakerName,
+//                 "EffectDate" => $EffectDate,
+//                 "spinnerText" => $spinnerText,
+//                 "LotNumber" => $LotNumber
+//             );
+
+//             $sum = $response["StockQty"] + $response["TotalQty"]; //加總庫存與要變更的數量
+
+//             $sql = "UPDATE drugstock 
+//                         SET StockQty = '$sum' 
+//                         WHERE 
+//                         AreaNo = '{$response["AreaNo"]}' AND 
+//                         BlockNo = '{$response["BlockNo"]}' AND
+//                          DrugCode = '{$response["DrugCode"]}' AND
+//                           StoreID = '{$response["StoreID"]}' ";
+
+//             if (mysqli_query($connection, $sql)) {
+//                 //echo "UPDATE Successful<br>";
+//             } else {
+//                 //echo "UPDATE FAIL<br>";
+//             } //卡位
+
+//             $recordSQL = "INSERT INTO drugadd 
+//                 (AddTime, DrugCode, LotNumber, 
+//                 StoreType, StoreID, AreaNo, 
+//                 BlockNo, AddQty, MakerID, 
+//                 MakerName, Remark, UserID, 
+//                 DrugName, DrugEnglish, 
+//                 EffectDate, StockQty, CodeID, ShiftNo) 
+//                 VALUES (
+//                     NOW(),
+//                     '{$response["DrugCode"]}',
+//                     '{$response["LotNumber"]}',
+//                     '{$response["BlockType"]}',
+//                     '{$response["StoreID"]}',
+//                     '{$response["AreaNo"]}',
+//                     '{$response["BlockNo"]}',
+//                     '{$response["TotalQty"]}',
+//                     '{$response["MakerID"]}',
+//                     '{$response["MakerName"]}',
+//                     '{$response["spinnerText"]}',
+//                     '$UserID',
+//                     '{$response["DrugName"]}',
+//                     '{$response["DrugEnglish"]}',
+//                     '{$response["EffectDate"]}',
+//                     '{$response["TotalQty"]}',
+//                     'A',
+//                     '1'
+//                 )";
+
+//             if (mysqli_query($connection, $recordSQL)) {
+//                 //echo "RECORD Successful<br>";
+//             } else {
+//                 //echo "RECORD FAIL<br>";
+//             }
+//             break;
+
+
+//         case "select":
+
+//             break;
+
+//         case "inventory":
+
+//             break;
+//     }
+// }
+
+function getJSON($ElabelNumber, $connection)
+{
+    $sql = "SELECT 
+    ed.StoreID, 
+    ed.ElabelType, 
+    ed.DrugCode, 
+    ed.DrugName, 
+    ed.DrugEnglish, 
+    ed.AreaNo, 
+    ed.BlockNo, 
+    ds.LotNumber,
+    ds.EffectDate,
+    ds.StockQty ,
+    di.MakerID,
+    di.MakerName
+    FROM elabeldrug ed 
+    INNER JOIN drugstock ds ON 
+        ed.StoreID = ds.StoreID AND 
+        ed.AreaNo = ds.AreaNo AND 
+        ed.BlockNo = ds.BlockNo AND 
+        ed.DrugCode = ds.DrugCode
+    INNER JOIN druginfo di ON
+        ed.DrugCode = di.DrugCode
+    WHERE ed.ElabelNumber = '$ElabelNumber'";
+
+    $result = mysqli_query($connection, $sql);
+    $response = [];
+
+    if ($result && mysqli_num_rows($result) > 0) {
+        $response = array();
+        while ($row = mysqli_fetch_assoc($result)) {
+            $item = array(
+                $row["StoreID"],
+                $row["ElabelType"],
+                $row["DrugCode"],
+                $row["DrugName"],
+                $row["DrugEnglish"],
+                $row["AreaNo"],
+                $row["BlockNo"],
+                $row["StockQty"],
+                $row["LotNumber"],
+                $row["MakerID"],
+                $row["MakerName"],
+                $row["EffectDate"]
             );
-
-            // $json = json_encode($response);
-            $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            echo $json . "<br>";
-
-
-            //header('Content-Type: application/json; charset=UTF-8');
-
-
-        } else {
-            echo "No results found";
+            array_push($response, $item);
         }
-        break;
+        $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo $json . "<br>";
+    }
+}
 
-    case "out":
-        echo "DBoption = " . $DBoption . "<br>";
+function getStockQty($LotNumber, $connection)
+{
+    $sql = "SELECT StockQty FROM drugstock WHERE LotNumber = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("s", $LotNumber);
 
-        //取得原先的庫存數量
-        $sql = "SELECT StockQty 
-FROM drugstock 
-WHERE AreaNo = '$AreaNo' AND BlockNo = '$BlockNo' AND DrugCode = '$DrugCode' AND StoreID = '$StoreID'";
-        $result = mysqli_query($connection, $sql);
+    $stmt->execute();
 
-        if ($result && mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
-            $Qty = $row["StockQty"];
-
-            //庫存量與要新增的量加總
-            $SumQty = $Qty - $TotalQty;
-            //update 資料庫的數量
-            $updateSql = "UPDATE drugstock 
-            SET StockQty = '$SumQty' 
-            WHERE AreaNo = '$AreaNo' AND BlockNo = '$BlockNo' AND DrugCode = '$DrugCode' AND StoreID = '$StoreID' ";
-
-            if (mysqli_query($connection, $updateSql)) {
-                echo "Update Success";
-            } else {
-                echo "Update Fail";
-            }
-        } else {
-            echo "No results found";
-        }
-
-        $drugAdd_SQL = "INSERT INTO drugadd (AddTime, DrugCode, LotNumber, StoreType, StoreID, AreaNo, BlockNo, AddQty, MakerID, MakerName, Remark, UserID, DrugName, DrugEnglish, EffectDate, StockQty,CodeID,ShiftNo)
-        SELECT 
-            NOW(), 
-            ds.DrugCode, 
-            ds.LotNumber, 
-            '$BlockType', 
-            ds.StoreID, 
-            ds.AreaNo, 
-            ds.BlockNo, 
-            '$TotalQty', 
-            di.MakerID, 
-            di.MakerName, 
-            '$spinnerText', 
-            '$UserID', 
-            di.DrugName, 
-            di.DrugEnglish, 
-            ds.EffectDate, 
-            '$TotalQty',
-            'A',
-            '1'
-        FROM 
-            drugstock ds
-        JOIN 
-            druginfo di ON ds.DrugCode = di.DrugCode
-        WHERE 
-            ds.DrugCode = '$DrugCode' 
-        AND 
-            ds.StoreID = '$StoreID' 
-        AND 
-            ds.BlockNo = '$BlockNo'";
-
-        if (mysqli_query($connection, $drugAdd_SQL)) {
-            echo "Record successfully inserted into drugadd table." . "<br>";
-        } else {
-            echo "ERROR: Could not able to execute DrugAdd" . mysqli_error($connection);
-        }
-
-        break;
-
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['StockQty'];
+    } else {
+        return null;
+    }
 }
 
 mysqli_close($connection);
