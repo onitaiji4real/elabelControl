@@ -36,6 +36,7 @@ if (isset($_GET["DBoption"])) {
                 getJSON($ElabelNumber, $connection);
             }
             break;
+
         case "INVENTORY":
             $DrugCode = $_GET["DrugCode"];
             $StoreID = $_GET["StoreID"];
@@ -76,9 +77,74 @@ if (isset($_GET["DBoption"])) {
             $result = mysqli_query($connection, $SQL);
 
             break;
+
+        case "IN": {
+
+                $dataArray = array(
+                    "DrugCode" => $_GET["DrugCode"],
+                    "StoreID" => $_GET["StoreID"],
+                    "AreaNo" => $_GET["AreaNo"],
+                    "BlockNo" => $_GET["BlockNo"],
+                    "LotNumber" => $_GET["LotNumber"],
+                    "MakeDate" => $_GET["MakeDate"],
+                    "EffectDate" => $_GET["EffectDate"],
+                    "StockQty" => $_GET["StockQty"],
+                    "StoreType" => $_GET["StoreType"]
+                );
+
+                $SQL = "INSERT INTO drugstock (DrugCode, StoreID, AreaNo, BlockNo, LotNumber, MakeDate, EffectDate, StockQty)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE StockQty = StockQty + ?;";
+
+                drugIN($dataArray, $SQL, $connection);
+
+                $record_SQL = "INSERT INTO drugadd 
+                                           (AddTime, DrugCode, LotNumber, 
+                                           StoreType, StoreID, AreaNo, 
+                                           BlockNo, AddQty, MakerID, 
+                                           EffectDate, StockQty, CodeID, 
+                                           ShiftNo) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                $stmt->bind_param(
+                    "sssssssssssss",
+                    'NOW()',
+                    $dataArray["DrugCode"],
+                    $dataArray["LotNumber"],
+                    $dataArray["StoreType"],
+                    $dataArray["StoreID"],
+                    $dataArray["AreaNo"],
+                    $dataArray["BlockNo"],
+                    $dataArray["StockQty"],
+                    $dataArray["MakerID"],
+                    $dataArray["EffectDate"],
+                    $dataArray["StockQty"],
+                    $dataArray["CodeID"],
+                    $dataArray["ShiftNo"],
+                    $dataArray[""],
+                    
+                );
+            }
+
+        case "OUT": {
+                $dataArray = array(
+                    "DrugCode" => $_GET["DrugCode"],
+                    "StoreID" => $_GET["StoreID"],
+                    "AreaNo" => $_GET["AreaNo"],
+                    "BlockNo" => $_GET["BlockNo"],
+                    "LotNumber" => $_GET["LotNumber"],
+                    "MakeDate" => $_GET["MakeDate"],
+                    "EffectDate" => $_GET["EffectDate"],
+                    "StockQty" => $_GET["StockQty"]
+                );
+
+                $SQL = "UPDATE drugstock 
+                        SET StockQty = StockQty - ?
+                        WHERE LotNumber = ?";
+
+                drugOUT($dataArray, $SQL, $connection);
+            }
     }
-
-
 }
 
 
@@ -132,33 +198,33 @@ if (isset($_GET["DBoption"])) {
 //                 //echo "UPDATE FAIL<br>";
 //             } //卡位
 
-//             $recordSQL = "INSERT INTO drugadd 
-//                 (AddTime, DrugCode, LotNumber, 
-//                 StoreType, StoreID, AreaNo, 
-//                 BlockNo, AddQty, MakerID, 
-//                 MakerName, Remark, UserID, 
-//                 DrugName, DrugEnglish, 
-//                 EffectDate, StockQty, CodeID, ShiftNo) 
-//                 VALUES (
-//                     NOW(),
-//                     '{$response["DrugCode"]}',
-//                     '{$response["LotNumber"]}',
-//                     '{$response["BlockType"]}',
-//                     '{$response["StoreID"]}',
-//                     '{$response["AreaNo"]}',
-//                     '{$response["BlockNo"]}',
-//                     '{$response["TotalQty"]}',
-//                     '{$response["MakerID"]}',
-//                     '{$response["MakerName"]}',
-//                     '{$response["spinnerText"]}',
-//                     '$UserID',
-//                     '{$response["DrugName"]}',
-//                     '{$response["DrugEnglish"]}',
-//                     '{$response["EffectDate"]}',
-//                     '{$response["TotalQty"]}',
-//                     'A',
-//                     '1'
-//                 )";
+// $recordSQL = "INSERT INTO drugadd 
+//     (AddTime, DrugCode, LotNumber, 
+//     StoreType, StoreID, AreaNo, 
+//     BlockNo, AddQty, MakerID, 
+//     MakerName, Remark, UserID, 
+//     DrugName, DrugEnglish, 
+//     EffectDate, StockQty, CodeID, ShiftNo) 
+//     VALUES (
+//         NOW(),
+//         '{$response["DrugCode"]}',
+//         '{$response["LotNumber"]}',
+//         '{$response["BlockType"]}',
+//         '{$response["StoreID"]}',
+//         '{$response["AreaNo"]}',
+//         '{$response["BlockNo"]}',
+//         '{$response["TotalQty"]}',
+//         '{$response["MakerID"]}',
+//         '{$response["MakerName"]}',
+//         '{$response["spinnerText"]}',
+//         '$UserID',
+//         '{$response["DrugName"]}',
+//         '{$response["DrugEnglish"]}',
+//         '{$response["EffectDate"]}',
+//         '{$response["TotalQty"]}',
+//         'A',
+//         '1'
+//     )";
 
 //             if (mysqli_query($connection, $recordSQL)) {
 //                 //echo "RECORD Successful<br>";
@@ -177,6 +243,87 @@ if (isset($_GET["DBoption"])) {
 //             break;
 //     }
 // }
+function drugOUT_record($dataArray, $SQL, $connection)
+{
+}
+
+function drugIN_record($dataArray, $SQL, $connection)
+{
+
+    $stmt = $connection->prepare($SQL);
+
+    if ($stmt === false) {
+        die("準備陳述式失敗: " . $connection->error);
+    }
+
+    $stmt->bind_param(
+        "sssssssssssss",
+        $dataArray["DrugCode"],
+        $dataArray["StoreID"],
+        $dataArray["AreaNo"],
+        $dataArray["BlockNo"],
+        $dataArray["LotNumber"],
+        $dataArray["MakeDate"],
+        $dataArray["EffectDate"],
+        $dataArray["StockQty"],
+        $dataArray["StockQty"]
+    );
+}
+function drugOUT($dataArray, $SQL, $connection)
+{
+    $stmt = $connection->prepare($SQL);
+    if ($stmt === false) {
+        die("準備陳述式失敗: " . $connection->error);
+    }
+
+    // 將資料綁定至陳述式的參數
+    $stmt->bind_param(
+        "ss",
+        $dataArray["StockQty"],
+        $dataArray["LotNumber"]
+    );
+    // 執行陳述式
+    if ($stmt->execute() === true) {
+        echo "資料插入成功";
+    } else {
+        echo "插入資料時發生錯誤: " . $stmt->error;
+    }
+    // 關閉陳述式
+    $stmt->close();
+}
+
+function drugIN($dataArray, $SQL, $connection)
+{
+    $stmt = $connection->prepare($SQL);
+
+    if ($stmt === false) {
+        die("準備陳述式失敗: " . $connection->error);
+    }
+
+    // 將資料綁定至陳述式的參數
+    $stmt->bind_param(
+        "sssssssss",
+        $dataArray["DrugCode"],
+        $dataArray["StoreID"],
+        $dataArray["AreaNo"],
+        $dataArray["BlockNo"],
+        $dataArray["LotNumber"],
+        $dataArray["MakeDate"],
+        $dataArray["EffectDate"],
+        $dataArray["StockQty"],
+        $dataArray["StockQty"]
+    );
+
+    // 執行陳述式
+    if ($stmt->execute() === true) {
+        echo "資料插入成功";
+    } else {
+        echo "插入資料時發生錯誤: " . $stmt->error;
+    }
+
+    // 關閉陳述式
+    $stmt->close();
+}
 
 function getJSON($ElabelNumber, $connection)
 {
