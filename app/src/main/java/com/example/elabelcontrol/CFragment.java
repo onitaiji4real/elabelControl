@@ -2,6 +2,10 @@ package com.example.elabelcontrol;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -14,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,12 +26,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.opencsv.CSVReader;
 
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,6 +40,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,10 +61,10 @@ import data.GlobalData;
 
 public class CFragment extends Fragment {
     Spinner spinner;
-    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
-    Button btnSumit, btnLight, btnGetDrugStore,btnClear;
+    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType,edtEffectDate,edtMakeDate;
+    Button btnSumit, btnLight, btnGetDrugStore,btnClear,btnPreViewIndex,btnNextIndex,btnNewDrugIN;
     GlobalData globaldata;
-    TextView textNum;
+    TextView textNum,txtLotNumber,textLotNumber_size;
 
 
 
@@ -87,6 +94,22 @@ public class CFragment extends Fragment {
     String UpdateTime;
     String CodeID;
     boolean getFin;
+    private int currentIndex = 0;
+    private ArrayList<String> storeIDs;
+    private ArrayList<String> elabelTypes;
+    private ArrayList<String> drugCodes;
+    private ArrayList<String> drugNames;
+    private ArrayList<String> drugEnglishs;
+    private ArrayList<String> areaNos;
+    private ArrayList<String> blockNos;
+    private ArrayList<String> stockQtys;
+    private ArrayList<String> lotNumbers;
+    private ArrayList<String> makerIDs;
+    private ArrayList<String> makerNames;
+    private ArrayList<String> effectDates;
+    private ArrayList<String> makeDates;
+
+//    DatePicker datePicker;
 
     @Nullable
     @Override
@@ -118,8 +141,30 @@ public class CFragment extends Fragment {
 
         textNum = view.findViewById(R.id.textNum);
 
-        btnClear = view.findViewById(R.id.btnNextIndex);
-        btnClear.setOnClickListener(onClear);
+        btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
+        btnNewDrugIN.setOnClickListener(onNewDrugIN);
+//        datePicker = view.findViewById(R.id.edt);
+
+//        btnClear = view.findViewById(R.id.btnNextIndex);
+//        btnClear.setOnClickListener(onClear);
+
+        txtLotNumber = view.findViewById(R.id.txtLotNumber);
+
+        btnNextIndex = view.findViewById(R.id.btnNextIndex);
+        btnNextIndex.setOnClickListener(nextIndex);
+
+        btnPreViewIndex = view.findViewById(R.id.btnPreViewIndex);
+        btnPreViewIndex.setOnClickListener(previewIndex);
+
+        edtEffectDate = view.findViewById(R.id.edtEffectDate);
+
+        edtMakeDate = view.findViewById(R.id.edtMakeDate);
+
+        textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
+
+
+
+
 
 
         spinner = view.findViewById(R.id.spOutCode);
@@ -131,7 +176,7 @@ public class CFragment extends Fragment {
                         android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setSelection(2, false);
+        spinner.setSelection(1, false);
 
         spinner.setOnItemSelectedListener(spnOnItemSelected);
         CodeID = "A";
@@ -153,6 +198,67 @@ public class CFragment extends Fragment {
         return view;
     }
 
+
+
+
+    private View.OnClickListener onNewDrugIN = new View.OnClickListener() {
+
+        boolean isPressed = false;
+        GradientDrawable drawable = new GradientDrawable();
+
+
+        //drawable.setColor(Color.RED);
+
+        @Override
+        public void onClick(View v) {
+            if(isPressed){
+
+
+                //已按下、回復原本狀態
+                //updateUIWithCurrentIndex();
+                updateUIWithCurrentIndex();
+                edtInQty.setText("");
+                edtInQty.requestFocus();
+
+                btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+
+
+
+                btnPreViewIndex.setEnabled(true);
+                btnNextIndex.setEnabled(true);
+
+                isPressed =false;
+            }else {
+                //第一次按下、回復原本狀態
+
+                Date currentDate = new Date();
+                SimpleDateFormat LotNumberFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                SimpleDateFormat MakeDateFormat = new SimpleDateFormat("yyy-MM-dd");
+                String formattedDate = LotNumberFormat.format(currentDate);
+                String MakeDateFormate = MakeDateFormat.format(currentDate);
+
+                //txtLotNumber.setText(formattedDate);
+                textNum.setText("新藥收入中");
+                txtLotNumber.setText(formattedDate);
+                edtMakeDate.setText(MakeDateFormate);
+                spinner.setSelection(3, false);
+                edtInQty.setText("");
+                edtInQty.requestFocus();
+                btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+                btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+                btnNextIndex.setEnabled(false);
+                btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+                btnPreViewIndex.setEnabled(false);
+
+                edtEffectDate.setText("2023-12-31");
+
+                isPressed = true;
+            }
+        }
+    };
+
     private View.OnClickListener onClear = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -169,10 +275,58 @@ public class CFragment extends Fragment {
             hideKeyboard(v.getContext());
         }
     };
+    private View.OnClickListener previewIndex = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (lotNumbers != null && currentIndex > 0) {
+                currentIndex--;
+                updateUIWithCurrentIndex();
+            }
+            edtInQty.setText("");
+            edtElabelNumber.requestFocus();
+        }
+    };
+
+    private View.OnClickListener nextIndex = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (lotNumbers != null && currentIndex < lotNumbers.size() - 1) {
+                currentIndex++;
+                updateUIWithCurrentIndex();
+            }
+            edtElabelNumber.requestFocus();
+            edtInQty.setText("");
+        }
+    };
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
+    private void updateUIWithCurrentIndex() {
+
+        int Lot_length = stockQtys.size();
+
+        String Lot_number = (currentIndex+1) + "/" + Lot_length;
+        textLotNumber_size.setText(Lot_number);
+
+        int sumQty = 0;
+        for (int i = 0; i < stockQtys.size(); i++) {
+            sumQty += Double.parseDouble(stockQtys.get(i));
+        }
+
+        edtDrugStore.setText(storeIDs.get(currentIndex)); //卡位StoreID
+        edtAreaNo.setText(areaNos.get(currentIndex));
+        edtBlockNo.setText(blockNos.get(currentIndex));
+        edtBlockType.setText(elabelTypes.get(currentIndex));
+        edtDrugCode.setText(drugCodes.get(currentIndex));
+        edtDrugEnglish.setText(drugEnglishs.get(currentIndex));
+        txtLotNumber.setText(lotNumbers.get(currentIndex));
+        textNum.setText(stockQtys.get(currentIndex));
+        edtEffectDate.setText(effectDates.get(currentIndex));
+        edtMakeDate.setText(makeDates.get(currentIndex));
+
+        //txtInventoryQty.setText(String.valueOf(sumQty)); //該儲區、藥代碼、所有批號之庫存總量
     }
 
     private void labelAfterScanListener() {
@@ -202,10 +356,10 @@ public class CFragment extends Fragment {
         String url = "http://192.168.5.41/pda_submit.php?";
         try{
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
-            //url += "DBoption=in" + "&";
-            url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
-            url += "UserID=" + globaldata.getLoginUserID() + "&";
-            url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
+            url += "DBoption=GET" + "&";
+            //url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
+            //url += "UserID=" + globaldata.getLoginUserID() + "&";
+            //url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
 
             Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
             Log.d("TAG", "DBoption:");
@@ -215,26 +369,53 @@ public class CFragment extends Fragment {
 
             sendGET(url, new VolleyCallback() {
                 @Override
-                public void onSuccess(JSONObject response) {
+                public void onSuccess(JSONArray response) {
                     try {
-                        String areaNo = response.getString("AreaNo");
-                        String blockNo = response.getString("BlockNo");
-                        String blockType = response.getString("BlockType");
-                        String drugCode = response.getString("DrugCode");
-                        String stockQty = response.getString("StockQty");
-                        String storeID = response.getString("StoreID");
-                        String drugenglish = response.getString("DrugName");
+//                        String areaNo = response.getString("AreaNo");
+//                        String blockNo = response.getString("BlockNo");
+//                        String blockType = response.getString("BlockType");
+//                        String drugCode = response.getString("DrugCode");
+//                        String stockQty = response.getString("StockQty");
+//                        String storeID = response.getString("StoreID");
+//                        String drugenglish = response.getString("DrugName");
+
+                        storeIDs = new ArrayList<>();
+                        elabelTypes = new ArrayList<>();
+                        drugCodes = new ArrayList<>();
+                        drugNames = new ArrayList<>();
+                        drugEnglishs = new ArrayList<>();
+                        areaNos = new ArrayList<>();
+                        blockNos = new ArrayList<>();
+                        stockQtys = new ArrayList<>();
+                        lotNumbers = new ArrayList<>();
+                        makerIDs = new ArrayList<>();
+                        makerNames = new ArrayList<>();
+                        effectDates = new ArrayList<>();
+                        makeDates = new ArrayList<>();
+
+                        for (int i = 0; i < response.length(); i++){
+                            JSONArray arr = response.getJSONArray(i);
+
+                            storeIDs.add(arr.getString(0));
+                            elabelTypes.add(arr.getString(1));
+                            drugCodes.add(arr.getString(2));
+                            drugNames.add(arr.getString(3));
+                            drugEnglishs.add(arr.getString(4));
+                            areaNos.add(arr.getString(5));
+                            blockNos.add(arr.getString(6));
+                            stockQtys.add(arr.getString(7));
+                            lotNumbers.add(arr.getString(8));
+                            makerIDs.add(arr.getString(9));
+                            makerNames.add(arr.getString(10));
+                            effectDates.add(arr.getString(11));
+                            makeDates.add(arr.getString(12));
+                        }
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                edtDrugStore.setText(storeID);
-                                edtAreaNo.setText(areaNo);
-                                edtBlockNo.setText(blockNo);
-                                edtBlockType.setText(blockType);
-                                edtDrugCode.setText(drugCode);
-                                edtDrugEnglish.setText(drugenglish);
-                                textNum.setText(stockQty);
+                                updateUIWithCurrentIndex();
+
                             }
                         });
                     }catch (JSONException e){
@@ -247,10 +428,7 @@ public class CFragment extends Fragment {
             e.printStackTrace();
 
         }
-
-
         Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
-
     }
     public void sendGET(String Url, final VolleyCallback callback) {
 
@@ -277,11 +455,11 @@ public class CFragment extends Fragment {
                 /** 取得回傳*/
                 try {
                     String responseData = response.body().string();
-                    JSONObject jsonObject;
+                    JSONArray jsonArray;
 
                     try {
-                        jsonObject = new JSONObject(responseData);
-                        callback.onSuccess(jsonObject);
+                        jsonArray = new JSONArray(responseData);
+                        callback.onSuccess(jsonArray);
                     } catch (JSONException e) {
                         Log.e("TAG", "Invalid JSON response: " + responseData);
                         e.printStackTrace();
@@ -295,9 +473,15 @@ public class CFragment extends Fragment {
     }
 
     public interface VolleyCallback {
-        void onSuccess(JSONObject response);
+        void onSuccess(JSONArray response);
         // 在這裡可以添加其他方法，如 onFailure 等
     }
+
+
+
+
+
+
 
 
     public void CSVReadDrugStore() {
@@ -388,11 +572,25 @@ public class CFragment extends Fragment {
 
 
 
-                    url += "DBoption=" +URLEncoder.encode("in", "UTF-8") + "&";
-                    url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                    url += "DBoption=" +URLEncoder.encode("IN", "UTF-8") + "&";
+                    //url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                    url += "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(),"UTF-8") + "&";
+                    url += "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
+                    url += "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
+                    url += "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
+                    url += "LotNumber=" + URLEncoder.encode(txtLotNumber.getText().toString(), "UTF-8") + "&";
+                    url += "MakeDate=" + URLEncoder.encode(edtMakeDate.getText().toString(), "UTF-8") + "&";
+                    url += "EffectDate=" + URLEncoder.encode(edtEffectDate.getText().toString(), "UTF-8") + "&";
+                    url += "StockQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                    url += "StoreType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
+                    url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(),"UTF-8") + "&";
+                    url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
+
+
+
                     url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
                     url += "UserID=" + globaldata.getLoginUserID() + "&";
-                    url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
+
 
 
 //                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
@@ -409,7 +607,7 @@ public class CFragment extends Fragment {
 
                     sendGET(url, new VolleyCallback() {
                         @Override
-                        public void onSuccess(JSONObject response) {
+                        public void onSuccess(JSONArray response) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {

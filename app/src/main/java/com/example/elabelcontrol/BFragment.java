@@ -376,7 +376,6 @@ public class BFragment extends Fragment {
                     try {
 
                         storeIDs = new ArrayList<>();
-                        storeIDs = new ArrayList<>();
                         elabelTypes = new ArrayList<>();
                         drugCodes = new ArrayList<>();
                         drugNames = new ArrayList<>();
