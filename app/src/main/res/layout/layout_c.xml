@@ -22,8 +22,8 @@
 
     <TextView
         android:id="@+id/textLotNumber_size"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="26dp"
         android:ems="10"
         android:inputType="phone"
         android:textAlignment="center"
@@ -32,10 +32,10 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.051"
+        app:layout_constraintHorizontal_bias="0.311"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.095" />
+        app:layout_constraintVertical_bias="0.103" />
 
     <EditText
         android:id="@+id/edtEffectDate"
@@ -125,8 +125,8 @@
 
     <TextView
         android:id="@+id/DrugQty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:text="電子紙條碼："
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -138,8 +138,8 @@
 
     <EditText
         android:id="@+id/edtElabelNumber"
-        android:layout_width="186dp"
-        android:layout_height="48dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:ems="10"
         android:hint="掃描電子紙條碼"
         android:inputType="textPersonName"
@@ -193,7 +193,7 @@
         android:text="下一筆"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.557"
+        app:layout_constraintHorizontal_bias="0.532"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.089" />
@@ -234,7 +234,7 @@
         android:layout_width="375dp"
         android:layout_height="54dp"
         android:ems="10"
-        android:hint="藥品商品名"
+        android:hint="請掃描QRcode"
         android:inputType="phone"
         android:textAlignment="center"
         android:textColor="#3F51B5"
@@ -242,10 +242,10 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.694"
+        app:layout_constraintHorizontal_bias="0.555"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.242" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <EditText
         android:id="@+id/edtBlockNo"
