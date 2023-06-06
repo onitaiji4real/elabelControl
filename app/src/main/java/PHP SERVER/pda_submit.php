@@ -82,7 +82,8 @@ if (isset($_GET["DBoption"])) {
                     "LotNumber" => $_GET["LotNumber"],
                     "MakeDate" => $_GET["MakeDate"],
                     "EffectDate" => $_GET["EffectDate"],
-                    "StockQty" => $_GET["StockQty"], //收入量
+                    "StockQty" => $_GET["StockQty"],
+                    //收入量
                     "StoreType" => $_GET["StoreType"],
                     "Remark" => $_GET["Remark"],
                     "UserID" => $_GET["UserID"],
@@ -91,9 +92,9 @@ if (isset($_GET["DBoption"])) {
                 $SQL = "INSERT INTO drugstock (DrugCode, StoreID, AreaNo, BlockNo, LotNumber, MakeDate, EffectDate, StockQty)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ON DUPLICATE KEY UPDATE StockQty = IFNULL(StockQty, 0) + ? ;";
-                
 
-                drugIN($dataArray, $SQL, $connection);//收入作業
+
+                drugIN($dataArray, $SQL, $connection); //收入作業
 
                 $record_SQL = "INSERT INTO drugadd
                                             (AddTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, 
@@ -124,10 +125,10 @@ if (isset($_GET["DBoption"])) {
                                 WHERE 
                                     druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                                     AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
-                
-                
-                drugIN_record($dataArray, $record_SQL, $connection);//收入作業紀錄
-                
+
+
+                drugIN_record($dataArray, $record_SQL, $connection); //收入作業紀錄
+
 
 
 
@@ -204,8 +205,15 @@ if (isset($_GET["DBoption"])) {
                                 WHERE 
                                     druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                                     AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
-                                    
-                drugOUT_record($dataArray,$record_SQL,$connection);
+
+                drugOUT_record($dataArray, $record_SQL, $connection);
+            }
+
+        case "GET_Inventory_Record": {
+
+                getInventory_record($connection);
+
+                break;
             }
     }
 }
@@ -308,9 +316,9 @@ if (isset($_GET["DBoption"])) {
 // }
 function drugOUT_record($dataArray, $record_SQL, $connection)
 {
-    if($connection->query($record_SQL)){
+    if ($connection->query($record_SQL)) {
         echo "支出作業紀錄成功<br>";
-    }else{
+    } else {
         echo "支出作業紀錄失敗<br>";
     }
 }
@@ -318,9 +326,9 @@ function drugOUT_record($dataArray, $record_SQL, $connection)
 function drugIN_record($dataArray, $record_SQL, $connection)
 {
 
-    if($connection->query($record_SQL)){
+    if ($connection->query($record_SQL)) {
         echo "收入作業紀錄成功<br>";
-    }else{
+    } else {
         echo "收入作業紀錄失敗<br>";
     }
 
@@ -343,7 +351,7 @@ function drugOUT($dataArray, $SQL, $connection)
     if ($stmt->execute() === true) {
         echo "支出作業資料插入成功<br>";
     } else {
-        echo "支出作業插入資料時發生錯誤: " . $stmt->error."<br>";
+        echo "支出作業插入資料時發生錯誤: " . $stmt->error . "<br>";
     }
     // 關閉陳述式
     $stmt->close();
@@ -354,7 +362,7 @@ function drugIN($dataArray, $SQL, $connection)
     $stmt = $connection->prepare($SQL);
 
     if ($stmt === false) {
-        die("收入作業準備陳述式失敗: " . $connection->error."<br>");
+        die("收入作業準備陳述式失敗: " . $connection->error . "<br>");
     }
 
     // 將資料綁定至陳述式的參數
@@ -375,7 +383,7 @@ function drugIN($dataArray, $SQL, $connection)
     if ($stmt->execute() === true) {
         echo "收入作業資料插入成功<br>";
     } else {
-        echo "收入作業插入資料時發生錯誤: " . $stmt->error."<br>";
+        echo "收入作業插入資料時發生錯誤: " . $stmt->error . "<br>";
     }
 
     // 關閉陳述式
@@ -452,6 +460,83 @@ function getStockQty($LotNumber, $connection)
         return null;
     }
 }
+
+// function getInventory_record($connection)
+// {
+//     $SQL = "SELECT * FROM inventory";
+//     $stmt = $connection->prepare($SQL);
+//     $stmt->execute();
+
+//     $result = $stmt->get_result();
+
+
+//     $response = [];
+//     if ($result && mysqli_num_rows($result) > 0) {
+//         $response = array();
+//         while ($row = $result -> fetch_assoc()){
+//             $item = array(
+//                 $row["InvDate"],
+//                 $row["DrugCode"],
+//                 $row["StoreID"],
+//                 $row["AreaNo"],
+//                 $row["BlockNo"],
+//                 $row["LotNumber"],
+//                 $row["StockQty"],
+//                 $row["InventoryQty"],
+//                 $row["AdjQty"],
+//                 $row["ShiftNo"],
+//                 $row["InvTime"],
+//                 $row["UserID"],
+//                 $row["Remark"],
+//                 $row["User"],
+//             );
+//             array_push($response, $item);
+//         }
+//         $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+//         echo $json . "<br>";
+//     }
+// }
+function getInventory_record($connection)
+{
+    $SQL = "SELECT i.*, ed.ElabelType, di.DrugName
+    FROM baiguo_demo.inventory AS i
+    JOIN elabeldrug AS ed ON i.DrugCode = ed.DrugCode
+    JOIN druginfo AS di ON i.DrugCode = di.DrugCode";
+    $stmt = $connection->prepare($SQL);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+
+
+    $response = [];
+    if ($result && mysqli_num_rows($result) > 0) {
+        $response = array();
+        while ($row = $result->fetch_assoc()) {
+            $item = new stdClass();
+            $item->InvDate = $row["InvDate"];
+            $item->DrugCode = $row["DrugCode"];
+            $item->DrugName = $row["DrugName"];
+            $item->StoreID = $row["StoreID"];
+            $item->AreaNo = $row["AreaNo"];
+            $item->BlockNo = $row["BlockNo"];
+            $item->BlockType = $row["ElabelType"];
+            $item->LotNumber = $row["LotNumber"];
+            $item->StockQty = $row["StockQty"];
+            $item->InventoryQty = $row["InventoryQty"];
+            $item->AdjQty = $row["AdjQty"];
+            $item->ShiftNo = $row["ShiftNo"];
+            $item->InvTime = $row["InvTime"];
+            $item->UserID = $row["UserID"];
+            $item->Remark = $row["Remark"];
+            $item->User = $row["User"];
+
+            array_push($response, $item);
+        }
+        $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo $json . "<br>";
+    }
+}
+
 
 mysqli_close($connection);
 //echo "結束 以下註解<br>"

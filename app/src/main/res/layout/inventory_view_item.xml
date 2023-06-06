@@ -3,17 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="125dp">
+<!--    android:layout_width="400dp"-->
 
     <TextView
         android:id="@+id/DrugName"
-        android:layout_width="278dp"
+        android:layout_width="wrap_content"
         android:layout_height="45dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="28dp"
+        android:textAlignment="textStart"
         android:textColor="@color/teal_700"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.879"
+        app:layout_constraintHorizontal_bias="0.031"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="泰格莎(阿斯特捷利康)(1AZD92)" />
@@ -24,7 +26,7 @@
         android:layout_height="21dp"
         android:layout_marginTop="8dp"
         android:textColor="#FF9800"
-        android:textSize="14sp"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.012"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,44 +34,91 @@
         tools:text="DSTS-23-24-D" />
 
     <TextView
-        android:id="@+id/DrugStore_B"
-        android:layout_width="90dp"
-        android:layout_height="27dp"
-        android:layout_marginTop="28dp"
-        android:textColor="#FF5722"
-        android:textSize="20sp"
+        android:id="@+id/DrugQty"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintHorizontal_bias="0.014"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="DSTS-23-24-D" />
-
-    <TextView
-        android:id="@+id/DrugQty"
-        android:layout_width="157dp"
-        android:layout_height="18dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DrugName"
+        app:layout_constraintVertical_bias="0.887"
         tools:text="盤點量 : 50  盤盈虧 : 0" />
 
     <TextView
         android:id="@+id/InventoryTime"
         android:layout_width="140dp"
         android:layout_height="18dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DrugName"
+        app:layout_constraintHorizontal_bias="0.974"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.077"
         tools:text="2023-01-07 09:00:00" />
 
     <Button
         android:id="@+id/button"
         android:layout_width="345dp"
         android:layout_height="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/InventoryTime" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.982" />
+
+    <TextView
+        android:id="@+id/txtLotNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="批號:"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.011"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.65" />
+
+    <TextView
+        android:id="@+id/txtStockQty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="庫存量:"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.798"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.669" />
+
+    <TextView
+        android:id="@+id/txtUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="使用者:Admin"
+        android:textAlignment="viewStart"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.948"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.883" />
+
+    <TextView
+        android:id="@+id/StockNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="251.00"
+        android:textColor="#C31919"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.98"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.669" />
 </androidx.constraintlayout.widget.ConstraintLayout>

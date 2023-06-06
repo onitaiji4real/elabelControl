@@ -32,6 +32,7 @@ import com.opencsv.CSVReader;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileReader;
@@ -57,25 +58,26 @@ public class AFragment extends Fragment {
     AFragment.MyListAdapter myListAdapter;
     SwipeRefreshLayout swipeRefreshLayout;
     View view;
-    Button btnClearData,btnUpdateData;
-    String ServerName="test";
-    String SearchAll_url = "http://192.168.5.49/"+ServerName+"/Select_All.php?";
+    Button btnClearData, btnUpdateData;
+    String ServerName = "test";
+    String SearchAll_url = "http://192.168.5.49/" + ServerName + "/Select_All.php?";
     String GetJson;
     JSONArray array;
     RadioGroup RadG1;
     Button btn_Search;
     EditText SearchStr;
-    CheckBox ch1,ch2,ch3,ch4,ch5,ch6;
+    CheckBox ch1, ch2, ch3, ch4, ch5, ch6;
     ArrayList<String> TypeStr = new ArrayList<String>();
     List<Inventory> Inventorys;
     List<Druginfo> Druginfos;
     boolean getFin;
     File dir;
     GlobalData globaldata;
-    ArrayList<HashMap<String,String>> arrayList = new ArrayList<>();
-    public View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container, @NonNull Bundle saveInstance){
+    ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
 
-        view = inflater.inflate(R.layout.layout_a,container,false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @NonNull ViewGroup container, @NonNull Bundle saveInstance) {
+
+        view = inflater.inflate(R.layout.layout_a, container, false);
 
         //設置RecycleView
         mRecyclerView = view.findViewById(R.id.recyclerView);
@@ -103,66 +105,92 @@ public class AFragment extends Fragment {
         ch4.setOnClickListener(OnCheck);
         ch5.setOnClickListener(OnCheck);
         ch6.setOnClickListener(OnCheck);
-        //Toast.makeText(view.getContext(), GetJson, Toast.LENGTH_SHORT).show();
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));*/
-
         Inventorys = new ArrayList<Inventory>();
         CSVReadInventory();
 
         Druginfos = new ArrayList<Druginfo>();
         CSVReadDrugInfo();
+        //Toast.makeText(view.getContext(), GetJson, Toast.LENGTH_SHORT).show();
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));*/
+        getInventory_record();
 
-        myListAdapter = new AFragment.MyListAdapter();
+
+        myListAdapter = new AFragment.MyListAdapter(arrayList);
         mRecyclerView.setAdapter(myListAdapter);
-        makeData();
-        /*
-        getFin=false;
-        sendGET(SearchAll_url, new AFragment.VolleyCallback(){
-            @Override
-            public void onSuccess() {
-                getFin=true;
-            }
-        });
-        while(!getFin)
-        {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        myListAdapter.notifyDataSetChanged();
+        //makeData();
 
-        swipeRefreshLayout = view.findViewById(R.id.refreshLayout);
-        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.blue_RURI));
-        swipeRefreshLayout.setOnRefreshListener(()->{
-            SearchStr.setText("");
-            Toast.makeText(view.getContext(), "顯示全部資料", Toast.LENGTH_SHORT).show();
-            arrayList.clear();
-            getFin=false;
-            sendGET(SearchAll_url, new BFragment.VolleyCallback(){
-                @Override
-                public void onSuccess() {
-                    getFin=true;
-                }
-            });
-            while(!getFin)
-            {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            myListAdapter.notifyDataSetChanged();
-            swipeRefreshLayout.setRefreshing(false);
-        });
-        dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);*/
         return view;
     }
 
-    public void sendGET(String Url,final AFragment.VolleyCallback callback) {
+
+    private void getInventory_record() {
+        String url = "http://192.168.5.41/pda_submit.php?";
+        String option = "GET_Inventory_Record";
+
+        try {
+            url += "DBoption=" + option;
+
+            Log.d("TAG", "DBoption: " + option);
+
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONArray response) {
+                    try {
+                        List<HashMap<String, String>> inventoryData = new ArrayList<>();
+                        // 遍历 JSONArray，提取每个 JSON 对象中的变量值
+                        for (int i = 0; i < response.length(); i++) {
+
+
+
+                            JSONObject jsonObject = response.getJSONObject(i);
+                            // 提取其他变量值
+                            String invDate = jsonObject.getString("InvDate");
+                            String drugCode = jsonObject.getString("DrugCode");
+                            String storeId = jsonObject.getString("StoreID");
+                            String areaNo = jsonObject.getString("AreaNo");
+                            String blockNo = jsonObject.getString("BlockNo");
+                            String blockType = jsonObject.getString("BlockType");
+                            String lotNumber = jsonObject.getString("LotNumber");
+                            String stockQty = jsonObject.getString("StockQty");
+                            String inventoryQty = jsonObject.getString("InventoryQty");
+                            String adjQty = jsonObject.getString("AdjQty");
+                            String shiftNo = jsonObject.getString("ShiftNo");
+                            String invTime = jsonObject.getString("InvTime");
+                            String userID = jsonObject.getString("UserID");
+                            String remark = jsonObject.getString("Remark");
+                            String user = jsonObject.getString("User");
+                            String drugName = jsonObject.getString("DrugName");
+                            // 在这里使用变量进行逻辑操作或显示在界面上
+                            //Log.d("TAG","AdjQty" + adjQty);
+
+                            HashMap<String, String> item = new HashMap<>();
+                            item.put("DrugStore", storeId + "-" + areaNo + "-" + blockNo + "-" + blockType);
+                            item.put("DrugName",drugName + "("+ drugCode +")");
+                            item.put("InventoryQty", inventoryQty);
+                            item.put("AdjQty",adjQty);
+                            item.put("RecordTime",invDate + " " +invTime);
+
+                            item.put("LotNumber",lotNumber);
+                            item.put("StockQty",stockQty);
+                            item.put("UserID",userID);
+                            item.put("UserName",user);
+
+                            inventoryData.add(item);
+                        }
+                        makeData(inventoryData);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void sendGET(String Url, final VolleyCallback callback) {
         /**建立連線*/
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
@@ -185,39 +213,41 @@ public class AFragment extends Fragment {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 /**取得回傳*/
-                GetJson = response.body().string();
                 try {
-                    array = new JSONArray(GetJson);
-                } catch (JSONException e) {
+                    String responseData = response.body().string();
+                    JSONArray jsonArray;
+
+                    try {
+                        jsonArray = new JSONArray(responseData);
+                        callback.onSuccess(jsonArray);
+                    } catch (JSONException e) {
+                        Log.e("TAG", "Invalid JSON response: " + responseData);
+                        e.printStackTrace();
+                    }
+
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                try {
-                    if(! array.getJSONObject(0).getString("Formula").equals("no anses")) makeData();
-                } catch (JSONException e) {
-                    makeData();
-                }
-                callback.onSuccess();
-
             }
         });
     }
+
     private View.OnClickListener onClearData = new View.OnClickListener() {
 
         @Override
         public void onClick(View v) {
-            Log.d("clear","clear");
+            Log.d("clear", "clear");
             Inventorys.clear();
             try {
-            File directory = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            String uniqueFileName = "/inventory.csv";
-            File file = new File(directory.getAbsolutePath(), uniqueFileName);
-            FileWriter fileWriter = null;
-            fileWriter = new FileWriter(file);
-            fileWriter.write("");
-            fileWriter.flush();
-            fileWriter.close();
-            Toast.makeText(getActivity(), "File Exported Successfully", Toast.LENGTH_SHORT).show();
+                File directory = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                String uniqueFileName = "/inventory.csv";
+                File file = new File(directory.getAbsolutePath(), uniqueFileName);
+                FileWriter fileWriter = null;
+                fileWriter = new FileWriter(file);
+                fileWriter.write("");
+                fileWriter.flush();
+                fileWriter.close();
+                Toast.makeText(getActivity(), "File Exported Successfully", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -225,6 +255,7 @@ public class AFragment extends Fragment {
             myListAdapter.notifyDataSetChanged();
         }
     };
+
     private View.OnClickListener onUpdateData = new View.OnClickListener() {
 
         @Override
@@ -232,77 +263,27 @@ public class AFragment extends Fragment {
             BFragment bFragment = new BFragment();
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fl_container,bFragment,"B");
+            fragmentTransaction.replace(R.id.fl_container, bFragment, "B");
             fragmentTransaction.commit();
         }
     };
-    public interface VolleyCallback{
-        void onSuccess();
-    }
-    private void makeData() {
-        if(arrayList.stream().count()!=0){
-            arrayList.clear();
-        }
-        Integer count = 0;
-        for (int i = 0; i < Inventorys.size(); i++) {
-            String DrugCode = Inventorys.get(i).getDrugCode();
-            String DrugEnglish = "";
-            Log.d("Drugonfos count", String.valueOf(Druginfos.stream().count()));
 
-            if(Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(DrugCode))).count() == 0)
-            {
-                Log.d("Error","無結果");
-            }
-            else
-            {
-                List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(DrugCode))).collect(Collectors.toList());
-                DrugEnglish = MatchDruginfo.get(0).getDrugEnglish();
-            }
-
-
-            HashMap<String,String> hashMap = new HashMap<>();
-            hashMap.put("DrugStore_SA",Inventorys.get(i).getStoreID()+"-"+Inventorys.get(i).getAreaNo());
-            hashMap.put("DrugStore_B",Inventorys.get(i).getBlockNo()+"("+Inventorys.get(i).getBlockType()+")");
-            hashMap.put("DrugName",DrugEnglish+"("+DrugCode+")");
-            hashMap.put("InventoryTime",Inventorys.get(i).getInvDate()+" "+Inventorys.get(i).getInvTime());
-            hashMap.put("DrugQty","盤點量:"+Inventorys.get(i).getInventoryQty()+"("+Inventorys.get(i).getAdjQty()+")");
-            arrayList.add(count,hashMap);
-            count++;
-        }
-
-
-        /*
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = array.getJSONObject(i);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                HashMap<String,String> hashMap = new HashMap<>();
-                hashMap.put("Code",jsonObject.getString("DrugCode"));
-                hashMap.put("Name",jsonObject.getString("DrugName"));
-                hashMap.put("Type",jsonObject.getString("DrugType"));
-                hashMap.put("NHI_Code",jsonObject.getString("NHI_Code"));
-                hashMap.put("ImageNum",jsonObject.getString("ImageNum"));
-                hashMap.put("Version",jsonObject.getString("Version"));
-                arrayList.add(i,hashMap);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-        */
+    public interface VolleyCallback {
+        void onSuccess(JSONArray response);
     }
 
-    public void CSVReadInventory(){
-        try{
+    private void makeData(List<HashMap<String, String>> inventoryData) {
+        arrayList.clear();
+        arrayList.addAll(inventoryData);
+        myListAdapter.notifyDataSetChanged();
+    }
+
+    public void CSVReadInventory() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/Inventory.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/Inventory.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -333,13 +314,12 @@ public class AFragment extends Fragment {
         }
     }
 
-
-    public void CSVReadDrugInfo(){
-        try{
+    public void CSVReadDrugInfo() {
+        try {
             File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
             Log.d("dir", dir.getAbsolutePath());
             // String path =
-            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/druginfo.csv"));
+            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/druginfo.csv"));
             String[] nextLine;
 
             int i = 0;
@@ -364,16 +344,13 @@ public class AFragment extends Fragment {
         public void onClick(View v) {
             //Toast.makeText(view.getContext(), "搜尋", Toast.LENGTH_SHORT).show();
             String Search_str = SearchStr.getText().toString();
-            if("".equals(Search_str))
-            {
+            if ("".equals(Search_str)) {
                 Toast.makeText(view.getContext(), "搜尋欄不可為空", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
+            } else {
                 int n = RadG1.getCheckedRadioButtonId();
                 //Toast.makeText(view.getContext(), String.valueOf(n), Toast.LENGTH_SHORT).show();
-                String SearchUrl="";
-                switch (n){
+                String SearchUrl = "";
+                switch (n) {
                     /*
                     case R.id.rdo_drugcode:
                         SearchUrl = "http://192.168.5.49/"+ServerName+"/SelectByDrugCode.php?DrugCode="+Search_str;
@@ -386,15 +363,15 @@ public class AFragment extends Fragment {
                         break;*/
                 }
                 arrayList.clear();
-                getFin=false;
+                getFin = false;
 
-                sendGET(SearchUrl, new AFragment.VolleyCallback(){
-                    @Override
-                    public void onSuccess() {
-                        getFin=true;
-                    }
-                });
-                while(! getFin) {
+//                sendGET(SearchUrl, new AFragment.VolleyCallback() {
+//                    @Override
+//                    public void onSuccess() {
+//                        getFin = true;
+//                    }
+//                });
+                while (!getFin) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -437,58 +414,76 @@ public class AFragment extends Fragment {
 
         return resizedBitmap;
     }
+
     public static void hideKeyboard(Context context) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
         }
     }
-    private class MyListAdapter extends RecyclerView.Adapter<AFragment.MyListAdapter.ViewHolder>{
+
+    private class MyListAdapter extends RecyclerView.Adapter<AFragment.MyListAdapter.ViewHolder> {
+
+//        ArrayList<HashMap<String, String>> arrayList = new ArrayList<>();
+        private ArrayList<HashMap<String, String>> arrayList;
+
+        public MyListAdapter(ArrayList<HashMap<String, String>> arrayList){
+            this.arrayList = arrayList;
+
+        }
 
 
-        class ViewHolder extends RecyclerView.ViewHolder{
-            private TextView tvDrugStore_SA,tvDrugStore_B,tvDrugName,tvDrugQty,tvInventoryTime;
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            private TextView tvDrugStore_SA, tvDrugStore_B, tvDrugName,
+                    tvDrugQty, tvInventoryTime,txtStockQty,txtUser,txtLotNumber,StockNum;
             private String type;
             ImageView ImageShower;
+
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvDrugStore_SA = itemView.findViewById(R.id.DrugStore_SA);
-                tvDrugStore_B = itemView.findViewById(R.id.DrugStore_B);
+                //tvDrugStore_B = itemView.findViewById(R.id.DrugStore_B);
                 tvDrugName = itemView.findViewById(R.id.DrugName);
                 tvDrugQty = itemView.findViewById(R.id.DrugQty);
                 tvInventoryTime = itemView.findViewById(R.id.InventoryTime);
+                txtStockQty = itemView.findViewById(R.id.txtStockQty);
+                txtUser = itemView.findViewById(R.id.txtUser);
+                txtLotNumber = itemView.findViewById(R.id.txtLotNumber);
+                StockNum = itemView.findViewById(R.id.StockNum);
             }
         }
+
         @NonNull
         @Override
         public AFragment.MyListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.inventory_view_item,parent,false);
+                    .inflate(R.layout.inventory_view_item, parent, false);
             return new AFragment.MyListAdapter.ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(@NonNull AFragment.MyListAdapter.ViewHolder holder, int position) {
             hideKeyboard(view.getContext());
-            holder.tvDrugStore_SA.setText(arrayList.get(position).get("DrugStore_SA"));
-            holder.tvDrugStore_B.setText(arrayList.get(position).get("DrugStore_B"));
-            holder.tvDrugName.setText(arrayList.get(position).get("DrugName"));
-            holder.tvDrugQty.setText(arrayList.get(position).get("DrugQty"));
-            holder.tvInventoryTime.setText(arrayList.get(position).get("InventoryTime"));
-/*
-            holder.itemView.setOnClickListener((v)->{
-                //Toast.makeText(view.getContext(),holder.tvCode.getText(), Toast.LENGTH_SHORT).show();
-                Bundle bundle = new Bundle();
-                bundle.putString("tvCode",holder.tvCode.getText().toString());
-                bundle.putString("tvVersion",holder.Version.getText().toString());
-                //bundle.putString("tvID",holder.DrugID);!!!!!!!!!!!!!!!!!
-                Intent intent = new Intent();
-                intent.setClass(view.getContext(),DrugDetail.class);
-                intent.putExtras(bundle);
-                startActivity(intent);
 
-            });
-*/
+            HashMap<String, String> item = arrayList.get(position);
+
+//            holder.tvDrugStore_SA.setText(arrayList.get(position).get("DrugStore_SA"));
+//            holder.tvDrugStore_B.setText(arrayList.get(position).get("DrugStore_B"));
+//            holder.tvDrugName.setText(arrayList.get(position).get("DrugName"));
+//            holder.tvDrugQty.setText(arrayList.get(position).get("DrugQty"));
+//            holder.tvInventoryTime.setText(arrayList.get(position).get("InventoryTime"));
+//            HashMap<String, String> item = arrayList.get(position);
+
+            holder.tvDrugStore_SA.setText(item.get("DrugStore"));
+//            holder.tvDrugStore_B.setText(item.get("DrugStore_B"));
+            holder.tvDrugName.setText(item.get("DrugName"));
+            holder.tvDrugQty.setText("盤點量: " + item.get("InventoryQty") + " 盤盈虧: " + item.get("AdjQty"));
+            holder.tvInventoryTime.setText(item.get("RecordTime"));
+            holder.txtLotNumber.setText("批號:" + item.get("LotNumber"));
+            holder.StockNum.setText(item.get("InventoryQty"));
+            holder.txtUser.setText("使用者:" + item.get("UserID"));
+
         }
 
         @Override
