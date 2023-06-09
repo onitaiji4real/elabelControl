@@ -2,6 +2,8 @@ package com.example.elabelcontrol;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -37,6 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import android.widget.Spinner;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import data.DrugInOut;
 import data.Druginfo;
 import data.Drugstore;
@@ -55,13 +60,28 @@ public class DFragment extends Fragment {
     private TextView edtElabelNumber;
     String CodeID;
     GlobalData globaldata;
-    Button btnLight,btnSumit;
+    Button btnLight,btnSumit,btnDrugOut,btnPreViewIndex,btnNextIndex;
     List<Drugstore> Drugstores;
     List<DrugInOut> DrugInOuts;
     List<Druginfo> Druginfos;
     boolean getFin;
     GlobalData globalData;
     EditText edtDrugStore,edtBlockNo,edtBlockType,edtAreaNo,edtDrugCode,edtDrugEnglish,edtInQty;
+    TextView textLotNumber_size,txtLotNumber,textNum,edtMakeDate,edtEffectDate;
+    private int currentIndex = 0;
+    private ArrayList<String> storeIDs;
+    private ArrayList<String> elabelTypes;
+    private ArrayList<String> drugCodes;
+    private ArrayList<String> drugNames;
+    private ArrayList<String> drugEnglishs;
+    private ArrayList<String> areaNos;
+    private ArrayList<String> blockNos;
+    private ArrayList<String> stockQtys;
+    private ArrayList<String> lotNumbers;
+    private ArrayList<String> makerIDs;
+    private ArrayList<String> makerNames;
+    private ArrayList<String> effectDates;
+    private ArrayList<String> makeDates;
 
 
 
@@ -82,6 +102,9 @@ public class DFragment extends Fragment {
         btnSumit = view.findViewById(R.id.btnSumit);
         btnSumit.setOnClickListener(OnSubmit);
         spinner = view.findViewById(R.id.spOutCode);
+
+        edtEffectDate = view.findViewById(R.id.edtEffectDate);
+        edtMakeDate = view.findViewById(R.id.edtMakeDate);
 
 
         edtAreaNo = view.findViewById(R.id.edtAreaNo);
@@ -112,6 +135,23 @@ public class DFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(2, false);
+
+        btnDrugOut = view.findViewById(R.id.btnDrugOut);
+        btnDrugOut.setEnabled(false);
+        btnDrugOut.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+
+        textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
+        txtLotNumber = view.findViewById(R.id.txtLotNumber);
+
+        btnNextIndex = view.findViewById(R.id.btnNextIndex);
+        btnNextIndex.setOnClickListener(nextIndex);
+        btnPreViewIndex = view.findViewById(R.id.btnPreViewIndex);
+        btnPreViewIndex.setOnClickListener(previewIndex);
+
+
+        textNum = view.findViewById(R.id.textNum);
+
+
 
         labelAfterScanListener();
 
@@ -186,87 +226,232 @@ public class DFragment extends Fragment {
     private void lsDrugInfo() {
         String ed = edtElabelNumber.getText().toString();
 
-        Druginfo target_DrugInfo = null;
-        Drugstore target_DrugStore = null;
-        for (Drugstore drugstore : Drugstores) {
-            if (drugstore.getElabelNumber().equals(ed)) {
-                target_DrugStore = drugstore;
-                break;
-            }
-        }
+        String url = "http://192.168.5.41/pda_submit.php?";
+        try {
+            url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+            url += "DBoption=GET" + "&";
+            //url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
+            //url += "UserID=" + globaldata.getLoginUserID() + "&";
+            //url += "spinnerText=" + URLEncoder.encode(spinner.getSelectedItem().toString());
 
-        for (Druginfo druginfo : Druginfos) {
-            if (druginfo.getDrugCode().equals(target_DrugStore.getDrugCode())) {
-                target_DrugInfo = druginfo;
-            }
-        }
+            Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+            Log.d("TAG", "DBoption:GET");
+            Log.d("TAG", "TotalQty" + edtInQty.getText().toString());
+            Log.d("USERID", "UserID" + globaldata.getLoginUserID());
+            Log.d("spinnerText", "Spinner" + spinner.getSelectedItem().toString());
 
-
-        edtDrugStore.setText(target_DrugStore.getStoreID());
-        edtAreaNo.setText(target_DrugStore.getAreaNo());
-        edtBlockNo.setText(target_DrugStore.getBlockNo());
-        edtBlockType.setText(target_DrugStore.getBlockType());
-        edtDrugCode.setText(target_DrugStore.getDrugCode());
-        edtDrugEnglish.setText(target_DrugInfo.getDrugName());
-
-        Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
-
-    }
-
-    private View.OnClickListener OnSubmit = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            hideKeyboard(v.getContext());
-            String url = "http://192.168.5.41/pda_submit.php?";
-            try {
-                String DBoption;
-                url = url + "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
-                url = url + "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
-                url = url + "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
-                url = url + "BlockType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
-                url = url + "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
-                url = url + "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
-                url = url + "DBoption=" +URLEncoder.encode("out", "UTF-8") + "&";
-                url = url + "ElabelNumber=" +URLEncoder.encode(edtElabelNumber.getText().toString(),"UTF-8")+"&";
-                url = url + "DrugEnglish=" +URLEncoder.encode(edtDrugEnglish.getText().toString(),"UTF-8")+"&";
-                url = url + "spinnerText=" +URLEncoder.encode(spinner.getSelectedItem().toString(),"UTF-8")+"&";
-                url = url + "UserID=" +URLEncoder.encode(globaldata.getLoginUserID(),"UTF-8");
-
-                Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
-                Log.d("TAG", "AreaNo: " + edtAreaNo.getText().toString());
-                Log.d("TAG", "BlockNo: " + edtBlockNo.getText().toString());
-                Log.d("TAG", "BlockType: " + edtBlockType.getText().toString());
-                Log.d("TAG", "TotalQty: " + edtInQty.getText().toString());
-                Log.d("TAG", "StoreID: " + edtDrugStore.getText().toString());
-                Log.d("TAG", "DBoption:out");
-                Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
-                Log.d("TAG", "DrugEnglish: " + edtDrugEnglish.getText().toString());
-                Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
-                Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            Toast.makeText(v.getContext(), url, Toast.LENGTH_SHORT).show();
-            getFin = false;
             sendGET(url, new VolleyCallback() {
                 @Override
-                public void onSuccess() {
-                    getFin = true;
+                public void onSuccess(JSONArray response) {
+                    try {
+//                        String areaNo = response.getString("AreaNo");
+//                        String blockNo = response.getString("BlockNo");
+//                        String blockType = response.getString("BlockType");
+//                        String drugCode = response.getString("DrugCode");
+//                        String stockQty = response.getString("StockQty");
+//                        String storeID = response.getString("StoreID");
+//                        String drugenglish = response.getString("DrugName");
+
+                        storeIDs = new ArrayList<>();
+                        elabelTypes = new ArrayList<>();
+                        drugCodes = new ArrayList<>();
+                        drugNames = new ArrayList<>();
+                        drugEnglishs = new ArrayList<>();
+                        areaNos = new ArrayList<>();
+                        blockNos = new ArrayList<>();
+                        stockQtys = new ArrayList<>();
+                        lotNumbers = new ArrayList<>();
+                        makerIDs = new ArrayList<>();
+                        makerNames = new ArrayList<>();
+                        effectDates = new ArrayList<>();
+                        makeDates = new ArrayList<>();
+
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONArray arr = response.getJSONArray(i);
+
+                            storeIDs.add(arr.getString(0));
+                            elabelTypes.add(arr.getString(1));
+                            drugCodes.add(arr.getString(2));
+                            drugNames.add(arr.getString(3));
+                            drugEnglishs.add(arr.getString(4));
+                            areaNos.add(arr.getString(5));
+                            blockNos.add(arr.getString(6));
+                            stockQtys.add(arr.getString(7));
+                            lotNumbers.add(arr.getString(8));
+                            makerIDs.add(arr.getString(9));
+                            makerNames.add(arr.getString(10));
+                            effectDates.add(arr.getString(11));
+                            makeDates.add(arr.getString(12));
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateUIWithCurrentIndex();
+                                edtInQty.requestFocus();
+
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
-            while (!getFin) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+
+        }
+        Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
+    }
+    private void updateUIWithCurrentIndex() {
+
+        int Lot_length = stockQtys.size();
+
+        String Lot_number = (currentIndex + 1) + "/" + Lot_length;
+        textLotNumber_size.setText(Lot_number);
+
+        int sumQty = 0;
+        for (int i = 0; i < stockQtys.size(); i++) {
+            sumQty += Double.parseDouble(stockQtys.get(i));
+        }
+
+        edtDrugStore.setText(storeIDs.get(currentIndex)); //卡位StoreID
+        edtAreaNo.setText(areaNos.get(currentIndex));
+        edtBlockNo.setText(blockNos.get(currentIndex));
+        edtBlockType.setText(elabelTypes.get(currentIndex));
+        edtDrugCode.setText(drugCodes.get(currentIndex));
+        edtDrugEnglish.setText(drugEnglishs.get(currentIndex));
+        txtLotNumber.setText(lotNumbers.get(currentIndex));
+        textNum.setText(stockQtys.get(currentIndex));
+        edtEffectDate.setText(effectDates.get(currentIndex));
+        edtMakeDate.setText(makeDates.get(currentIndex));
+
+        //txtInventoryQty.setText(String.valueOf(sumQty)); //該儲區、藥代碼、所有批號之庫存總量
+    }
+    private View.OnClickListener previewIndex = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (lotNumbers != null && currentIndex > 0) {
+                currentIndex--;
+                updateUIWithCurrentIndex();
             }
+            edtInQty.setText("");
+            edtElabelNumber.requestFocus();
         }
     };
 
+    private View.OnClickListener nextIndex = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (lotNumbers != null && currentIndex < lotNumbers.size() - 1) {
+                currentIndex++;
+                updateUIWithCurrentIndex();
+            }
+            edtElabelNumber.requestFocus();
+            edtInQty.setText("");
+        }
+    };
+
+    private View.OnClickListener OnSubmit = new View.OnClickListener() {
+        /**收入*/
+
+        @Override
+        public void onClick(View v) {
+            hideKeyboard(v.getContext());
+            String labelCode = edtElabelNumber.getText().toString();
+            OnLight(v, labelCode,"進行支出！"); //亮燈
+            String url = "http://192.168.5.41/pda_submit.php?";
+            try {
+                //exportDataToCSV();
+
+
+                url += "DBoption=" + URLEncoder.encode("OUT", "UTF-8") + "&";
+                //url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                url += "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
+                url += "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
+                url += "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
+                url += "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
+                url += "LotNumber=" + URLEncoder.encode(txtLotNumber.getText().toString(), "UTF-8") + "&";
+                url += "MakeDate=" + URLEncoder.encode(edtMakeDate.getText().toString(), "UTF-8") + "&";
+                url += "EffectDate=" + URLEncoder.encode(edtEffectDate.getText().toString(), "UTF-8") + "&";
+                url += "StockQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                url += "StoreType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
+                url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(), "UTF-8") + "&";
+                url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
+
+
+                url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                url += "UserID=" + globaldata.getLoginUserID() + "&";
+
+
+//                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
+//                    Log.d("TAG", "AreaNo: " + edtAreaNo.getText().toString());
+//                    Log.d("TAG", "BlockNo: " + edtBlockNo.getText().toString());
+//                    Log.d("TAG", "BlockType: " + edtBlockType.getText().toString());
+//                    Log.d("TAG", "TotalQty: " + edtInQty.getText().toString());
+//                    Log.d("TAG", "StoreID: " + edtDrugStore.getText().toString());
+//                    Log.d("TAG", "DBoption: in");
+//                    Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
+//                    Log.d("TAG", "DrugEnglish: " + edtDrugEnglish.getText().toString());
+//                    Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
+//                    Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
+
+                sendGET(url, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(JSONArray response) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Toast.makeText(v.getContext(),"submit",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(v.getContext(), "進行支出！", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    public void OnLight(View view, String labelCode,String txt) {
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+        RequestBody body = RequestBody.create(mediaType, jsonString);
+        Request request = new Request.Builder()
+                .url("http://192.168.5.42:9003/labels/contents/led")
+                .method("PUT", body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "*/*")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                } else {
+                    // Remember to run this on UI thread if you're planning to update UI
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(view.getContext(),txt, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     public interface VolleyCallback {
-        void onSuccess();
+        void onSuccess(JSONArray response);
         // 在這裡可以添加其他方法，如 onFailure 等
     }
 
@@ -293,7 +478,20 @@ public class DFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 /** 取得回傳*/
-                callback.onSuccess();
+                try {
+                    String responseData = response.body().string();
+                    JSONArray jsonArray;
+
+                    try {
+                        jsonArray = new JSONArray(responseData);
+                        callback.onSuccess(jsonArray);
+                    } catch (JSONException e) {
+                        Log.e("TAG", "Invalid JSON response: " + responseData);
+                        e.printStackTrace();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

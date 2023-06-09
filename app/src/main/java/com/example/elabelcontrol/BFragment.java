@@ -48,10 +48,10 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class BFragment extends Fragment {
-    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtNumBox, edtNumRow, edtNumPill, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType;
-    TextView txtInventoryQty, txtInventoryNum, textNum, txtLotNumber;
+    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtNumBox, edtNumRow, edtNumPill, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType, edtEffectDate, edtMakeDate;
+    TextView txtInventoryQty, txtInventoryNum, textNum, txtLotNumber, textLotNumber_size;
     private Activity activity;
-    Button btnSumit, btnLight, btnClear,btnPreview,btnNextIndex;
+    Button btnSumit, btnLight, btnClear, btnPreview, btnNextIndex, btnStatus;
     Boolean GetFin;
     Spinner SpPage;
     GridView gridLotnumber;
@@ -105,6 +105,7 @@ public class BFragment extends Fragment {
     private ArrayList<String> makerIDs;
     private ArrayList<String> makerNames;
     private ArrayList<String> effectDates;
+    private ArrayList<String> makeDates;
 
     @Nullable
     @Override
@@ -146,6 +147,12 @@ public class BFragment extends Fragment {
 
         btnPreview = view.findViewById(R.id.btnPreViewIndex);
         btnPreview.setOnClickListener(previewIndex);
+
+        btnStatus = view.findViewById(R.id.btnStatus);
+
+        textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
+        edtEffectDate = view.findViewById(R.id.edtEffectDate);
+        edtMakeDate = view.findViewById(R.id.edtMakeDate);
 //        txtInventoryNum = view.findViewById(R.id.txtInventoryNum);
 
 //        edtNumBox.addTextChangedListener(new TextWatcher() {
@@ -198,7 +205,11 @@ public class BFragment extends Fragment {
     private View.OnClickListener onSubmit = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String sElabelNumber = edtElabelNumber.getText().toString();
+            hideKeyboard(v.getContext());
+
+            String labelCode = edtElabelNumber.getText().toString();
+
+            //String sElabelNumber = edtElabelNumber.getText().toString();
             String sDrugStore = edtDrugStore.getText().toString();
             String sDrugCode = edtDrugCode.getText().toString();
 
@@ -212,40 +223,75 @@ public class BFragment extends Fragment {
 
 
             String DBoption = "DBoption=INVENTORY";
-            String url ="http://192.168.5.41/pda_submit.php?"+ DBoption + "&";
-            try{
+            String url = "http://192.168.5.41/pda_submit.php?" + DBoption + "&";
+            try {
 //                url += URLEncoder.encode(DBoption,"UTF-8") + "&";
 
                 //InvDate從資料庫代入當前時間
                 //url += "ElabelNumber=" + URLEncoder.encode(sElabelNumber,"UTF-8") + "&";
-                url += "DrugCode=" +URLEncoder.encode(sDrugCode,"UTF-8") + "&";
+                url += "DrugCode=" + URLEncoder.encode(sDrugCode, "UTF-8") + "&";
                 url += "StoreID=" + URLEncoder.encode(sDrugStore, "UTF-8") + "&";
-                url += "AreaNo=" + URLEncoder.encode(sAreaNo,"UTF-8") + "&";
-                url += "BlockNo=" + URLEncoder.encode(sBlockNo,"UTF-8") + "&";
-                url += "LotNumber=" + URLEncoder.encode(sLotNumber,"UTF-8") + "&";
+                url += "AreaNo=" + URLEncoder.encode(sAreaNo, "UTF-8") + "&";
+                url += "BlockNo=" + URLEncoder.encode(sBlockNo, "UTF-8") + "&";
+                url += "LotNumber=" + URLEncoder.encode(sLotNumber, "UTF-8") + "&";
                 //StockQty 從PHP取得
                 url += "InventoryQty=" + URLEncoder.encode(sedtNumPill, "UTF-8") + "&";
                 //AdjQty 數量從PHP計算
                 //Shift從PHP固定填1
                 //InvTime從資料庫代入
-                url += "UserId=" + URLEncoder.encode(globaldata.getLoginUserID(),"UTF-8") + "&";
-                url += "User=" + URLEncoder.encode(globaldata.getLoginUserName(),"UTF-8");
+                url += "UserId=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
+                url += "User=" + URLEncoder.encode(globaldata.getLoginUserName(), "UTF-8");
 
-            }catch (UnsupportedEncodingException  e){
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
 
             sendGET(url, new VolleyCallback() {
                 @Override
                 public void onSuccess(JSONArray response) {
-
+                    Toast.makeText(v.getContext(), "盤點成功！", Toast.LENGTH_SHORT).show();
                 }
             });
 
 
-
+            OnLight(v, labelCode,"盤點成功！"); //亮燈
         }
     };
+
+    public void OnLight(View view, String labelCode,String txt) {
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+        RequestBody body = RequestBody.create(mediaType, jsonString);
+        Request request = new Request.Builder()
+                .url("http://192.168.5.42:9003/labels/contents/led")
+                .method("PUT", body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "*/*")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                } else {
+                    // Remember to run this on UI thread if you're planning to update UI
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(view.getContext(), txt, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
 
     private View.OnClickListener previewIndex = new View.OnClickListener() {
         @Override
@@ -274,45 +320,15 @@ public class BFragment extends Fragment {
     private View.OnClickListener OnLight = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            hideKeyboard(view.getContext());
-            OkHttpClient client = new OkHttpClient().newBuilder().build();
-            MediaType mediaType = MediaType.parse("application/json");
             String labelCode = edtElabelNumber.getText().toString();
-            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
-            RequestBody body = RequestBody.create(mediaType, jsonString);
-            Request request = new Request.Builder()
-                    .url("http://192.168.5.42:9003/labels/contents/led")
-                    .method("PUT", body)
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("Accept", "*/*")
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        throw new IOException("Unexpected code " + response);
-                    } else {
-                        // Remember to run this on UI thread if you're planning to update UI
-                        view.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(view.getContext(), "亮燈", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-            });
+            OnLight(view, labelCode,"亮燈成功！"); //亮燈
         }
     };
 
     private void updateUIWithCurrentIndex() {
-
+        int Lot_length = stockQtys.size();
+        String Lot_number = (currentIndex + 1) + "/" + Lot_length;
+        textLotNumber_size.setText(Lot_number);
         int sumQty = 0;
         for (int i = 0; i < stockQtys.size(); i++) {
             sumQty += Double.parseDouble(stockQtys.get(i));
@@ -326,6 +342,8 @@ public class BFragment extends Fragment {
         edtDrugEnglish.setText(drugEnglishs.get(currentIndex));
         txtLotNumber.setText(lotNumbers.get(currentIndex));
         textNum.setText(stockQtys.get(currentIndex));
+        edtEffectDate.setText(effectDates.get(currentIndex));
+        edtMakeDate.setText(makeDates.get(currentIndex));
 
         txtInventoryQty.setText(String.valueOf(sumQty)); //該儲區、藥代碼、所有批號之庫存總量
     }
@@ -388,6 +406,7 @@ public class BFragment extends Fragment {
                         makerIDs = new ArrayList<>();
                         makerNames = new ArrayList<>();
                         effectDates = new ArrayList<>();
+                        makeDates = new ArrayList<>();
 
                         for (int i = 0; i < response.length(); i++) {
 
@@ -404,6 +423,7 @@ public class BFragment extends Fragment {
                             makerIDs.add(arr.getString(9));
                             makerNames.add(arr.getString(10));
                             effectDates.add(arr.getString(11));
+                            makeDates.add(arr.getString(12));
 
 //                            String storeID = arr.getString(0);
 //                            String elabelType = arr.getString(1);
@@ -418,6 +438,8 @@ public class BFragment extends Fragment {
 //                            String makerName = arr.getString(10);
 //                            String effectDate = arr.getString(11);
                             /**擷取取得的陣列*/
+                            //btnStatus.setText("已掃描");
+
                         }
 
 
@@ -508,7 +530,6 @@ public class BFragment extends Fragment {
         void onSuccess(JSONArray response);
         // 在這裡可以添加其他方法，如 onFailure 等
     }
-
 
 
     public static void hideKeyboard(Context context) {

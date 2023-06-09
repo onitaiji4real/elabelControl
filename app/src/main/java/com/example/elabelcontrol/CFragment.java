@@ -61,12 +61,10 @@ import data.GlobalData;
 
 public class CFragment extends Fragment {
     Spinner spinner;
-    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType,edtEffectDate,edtMakeDate;
-    Button btnSumit, btnLight, btnGetDrugStore,btnClear,btnPreViewIndex,btnNextIndex,btnNewDrugIN;
+    EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType, edtEffectDate, edtMakeDate;
+    Button btnSumit, btnLight, btnGetDrugStore, btnClear, btnPreViewIndex, btnNextIndex, btnNewDrugIN;
     GlobalData globaldata;
-    TextView textNum,txtLotNumber,textLotNumber_size;
-
-
+    TextView textNum, txtLotNumber, textLotNumber_size;
 
 
     List<Drugstore> Drugstores;
@@ -136,8 +134,8 @@ public class CFragment extends Fragment {
         btnLight = view.findViewById(R.id.btnLight);
         btnLight.setOnClickListener(OnLight);
 
-        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
-        btnGetDrugStore.setOnClickListener(OnGetDrugStore);
+//        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
+//        btnGetDrugStore.setOnClickListener(OnGetDrugStore);
 
         textNum = view.findViewById(R.id.textNum);
 
@@ -162,13 +160,7 @@ public class CFragment extends Fragment {
 
         textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
 
-
-
-
-
-
         spinner = view.findViewById(R.id.spOutCode);
-
 
         ArrayAdapter<CharSequence> adapter =
                 ArrayAdapter.createFromResource(view.getContext(),
@@ -180,25 +172,18 @@ public class CFragment extends Fragment {
 
         spinner.setOnItemSelectedListener(spnOnItemSelected);
         CodeID = "A";
-        /*
-        tvhello= (TextView) findViewById(R.id.hello);
-        tvhello.setText("選項:"+spinner.getSelectedItem().toString());*/
 
-        Drugstores = new ArrayList<Drugstore>();
-        CSVReadDrugStore();
-
-        DrugInOuts = new ArrayList<DrugInOut>();
-
-        Druginfos = new ArrayList<Druginfo>();
-        CSVReadDrugInfo();
+//        Drugstores = new ArrayList<Drugstore>();
+//        CSVReadDrugStore();
+//
+//        DrugInOuts = new ArrayList<DrugInOut>();
+//
+//        Druginfos = new ArrayList<Druginfo>();
+//        CSVReadDrugInfo();
 
         labelAfterScanListener();
-
-
         return view;
     }
-
-
 
 
     private View.OnClickListener onNewDrugIN = new View.OnClickListener() {
@@ -211,27 +196,37 @@ public class CFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            if(isPressed){
+            if (isPressed) {
 
 
                 //已按下、回復原本狀態
                 //updateUIWithCurrentIndex();
-                updateUIWithCurrentIndex();
-                edtInQty.setText("");
-                edtInQty.requestFocus();
+                if (edtElabelNumber.length()==12){
+                    updateUIWithCurrentIndex();
+                }else {
+                    edtInQty.setText("");
+                    txtLotNumber.setText("");
+                    edtEffectDate.setText("");
+                    edtMakeDate.setText("");
+                    textNum.setText("");
+                    spinner.setEnabled(true);
+                    spinner.setSelection(1, false);
+                    edtInQty.requestFocus();
 
-                btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
-                btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
-                btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    Toast.makeText(v.getContext(), "離開新藥收入模式！", Toast.LENGTH_SHORT).show();
+
+                    btnPreViewIndex.setEnabled(true);
+                    btnNextIndex.setEnabled(true);
+                }
 
 
 
-                btnPreViewIndex.setEnabled(true);
-                btnNextIndex.setEnabled(true);
-
-                isPressed =false;
-            }else {
-                //第一次按下、回復原本狀態
+                isPressed = false;
+            } else {
+                //第一次按下、
 
                 Date currentDate = new Date();
                 SimpleDateFormat LotNumberFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -252,8 +247,11 @@ public class CFragment extends Fragment {
                 btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
                 btnPreViewIndex.setEnabled(false);
 
-                edtEffectDate.setText("2023-12-31");
+                spinner.setEnabled(false);
 
+                edtEffectDate.setText("2023-12-31");
+                Toast.makeText(v.getContext(), "開始執行新藥收入！", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "請輸入收入數量！", Toast.LENGTH_SHORT).show();
                 isPressed = true;
             }
         }
@@ -303,11 +301,12 @@ public class CFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
+
     private void updateUIWithCurrentIndex() {
 
         int Lot_length = stockQtys.size();
 
-        String Lot_number = (currentIndex+1) + "/" + Lot_length;
+        String Lot_number = (currentIndex + 1) + "/" + Lot_length;
         textLotNumber_size.setText(Lot_number);
 
         int sumQty = 0;
@@ -335,10 +334,12 @@ public class CFragment extends Fragment {
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //目前不使用到
             }
+
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 //目前不使用到
             }
+
             @Override
             public void afterTextChanged(Editable e) {
                 String input = e.toString();
@@ -354,7 +355,7 @@ public class CFragment extends Fragment {
         String ed = edtElabelNumber.getText().toString();
 
         String url = "http://192.168.5.41/pda_submit.php?";
-        try{
+        try {
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
             url += "DBoption=GET" + "&";
             //url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
@@ -363,9 +364,9 @@ public class CFragment extends Fragment {
 
             Log.d("TAG", "ElabelNumber: " + edtElabelNumber.getText().toString());
             Log.d("TAG", "DBoption:");
-            Log.d("TAG" , "TotalQty" +edtInQty.getText().toString());
-            Log.d("USERID", "UserID"+globaldata.getLoginUserID());
-            Log.d("spinnerText","Spinner"+spinner.getSelectedItem().toString());
+            Log.d("TAG", "TotalQty" + edtInQty.getText().toString());
+            Log.d("USERID", "UserID" + globaldata.getLoginUserID());
+            Log.d("spinnerText", "Spinner" + spinner.getSelectedItem().toString());
 
             sendGET(url, new VolleyCallback() {
                 @Override
@@ -393,7 +394,7 @@ public class CFragment extends Fragment {
                         effectDates = new ArrayList<>();
                         makeDates = new ArrayList<>();
 
-                        for (int i = 0; i < response.length(); i++){
+                        for (int i = 0; i < response.length(); i++) {
                             JSONArray arr = response.getJSONArray(i);
 
                             storeIDs.add(arr.getString(0));
@@ -418,18 +419,19 @@ public class CFragment extends Fragment {
 
                             }
                         });
-                    }catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             });
 
-        }catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
 
         }
         Toast.makeText(getActivity(), "掃描成功", Toast.LENGTH_SHORT).show();
     }
+
     public void sendGET(String Url, final VolleyCallback callback) {
 
         /**建立連線*/
@@ -476,12 +478,6 @@ public class CFragment extends Fragment {
         void onSuccess(JSONArray response);
         // 在這裡可以添加其他方法，如 onFailure 等
     }
-
-
-
-
-
-
 
 
     public void CSVReadDrugStore() {
@@ -565,32 +561,30 @@ public class CFragment extends Fragment {
         @Override
         public void onClick(View v) {
             hideKeyboard(v.getContext());
+            String labelCode = edtElabelNumber.getText().toString();
+            OnLight(v, labelCode,"收入成功！"); //亮燈
+            String url = "http://192.168.5.41/pda_submit.php?";
             try {
-                exportDataToCSV();
-                String url = "http://192.168.5.41/pda_submit.php?";
-                try {
+                //exportDataToCSV();
 
 
-
-                    url += "DBoption=" +URLEncoder.encode("IN", "UTF-8") + "&";
-                    //url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
-                    url += "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(),"UTF-8") + "&";
-                    url += "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
-                    url += "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
-                    url += "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
-                    url += "LotNumber=" + URLEncoder.encode(txtLotNumber.getText().toString(), "UTF-8") + "&";
-                    url += "MakeDate=" + URLEncoder.encode(edtMakeDate.getText().toString(), "UTF-8") + "&";
-                    url += "EffectDate=" + URLEncoder.encode(edtEffectDate.getText().toString(), "UTF-8") + "&";
-                    url += "StockQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
-                    url += "StoreType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
-                    url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(),"UTF-8") + "&";
-                    url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
-
+                url += "DBoption=" + URLEncoder.encode("IN", "UTF-8") + "&";
+                //url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                url += "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
+                url += "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
+                url += "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";
+                url += "BlockNo=" + URLEncoder.encode(edtBlockNo.getText().toString(), "UTF-8") + "&";
+                url += "LotNumber=" + URLEncoder.encode(txtLotNumber.getText().toString(), "UTF-8") + "&";
+                url += "MakeDate=" + URLEncoder.encode(edtMakeDate.getText().toString(), "UTF-8") + "&";
+                url += "EffectDate=" + URLEncoder.encode(edtEffectDate.getText().toString(), "UTF-8") + "&";
+                url += "StockQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                url += "StoreType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
+                url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(), "UTF-8") + "&";
+                url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
 
 
-                    url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(),"UTF-8") + "&";
-                    url += "UserID=" + globaldata.getLoginUserID() + "&";
-
+                url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
+                url += "UserID=" + globaldata.getLoginUserID() + "&";
 
 
 //                    Log.d("TAG", "DrugCode: " + edtDrugCode.getText().toString());
@@ -605,31 +599,24 @@ public class CFragment extends Fragment {
 //                    Log.d("TAG", "spinnerText: " + spinner.getSelectedItem().toString());
 //                    Log.d("TAG", "UserID: " + globaldata.getLoginUserID());
 
-                    sendGET(url, new VolleyCallback() {
-                        @Override
-                        public void onSuccess(JSONArray response) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //Toast.makeText(v.getContext(),"submit",Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    });
-
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
-                Toast.makeText(v.getContext(),"送出", Toast.LENGTH_SHORT).show();
-
-
-            } catch (IOException e) {
+                sendGET(url, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(JSONArray response) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Toast.makeText(v.getContext(),"submit",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            Toast.makeText(v.getContext(), "進行收入！", Toast.LENGTH_SHORT).show();
         }
     };
+
     private View.OnClickListener OnGetDrugStore = new View.OnClickListener() {
 
         @Override
@@ -676,43 +663,45 @@ public class CFragment extends Fragment {
     private View.OnClickListener OnLight = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            hideKeyboard(view.getContext());
-            OkHttpClient client = new OkHttpClient().newBuilder().build();
-            MediaType mediaType = MediaType.parse("application/json");
             String labelCode = edtElabelNumber.getText().toString();
-            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
-            RequestBody body = RequestBody.create(mediaType, jsonString);
-            Request request = new Request.Builder()
-                    .url("http://192.168.5.42:9003/labels/contents/led")
-                    .method("PUT", body)
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("Accept", "*/*")
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        throw new IOException("Unexpected code " + response);
-                    } else {
-                        // Remember to run this on UI thread if you're planning to update UI
-                        view.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(view.getContext(),"toast", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-            });
+            OnLight(view, labelCode,"亮燈成功！"); //亮燈
         }
     };
 
+    public void OnLight(View view, String labelCode,String txt) {
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+        RequestBody body = RequestBody.create(mediaType, jsonString);
+        Request request = new Request.Builder()
+                .url("http://192.168.5.42:9003/labels/contents/led")
+                .method("PUT", body)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "*/*")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                } else {
+                    // Remember to run this on UI thread if you're planning to update UI
+                    view.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(view.getContext(), txt, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
 
 
     private Spinner.OnItemSelectedListener spnOnItemSelected = new Spinner.OnItemSelectedListener() {
