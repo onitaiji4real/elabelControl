@@ -89,8 +89,9 @@ public class AFragment extends Fragment {
         //btnUpdateData.setOnClickListener(onUpdateData);
 
         btnClearData = view.findViewById(R.id.btnClearData);
-        btnClearData.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
-        btnClearData.setEnabled(false);
+//        btnClearData.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+//        btnClearData.setEnabled(false);
+        btnClearData.setOnClickListener(onClearData);
 
         btnUpdateData = view.findViewById(R.id.btnUpdateData);
         btnUpdateData.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
@@ -102,6 +103,13 @@ public class AFragment extends Fragment {
 
         return view;
     }
+
+    private View.OnClickListener onClearData = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Toast.makeText(view.getContext(),"權限不足！", Toast.LENGTH_SHORT).show();
+        }
+    };
 
     private void getInventory_record() {
         String url = "http://192.168.5.41/pda_submit.php?";

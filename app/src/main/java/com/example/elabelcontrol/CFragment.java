@@ -134,17 +134,9 @@ public class CFragment extends Fragment {
         btnLight = view.findViewById(R.id.btnLight);
         btnLight.setOnClickListener(OnLight);
 
-//        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
-//        btnGetDrugStore.setOnClickListener(OnGetDrugStore);
-
         textNum = view.findViewById(R.id.textNum);
-
         btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
         btnNewDrugIN.setOnClickListener(onNewDrugIN);
-//        datePicker = view.findViewById(R.id.edt);
-
-//        btnClear = view.findViewById(R.id.btnNextIndex);
-//        btnClear.setOnClickListener(onClear);
 
         txtLotNumber = view.findViewById(R.id.txtLotNumber);
 
@@ -173,18 +165,9 @@ public class CFragment extends Fragment {
         spinner.setOnItemSelectedListener(spnOnItemSelected);
         CodeID = "A";
 
-//        Drugstores = new ArrayList<Drugstore>();
-//        CSVReadDrugStore();
-//
-//        DrugInOuts = new ArrayList<DrugInOut>();
-//
-//        Druginfos = new ArrayList<Druginfo>();
-//        CSVReadDrugInfo();
-
         labelAfterScanListener();
         return view;
     }
-
 
     private View.OnClickListener onNewDrugIN = new View.OnClickListener() {
 
@@ -202,8 +185,22 @@ public class CFragment extends Fragment {
                 //已按下、回復原本狀態
                 //updateUIWithCurrentIndex();
                 if (edtElabelNumber.length()==12){
+
                     updateUIWithCurrentIndex();
+
+                    spinner.setEnabled(true);
+                    spinner.setSelection(1, false);
+                    btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    btnPreViewIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
+                    Toast.makeText(v.getContext(), "離開新藥收入模式！", Toast.LENGTH_SHORT).show();
+
+                    btnPreViewIndex.setEnabled(true);
+                    btnNextIndex.setEnabled(true);
+
+
                 }else {
+//                    btnNewDrugIN.setEnabled(false);
                     edtInQty.setText("");
                     txtLotNumber.setText("");
                     edtEffectDate.setText("");
@@ -211,7 +208,7 @@ public class CFragment extends Fragment {
                     textNum.setText("");
                     spinner.setEnabled(true);
                     spinner.setSelection(1, false);
-                    edtInQty.requestFocus();
+                    edtElabelNumber.requestFocus();
 
                     btnNewDrugIN.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
                     btnNextIndex.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green)));
@@ -273,6 +270,7 @@ public class CFragment extends Fragment {
             hideKeyboard(v.getContext());
         }
     };
+
     private View.OnClickListener previewIndex = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -416,7 +414,7 @@ public class CFragment extends Fragment {
                             @Override
                             public void run() {
                                 updateUIWithCurrentIndex();
-
+                                edtInQty.requestFocus();
                             }
                         });
                     } catch (JSONException e) {
@@ -478,7 +476,6 @@ public class CFragment extends Fragment {
         void onSuccess(JSONArray response);
         // 在這裡可以添加其他方法，如 onFailure 等
     }
-
 
     public void CSVReadDrugStore() {
         try {
@@ -617,49 +614,6 @@ public class CFragment extends Fragment {
         }
     };
 
-    private View.OnClickListener OnGetDrugStore = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            hideKeyboard(v.getContext());
-            String ElabelNumber = edtElabelNumber.getText().toString();
-            if (Drugstores.stream().count() == 0) {
-                //Log.d("Drugstores", "Drugstores 為 0");
-            }
-            Log.d("ElabelNumber", ElabelNumber);
-            if (Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).count() == 0) {
-                //無此條碼資料
-                Log.d("error", "無結果");
-            } else {
-                List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).collect(Collectors.toList());
-                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count() > 0) {
-                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
-                    edtDrugEnglish.setText(MatchDruginfo.get(0).getDrugEnglish());
-                }
-                edtDrugCode.setText(MatchDrugstore.get(0).getDrugCode());
-                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID() + "-" + MatchDrugstore.get(0).getAreaNo() + "-" + MatchDrugstore.get(0).getBlockNo() + "-" + MatchDrugstore.get(0).getBlockType());
-                StoreID = MatchDrugstore.get(0).getStoreID();
-                AreaNo = MatchDrugstore.get(0).getAreaNo();
-                BlockNo = MatchDrugstore.get(0).getBlockNo();
-                BlockType = MatchDrugstore.get(0).getBlockType();
-                DrugCode = MatchDrugstore.get(0).getDrugCode();
-                MakerID = MatchDrugstore.get(0).getMakerID();
-                TemPt_Kind = MatchDrugstore.get(0).getTemPt_Kind();
-                SafeStock = MatchDrugstore.get(0).getSafeStock();
-                TotalQty = MatchDrugstore.get(0).getTotalQty();
-                SetTime = MatchDrugstore.get(0).getSetTime();
-                SetUserID = MatchDrugstore.get(0).getSetUserID();
-                InvQtyTime = MatchDrugstore.get(0).getInvQtyTime();
-                InvQtyUserID = MatchDrugstore.get(0).getInvQtyUserID();
-                LotNumber = MatchDrugstore.get(0).getLotNumber();
-                EffectDate = MatchDrugstore.get(0).getEffectDate();
-                StockQty = MatchDrugstore.get(0).getStockQty();
-                UpdateUserID = MatchDrugstore.get(0).getUpdateUserID();
-                UpdateTime = MatchDrugstore.get(0).getUpdateTime();
-            }
-        }
-    };
-
     private View.OnClickListener OnLight = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -702,7 +656,6 @@ public class CFragment extends Fragment {
             }
         });
     }
-
 
     private Spinner.OnItemSelectedListener spnOnItemSelected = new Spinner.OnItemSelectedListener() {
 
@@ -792,4 +745,47 @@ public class CFragment extends Fragment {
 
  */
     }
+
+    private View.OnClickListener OnGetDrugStore = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+            hideKeyboard(v.getContext());
+            String ElabelNumber = edtElabelNumber.getText().toString();
+            if (Drugstores.stream().count() == 0) {
+                //Log.d("Drugstores", "Drugstores 為 0");
+            }
+            Log.d("ElabelNumber", ElabelNumber);
+            if (Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).count() == 0) {
+                //無此條碼資料
+                Log.d("error", "無結果");
+            } else {
+                List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getElabelNumber().equals(ElabelNumber))).collect(Collectors.toList());
+                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).count() > 0) {
+                    List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(MatchDrugstore.get(0).getDrugCode()))).collect(Collectors.toList());
+                    edtDrugEnglish.setText(MatchDruginfo.get(0).getDrugEnglish());
+                }
+                edtDrugCode.setText(MatchDrugstore.get(0).getDrugCode());
+                edtDrugStore.setText(MatchDrugstore.get(0).getStoreID() + "-" + MatchDrugstore.get(0).getAreaNo() + "-" + MatchDrugstore.get(0).getBlockNo() + "-" + MatchDrugstore.get(0).getBlockType());
+                StoreID = MatchDrugstore.get(0).getStoreID();
+                AreaNo = MatchDrugstore.get(0).getAreaNo();
+                BlockNo = MatchDrugstore.get(0).getBlockNo();
+                BlockType = MatchDrugstore.get(0).getBlockType();
+                DrugCode = MatchDrugstore.get(0).getDrugCode();
+                MakerID = MatchDrugstore.get(0).getMakerID();
+                TemPt_Kind = MatchDrugstore.get(0).getTemPt_Kind();
+                SafeStock = MatchDrugstore.get(0).getSafeStock();
+                TotalQty = MatchDrugstore.get(0).getTotalQty();
+                SetTime = MatchDrugstore.get(0).getSetTime();
+                SetUserID = MatchDrugstore.get(0).getSetUserID();
+                InvQtyTime = MatchDrugstore.get(0).getInvQtyTime();
+                InvQtyUserID = MatchDrugstore.get(0).getInvQtyUserID();
+                LotNumber = MatchDrugstore.get(0).getLotNumber();
+                EffectDate = MatchDrugstore.get(0).getEffectDate();
+                StockQty = MatchDrugstore.get(0).getStockQty();
+                UpdateUserID = MatchDrugstore.get(0).getUpdateUserID();
+                UpdateTime = MatchDrugstore.get(0).getUpdateTime();
+            }
+        }
+    };
 }
