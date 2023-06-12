@@ -62,7 +62,7 @@ import data.GlobalData;
 public class CFragment extends Fragment {
     Spinner spinner;
     EditText edtElabelNumber, edtDrugCode, edtDrugEnglish, edtInQty, edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType, edtEffectDate, edtMakeDate;
-    Button btnSumit, btnLight, btnGetDrugStore, btnClear, btnPreViewIndex, btnNextIndex, btnNewDrugIN;
+    Button btnSumit, btnLight, btnGetDrugStore, btnClear, btnPreViewIndex, btnNextIndex, btnNewDrugIN,btnStatus;
     GlobalData globaldata;
     TextView textNum, txtLotNumber, textLotNumber_size;
 
@@ -165,9 +165,34 @@ public class CFragment extends Fragment {
         spinner.setOnItemSelectedListener(spnOnItemSelected);
         CodeID = "A";
 
+        btnStatus = view.findViewById(R.id.btnStatus);
+        btnStatus.setOnClickListener(onClearField);
+
         labelAfterScanListener();
         return view;
     }
+    private View.OnClickListener onClearField = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            edtElabelNumber.setText("");
+            edtElabelNumber.requestFocus();
+            edtDrugStore.setText("");
+            edtAreaNo.setText("");
+            edtBlockNo.setText("");
+            edtBlockType.setText("");
+            edtDrugEnglish.setText("");
+            txtLotNumber.setText("");
+            edtEffectDate.setText("");
+            edtMakeDate.setText("");
+            textNum.setText("");
+            textLotNumber_size.setText("0/0");
+            //edtNumPill.setText("");
+            //edtNumRow.setText("");
+            //edtNumBox.setText("");
+            //txtInventoryQty.setText("");
+            edtDrugCode.setText("");
+        }
+    };
 
     private View.OnClickListener onNewDrugIN = new View.OnClickListener() {
 
@@ -628,7 +653,7 @@ public class CFragment extends Fragment {
         String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
         RequestBody body = RequestBody.create(mediaType, jsonString);
         Request request = new Request.Builder()
-                .url("http://192.168.5.42:9003/labels/contents/led")
+                .url("http://192.168.5.137:9003/labels/contents/led")
                 .method("PUT", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "*/*")

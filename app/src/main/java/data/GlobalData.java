@@ -8,7 +8,7 @@ import java.util.List;
 //盤點資料以及盤點所產生的收入支出只能用總數回傳，目前無法考慮各批號的數量，若是此種方式傳回的資料其lotnumber會帶入"APP"，系統端後續再去決定如何相容
 public class GlobalData extends Application {
     public String Server = "http://192.168.5.77:8080/";
-    public String AIMSServer = "http://192.168.5.42:8003/";
+    public String AIMSServer = "http://192.168.5.137:9003/";
     private String LoginUserID;
     private String LoginUserName;
     private List<User> users;

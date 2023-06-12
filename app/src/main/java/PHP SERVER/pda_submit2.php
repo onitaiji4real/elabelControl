@@ -1,6 +1,6 @@
 <?php
 $dbConfig = [
-    'host' => '192.168.5.41',
+    'host' => '192.168.5.42',
     'username' => 'root',
     'password' => 'myt855myt855',
     'db' => 'baiguo_demo'

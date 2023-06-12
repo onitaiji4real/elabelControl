@@ -57,16 +57,16 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class DFragment extends Fragment {
     private Spinner spinner;
-    private TextView edtElabelNumber;
+//    private TextView ;
     String CodeID;
     GlobalData globaldata;
-    Button btnLight,btnSumit,btnDrugOut,btnPreViewIndex,btnNextIndex;
+    Button btnLight,btnSumit,btnDrugOut,btnPreViewIndex,btnNextIndex,btnStatus;
     List<Drugstore> Drugstores;
     List<DrugInOut> DrugInOuts;
     List<Druginfo> Druginfos;
     boolean getFin;
     GlobalData globalData;
-    EditText edtDrugStore,edtBlockNo,edtBlockType,edtAreaNo,edtDrugCode,edtDrugEnglish,edtInQty;
+    EditText edtDrugStore,edtBlockNo,edtBlockType,edtAreaNo,edtDrugCode,edtDrugEnglish,edtInQty,edtElabelNumber;
     TextView textLotNumber_size,txtLotNumber,textNum,edtMakeDate,edtEffectDate;
     private int currentIndex = 0;
     private ArrayList<String> storeIDs;
@@ -138,7 +138,7 @@ public class DFragment extends Fragment {
 
         btnDrugOut = view.findViewById(R.id.btnDrugOut);
         btnDrugOut.setEnabled(false);
-        btnDrugOut.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+        //btnDrugOut.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
 
         textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
         txtLotNumber = view.findViewById(R.id.txtLotNumber);
@@ -147,6 +147,11 @@ public class DFragment extends Fragment {
         btnNextIndex.setOnClickListener(nextIndex);
         btnPreViewIndex = view.findViewById(R.id.btnPreViewIndex);
         btnPreViewIndex.setOnClickListener(previewIndex);
+
+        btnStatus = view.findViewById(R.id.btnStatus);
+        btnStatus.setOnClickListener(onClearField);
+
+
 
 
         textNum = view.findViewById(R.id.textNum);
@@ -157,6 +162,28 @@ public class DFragment extends Fragment {
 
         return view;
     }
+    private View.OnClickListener onClearField = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            edtElabelNumber.setText("");
+            edtElabelNumber.requestFocus();
+            edtDrugStore.setText("");
+            edtAreaNo.setText("");
+            edtBlockNo.setText("");
+            edtBlockType.setText("");
+            edtDrugEnglish.setText("");
+            txtLotNumber.setText("");
+            edtEffectDate.setText("");
+            edtMakeDate.setText("");
+            textNum.setText("");
+            textLotNumber_size.setText("0/0");
+            //edtNumPill.setText("");
+            //edtNumRow.setText("");
+            //edtNumBox.setText("");
+            //txtInventoryQty.setText("");
+            edtDrugCode.setText("");
+        }
+    };
 
     private View.OnClickListener OnLight = new View.OnClickListener() {
         @Override
@@ -169,7 +196,7 @@ public class DFragment extends Fragment {
             String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
             RequestBody body = RequestBody.create(mediaType, jsonString);
             Request request = new Request.Builder()
-                    .url("http://192.168.5.42:9003/labels/contents/led")
+                    .url("http://192.168.5.137:9003/labels/contents/led")
                     .method("PUT", body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept", "*/*")
@@ -421,7 +448,7 @@ public class DFragment extends Fragment {
         String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
         RequestBody body = RequestBody.create(mediaType, jsonString);
         Request request = new Request.Builder()
-                .url("http://192.168.5.42:9003/labels/contents/led")
+                .url("http://192.168.5.137:9003/labels/contents/led")
                 .method("PUT", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "*/*")
