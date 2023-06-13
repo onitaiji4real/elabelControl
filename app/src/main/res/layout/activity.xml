@@ -95,19 +95,19 @@
             android:id="@+id/tab3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="收入作業" />
+            android:text="入庫作業" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tab4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="支出作業" />
+            android:text="調撥作業" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tab5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="亮燈指引" />
+            android:text="搜索" />
 
     </com.google.android.material.tabs.TabLayout>
 

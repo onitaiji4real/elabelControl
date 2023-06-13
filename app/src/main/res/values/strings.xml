@@ -12,13 +12,13 @@
     </string-array>
     <string-array name="InCode">
         <item>購買</item>
-        <item>一般收入</item>
+        <item>入庫</item>
         <item>初期庫存量</item>
         <item>新藥收入(新批)</item>
     </string-array>
     <string-array name="OutCode">
         <item>退藥</item>
-        <item>一般支出</item>
+        <item>調撥</item>
         <item>銷毀</item>
     </string-array>
     <style name="Spinner" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
