@@ -71,6 +71,7 @@ public class CFragment extends Fragment {
     List<DrugInOut> DrugInOuts;
     List<Druginfo> Druginfos;
 
+
     String StoreID;
     String AreaNo;
     String BlockNo;
@@ -159,6 +160,7 @@ public class CFragment extends Fragment {
                         R.array.InCode,
                         android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         spinner.setAdapter(adapter);
         spinner.setSelection(1, false);
 
@@ -168,9 +170,36 @@ public class CFragment extends Fragment {
         btnStatus = view.findViewById(R.id.btnStatus);
         btnStatus.setOnClickListener(onClearField);
 
+        List<spinner_Selection> spinner_Selection = new ArrayList<>();
+        spinner_Selection.add(new spinner_Selection("購買", "A"));
+        spinner_Selection.add(new spinner_Selection("入庫", "A"));
+        spinner_Selection.add(new spinner_Selection("初期庫存量", "A"));
+        spinner_Selection.add(new spinner_Selection("新藥收入(新批)", "A"));
+
         labelAfterScanListener();
         return view;
     }
+
+      public class spinner_Selection{
+          private String REMARK_INFO;
+          private String REMARK_INFO_ID;
+
+          public spinner_Selection(String REMARK_INFO, String REMARK_INFO_ID) {
+              this.REMARK_INFO = REMARK_INFO;
+              this.REMARK_INFO_ID = REMARK_INFO_ID;
+          }
+
+          public String getREMARK_INFO() {
+              return REMARK_INFO;
+          }
+
+          public String getREMARK_INFO_ID() {
+              return REMARK_INFO_ID;
+          }
+
+
+      }
+
     private View.OnClickListener onClearField = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
