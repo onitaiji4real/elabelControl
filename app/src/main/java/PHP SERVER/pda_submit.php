@@ -3,6 +3,7 @@ $host = '192.168.5.42';
 $name = 'root';
 $pwd = 'myt855myt855';
 $db = 'baiguo_demo';
+date_default_timezone_set('Asia/Taipei');
 //header('Content-Type: application/json; charset=UTF-8');
 
 // 建立与MySQL数据库的连接
@@ -38,54 +39,296 @@ if (isset($_GET["DBoption"])) {
             break;
 
         case "INVENTORY":
-            $DrugCode = $_GET["DrugCode"];
-            $StoreID = $_GET["StoreID"];
-            $AreaNo = $_GET["AreaNo"];
-            $BlockNo = $_GET["BlockNo"];
             $LotNumber = $_GET["LotNumber"];
             $InventoryQty = $_GET["InventoryQty"];
-            $UserId = $_GET["UserId"];
-            $User = $_GET["User"];
-            // $InventoryQty = $_GET["InventoryQty"];
+            $StockQty = getStockQty($LotNumber, $connection); // 取得當前庫存
 
-            $StockQty = getStockQty($LotNumber, $connection);
-            $AdjQty = $InventoryQty - $StockQty;
+            $AdjQty = $InventoryQty - $StockQty; // 計算盤營盤虧量 會有負數
+            $PayQty = abs($InventoryQty - $StockQty); //只會有正數
+            $dataArray = array(
+                "InvDate" => date("Y-m-d"),
+                // 取得當前日期
+                "InvTime" => date("H:i:s"),
+                // 取得當前日期和時間
+                "DrugCode" => $_GET["DrugCode"],
+                "StoreID" => $_GET["StoreID"],
+                "AreaNo" => $_GET["AreaNo"],
+                "BlockNo" => $_GET["BlockNo"],
+                "LotNumber" => $_GET["LotNumber"],
+                "AdjQty" => $AdjQty,
+                "PayQty" => $PayQty,
+                "StockQty" => $StockQty,
+                "InventoryQty" => $_GET["InventoryQty"],
+                "User" => $_GET["User"],
+                "UserID" => $_GET["UserId"],
+            );
 
-            $SQL = "INSERT INTO inventory 
-                                (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserId, User)
-                    SELECT 
-                    CURDATE(),
-                    '$DrugCode',
-                        '$StoreID',
-                        '$AreaNo',
-                        '$BlockNo',
-                        '$LotNumber',
-                        '$StockQty',
-                        '$InventoryQty',
-                        '$AdjQty',
-                        IFNULL((SELECT MAX(ShiftNo) + 1 FROM inventory WHERE LotNumber = '$LotNumber'), 1),
-                        CURTIME(),
-                        '$UserId',
-                        '$User'";
+            $InvDateTime = $dataArray["InvDate"] . " " . $dataArray["InvTime"];
 
-            $result = mysqli_query($connection, $SQL);
+
+
+            print_r($dataArray);
+            echo "<br>";
+
+            if ($AdjQty > 0) {
+                echo "盤盈<br>";
+                $remark_CodeID = "D"; // 藥品盤盈
+                // 寫入該筆盤點紀錄至 inventory 表內
+                $SQL = "INSERT INTO inventory 
+                                    (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserID, User)
+                        VALUES
+                                    ('" . $dataArray["InvDate"] . "', 
+                                    '" . $dataArray["DrugCode"] . "', 
+                                    '" . $dataArray["StoreID"] . "', 
+                                    '" . $dataArray["AreaNo"] . "', 
+                                    '" . $dataArray["BlockNo"] . "', 
+                                    '" . $dataArray["LotNumber"] . "', 
+                                    '" . $dataArray["StockQty"] . "', 
+                                    '" . $dataArray["InventoryQty"] . "', 
+                                    '" . $dataArray["AdjQty"] . "', 
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                                    '" . $dataArray["InvTime"] . "', 
+                                    '" . $dataArray["UserID"] . "', 
+                                    '" . $dataArray["User"] . "')";
+
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully inserted into inventory table.<br>";
+                } else {
+                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                }
+
+                // 寫入盤點班次至 inventoryshift 表內
+                $SQL = "INSERT INTO inventoryshift
+                                    (StoreID, InvDate, ShiftNo, AreaNo, InvTime, ShiftName, User, Remark)
+                        SELECT
+                                    '" . $dataArray["StoreID"] . "',
+                                    '" . $dataArray["InvDate"] . "',
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    '" . $dataArray["AreaNo"] . "',
+                                    '" . $dataArray["InvTime"] . "',
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    '" . $dataArray["StoreID"] . "',
+                                    ''";
+                $result = mysqli_query($connection, $SQL);
+                
+                if ($result) {
+                    echo "Successfully inserted into inventoryshift table.<br>";
+                } else {
+                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                }
+
+                // 依據盤點數量更新 drugstock 的 StockQty 值
+                $SQL = "UPDATE drugstock 
+                            SET StockQty = '" . $dataArray["InventoryQty"] . "'
+                            WHERE LotNumber = '" . $dataArray["LotNumber"] . "'";
+
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully updated drugstock table.<br>";
+                } else {
+                    echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
+                }
+
+                $record_SQL = "INSERT INTO drugadd
+                            (AddTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, BlockNo, AddQty, MakerID, MakerName, Remark, UserID, ShiftNo, DrugName, DrugEnglish, EffectDate, StockQty) 
+                            SELECT 
+                            '$InvDateTime',
+                            '" . $dataArray["DrugCode"] . "', 
+                            '$remark_CodeID', 
+                            '" . $dataArray["LotNumber"] . "', 
+                            (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
+                            '" . $dataArray["StoreID"] . "', 
+                            '" . $dataArray["AreaNo"] . "', 
+                            '" . $dataArray["BlockNo"] . "', 
+                            '" . $dataArray["AdjQty"] . "', 
+                            druginfo.MakerID, 
+                            druginfo.MakerName,
+                            (SELECT CodeDesc FROM codetable WHERE CodeID = '$remark_CodeID'),
+                            '" . $dataArray["UserID"] . "', 
+                            (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                            druginfo.DrugName, 
+                            druginfo.DrugEnglish, 
+                            drugstock.EffectDate,
+                            drugstock.StockQty
+                            FROM 
+                            druginfo 
+                            JOIN 
+                            drugstock ON druginfo.DrugCode = drugstock.DrugCode
+                            WHERE 
+                            druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
+                            AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
+
+                drugOUT_record($dataArray, $record_SQL, $connection);
+
+                
+            } else if ($AdjQty < 0) {
+                echo "盤虧<br>";
+                $remark_CodeID = "H"; // 藥品盤虧
+
+                // 寫入該筆盤點紀錄至 inventory 表內
+                $SQL = "INSERT INTO inventory 
+                                    (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserID, User)
+                        VALUES
+                                    ('" . $dataArray["InvDate"] . "', 
+                                    '" . $dataArray["DrugCode"] . "', 
+                                    '" . $dataArray["StoreID"] . "', 
+                                    '" . $dataArray["AreaNo"] . "', 
+                                    '" . $dataArray["BlockNo"] . "', 
+                                    '" . $dataArray["LotNumber"] . "', 
+                                    '" . $dataArray["StockQty"] . "', 
+                                    '" . $dataArray["InventoryQty"] . "', 
+                                    '" . $dataArray["AdjQty"] . "', 
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                                    '" . $dataArray["InvTime"] . "', 
+                                    '" . $dataArray["UserID"] . "', 
+                                    '" . $dataArray["User"] . "')";
+
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully inserted into inventory table.<br>";
+                } else {
+                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                }
+
+                // 寫入盤點班次至 inventoryshift 表內
+                $SQL = "INSERT INTO inventoryshift
+                                    (StoreID, InvDate, ShiftNo, AreaNo, InvTime, ShiftName, User, Remark)
+                        SELECT
+                                    '" . $dataArray["StoreID"] . "',
+                                    '" . $dataArray["InvDate"] . "',
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    '" . $dataArray["AreaNo"] . "',
+                                    '" . $dataArray["InvTime"] . "',
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    '" . $dataArray["StoreID"] . "',
+                                    ''";
+                $result = mysqli_query($connection, $SQL);
+                
+                if ($result) {
+                    echo "Successfully inserted into inventoryshift table.<br>";
+                } else {
+                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                }
+
+                // 依據盤點數量更新 drugstock 的 StockQty 值
+                $SQL = "UPDATE drugstock 
+                            SET StockQty = '" . $dataArray["InventoryQty"] . "'
+                            WHERE LotNumber = '" . $dataArray["LotNumber"] . "'";
+
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully updated drugstock table.<br>";
+                } else {
+                    echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
+                }
+
+                $record_SQL = "INSERT INTO drugpay
+                            (PayTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, BlockNo, PayQty, MakerID, MakerName, Remark, UserID, ShiftNo, DrugName, DrugEnglish, EffectDate, StockQty) 
+                            SELECT 
+                            NOW(),
+                            '" . $dataArray["DrugCode"] . "', 
+                            '$remark_CodeID', 
+                            '" . $dataArray["LotNumber"] . "', 
+                            (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'),
+                            '" . $dataArray["StoreID"] . "', 
+                            '" . $dataArray["AreaNo"] . "', 
+                            '" . $dataArray["BlockNo"] . "', 
+                            '" . $dataArray["PayQty"] . "', 
+                            druginfo.MakerID, 
+                            druginfo.MakerName,
+                            (SELECT CodeDesc FROM codetable WHERE CodeID = '$remark_CodeID'), 
+                            '" . $dataArray["UserID"] . "', 
+                            (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                            druginfo.DrugName, 
+                            druginfo.DrugEnglish, 
+                            drugstock.EffectDate,
+                            drugstock.StockQty
+                            FROM 
+                            druginfo 
+                            JOIN 
+                            drugstock ON druginfo.DrugCode = drugstock.DrugCode
+                            WHERE 
+                            druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
+                            AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
+
+                drugOUT_record($dataArray, $record_SQL, $connection);
+
+            } else {
+                echo "盤平<br>";
+                // 寫入該筆盤點紀錄至 inventory 表內
+                $SQL = "INSERT INTO inventory 
+                                    (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserID, User)
+                        VALUES
+                                    ('" . $dataArray["InvDate"] . "', 
+                                    '" . $dataArray["DrugCode"] . "', 
+                                    '" . $dataArray["StoreID"] . "', 
+                                    '" . $dataArray["AreaNo"] . "', 
+                                    '" . $dataArray["BlockNo"] . "', 
+                                    '" . $dataArray["LotNumber"] . "', 
+                                    '" . $dataArray["StockQty"] . "', 
+                                    '" . $dataArray["InventoryQty"] . "', 
+                                    '" . $dataArray["AdjQty"] . "', 
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                                    '" . $dataArray["InvTime"] . "', 
+                                    '" . $dataArray["UserID"] . "', 
+                                    '" . $dataArray["User"] . "')";
+
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully inserted into inventory table.<br>";
+                } else {
+                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                }
+
+                // 寫入盤點班次至 inventoryshift 表內
+                $SQL = "INSERT INTO inventoryshift
+                                    (StoreID, InvDate, ShiftNo, AreaNo, InvTime, ShiftName, User, Remark)
+                        SELECT
+                                    '" . $dataArray["StoreID"] . "',
+                                    '" . $dataArray["InvDate"] . "',
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    '" . $dataArray["AreaNo"] . "',
+                                    '" . $dataArray["InvTime"] . "',
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    '" . $dataArray["StoreID"] . "',
+                                    ''";
+                $result = mysqli_query($connection, $SQL);
+
+                if ($result) {
+                    echo "Successfully inserted into inventoryshift table.<br>";
+                } else {
+                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                }
+
+            }
 
             break;
 
-            case "IN": {
+
+
+
+
+        case "IN": {
 
                 $dataArray = getDataArray();
-                
+
                 $SQL = getInsertOrUpdateSQL();
                 drugIN($dataArray, $SQL, $connection);
-            
+
                 $record_SQL = getRecordInsertSQL($dataArray);
                 drugIN_record($dataArray, $record_SQL, $connection);
-            
+
                 break;
             }
 
         case "OUT": {
+            $remark_CodeID = "H";
                 $dataArray = array(
                     "DrugCode" => $_GET["DrugCode"],
                     "StoreID" => $_GET["StoreID"],
@@ -112,9 +355,9 @@ if (isset($_GET["DBoption"])) {
                                 SELECT 
                                 NOW(),
                                     '" . $dataArray["DrugCode"] . "', 
-                                    'A', 
+                                    '$remark_CodeID',
                                     '" . $dataArray["LotNumber"] . "', 
-                                    '" . $dataArray["StoreType"] . "', 
+                                    (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
                                     '" . $dataArray["StoreID"] . "', 
                                     '" . $dataArray["AreaNo"] . "', 
                                     '" . $dataArray["BlockNo"] . "', 
@@ -148,12 +391,14 @@ if (isset($_GET["DBoption"])) {
     }
 }
 
-function getInsertOrUpdateSQL() {
+function getInsertOrUpdateSQL()
+{
     return "INSERT INTO drugstock (DrugCode, StoreID, AreaNo, BlockNo, LotNumber, MakeDate, EffectDate, StockQty)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE StockQty = IFNULL(StockQty, 0) + ? ;";
 }
-function getRecordInsertSQL($dataArray) {
+function getRecordInsertSQL($dataArray)
+{
     return "INSERT INTO drugadd
             (AddTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, 
             BlockNo, AddQty, MakerID, MakerName, Remark, UserID, ShiftNo, DrugName, DrugEnglish, EffectDate, StockQty) 
@@ -162,7 +407,7 @@ function getRecordInsertSQL($dataArray) {
                 '" . $dataArray["DrugCode"] . "', 
                 'A', 
                 '" . $dataArray["LotNumber"] . "', 
-                '" . $dataArray["StoreType"] . "', 
+                (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
                 '" . $dataArray["StoreID"] . "', 
                 '" . $dataArray["AreaNo"] . "', 
                 '" . $dataArray["BlockNo"] . "', 
@@ -184,7 +429,8 @@ function getRecordInsertSQL($dataArray) {
                 druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                 AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 }
-function getDataArray() {
+function getDataArray()
+{
     return array(
         "DrugCode" => $_GET["DrugCode"],
         "StoreID" => $_GET["StoreID"],
@@ -202,18 +448,18 @@ function getDataArray() {
 function drugOUT_record($dataArray, $record_SQL, $connection)
 {
     if ($connection->query($record_SQL)) {
-        echo "支出作業紀錄成功<br>";
+        echo "紀錄成功<br>";
     } else {
-        echo "支出作業紀錄失敗<br>";
+        echo "紀錄失敗<br>";
     }
 }
 function drugIN_record($dataArray, $record_SQL, $connection)
 {
 
     if ($connection->query($record_SQL)) {
-        echo "收入作業紀錄成功<br>";
+        echo "紀錄成功<br>";
     } else {
-        echo "收入作業紀錄失敗<br>";
+        echo "紀錄失敗<br>";
     }
 
 

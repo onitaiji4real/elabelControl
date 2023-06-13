@@ -107,7 +107,7 @@
             android:id="@+id/tab5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="搜索" />
+            android:text="藥品搜索" />
 
     </com.google.android.material.tabs.TabLayout>
 
