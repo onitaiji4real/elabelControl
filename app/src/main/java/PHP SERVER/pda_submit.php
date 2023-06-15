@@ -25,6 +25,7 @@ isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
 isset($_GET["UserID"]) ? $UserID = $_GET["UserID"] : null;
 isset($_GET["TotalQty"]) ? $TotalQty = $_GET["TotalQty"] : null;
 isset($_GET["spinnerText"]) ? $spinnerText = $_GET["spinnerText"] : null;
+isset($_GET["DrugLabel"]) ? $DrugLabel = $_GET["DrugLabel"] : null;
 
 if (isset($_GET["DBoption"])) {
     $DBoption = $_GET["DBoption"];
@@ -39,6 +40,7 @@ if (isset($_GET["DBoption"])) {
             break;
 
         case "INVENTORY":
+            isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
             $LotNumber = $_GET["LotNumber"];
             $InventoryQty = $_GET["InventoryQty"];
             $StockQty = getStockQty($LotNumber, $connection); // 取得當前庫存
@@ -67,7 +69,7 @@ if (isset($_GET["DBoption"])) {
 
 
 
-            print_r($dataArray);
+            //print_r($dataArray);
             echo "<br>";
 
             if ($AdjQty > 0) {
@@ -112,7 +114,7 @@ if (isset($_GET["DBoption"])) {
                                     '" . $dataArray["StoreID"] . "',
                                     ''";
                 $result = mysqli_query($connection, $SQL);
-                
+
                 if ($result) {
                     echo "Successfully inserted into inventoryshift table.<br>";
                 } else {
@@ -139,7 +141,7 @@ if (isset($_GET["DBoption"])) {
                             '" . $dataArray["DrugCode"] . "', 
                             '$remark_CodeID', 
                             '" . $dataArray["LotNumber"] . "', 
-                            (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
+                            (SELECT StoreType FROM store WHERE StoreID = '" . $dataArray["StoreID"] . "'), 
                             '" . $dataArray["StoreID"] . "', 
                             '" . $dataArray["AreaNo"] . "', 
                             '" . $dataArray["BlockNo"] . "', 
@@ -162,9 +164,14 @@ if (isset($_GET["DBoption"])) {
                             AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
+                update_elabeldrug($ElabelNumber, $dataArray, $connection);
 
-                
             } else if ($AdjQty < 0) {
+
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
+
                 echo "盤虧<br>";
                 $remark_CodeID = "H"; // 藥品盤虧
 
@@ -207,7 +214,7 @@ if (isset($_GET["DBoption"])) {
                                     '" . $dataArray["StoreID"] . "',
                                     ''";
                 $result = mysqli_query($connection, $SQL);
-                
+
                 if ($result) {
                     echo "Successfully inserted into inventoryshift table.<br>";
                 } else {
@@ -234,7 +241,7 @@ if (isset($_GET["DBoption"])) {
                             '" . $dataArray["DrugCode"] . "', 
                             '$remark_CodeID', 
                             '" . $dataArray["LotNumber"] . "', 
-                            (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'),
+                            (SELECT StoreType FROM store WHERE StoreID = '" . $dataArray["StoreID"] . "'),
                             '" . $dataArray["StoreID"] . "', 
                             '" . $dataArray["AreaNo"] . "', 
                             '" . $dataArray["BlockNo"] . "', 
@@ -257,9 +264,12 @@ if (isset($_GET["DBoption"])) {
                             AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
-
+                update_elabeldrug($ElabelNumber, $dataArray, $connection);
             } else {
-                echo "盤平<br>";
+
+                isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
+
+                //echo "盤平<br>";
                 // 寫入該筆盤點紀錄至 inventory 表內
                 $SQL = "INSERT INTO inventory 
                                     (InvDate, DrugCode, StoreID, AreaNo, BlockNo, LotNumber, StockQty, InventoryQty, AdjQty, ShiftNo, InvTime, UserID, User)
@@ -281,9 +291,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventory table.<br>";
+                    //echo "Successfully inserted into inventory table.<br>";
                 } else {
-                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                    //echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 寫入盤點班次至 inventoryshift 表內
@@ -301,12 +311,15 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventoryshift table.<br>";
+                    //echo "Successfully inserted into inventoryshift table.<br>";
                 } else {
-                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                    //echo "Error inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
+                update_elabeldrug($ElabelNumber, $dataArray, $connection);
 
             }
+
+
 
             break;
 
@@ -316,19 +329,31 @@ if (isset($_GET["DBoption"])) {
 
         case "IN": {
 
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
+
+                $remark_CodeID = "B";
+
                 $dataArray = getDataArray();
 
                 $SQL = getInsertOrUpdateSQL();
                 drugIN($dataArray, $SQL, $connection);
 
-                $record_SQL = getRecordInsertSQL($dataArray);
+                $record_SQL = getRecordInsertSQL($dataArray, $remark_CodeID);
                 drugIN_record($dataArray, $record_SQL, $connection);
+                echo "CASE IN";
+                update_elabeldrug($ElabelNumber, $dataArray, $connection);
 
                 break;
             }
 
         case "OUT": {
-            $remark_CodeID = "H";
+
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
+                $remark_CodeID = "G";
                 $dataArray = array(
                     "DrugCode" => $_GET["DrugCode"],
                     "StoreID" => $_GET["StoreID"],
@@ -357,14 +382,14 @@ if (isset($_GET["DBoption"])) {
                                     '" . $dataArray["DrugCode"] . "', 
                                     '$remark_CodeID',
                                     '" . $dataArray["LotNumber"] . "', 
-                                    (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
+                                    (SELECT StoreType FROM store WHERE StoreID = '" . $dataArray["StoreID"] . "'), 
                                     '" . $dataArray["StoreID"] . "', 
                                     '" . $dataArray["AreaNo"] . "', 
                                     '" . $dataArray["BlockNo"] . "', 
                                     '" . $dataArray["StockQty"] . "', 
                                     druginfo.MakerID, 
                                     druginfo.MakerName,
-                                    '" . $dataArray["Remark"] . "', 
+                                    (SELECT CodeDesc FROM codetable WHERE CodeID = '$remark_CodeID'), 
                                     '" . $dataArray["UserID"] . "', 
                                     '1', 
                                     druginfo.DrugName, 
@@ -380,6 +405,7 @@ if (isset($_GET["DBoption"])) {
                                     AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
+                update_elabeldrug($ElabelNumber, $dataArray, $connection);
             }
 
         case "GET_Inventory_Record": {
@@ -387,6 +413,13 @@ if (isset($_GET["DBoption"])) {
                 getInventory_record($connection);
 
                 break;
+            }
+        case "Search_BY_Drug_Label": {
+                $dataArray = array(
+                    "DrugLabel" => $_GET["DrugLabel"]
+                );
+
+                get_Store_withDrugLabel($dataArray, $connection);
             }
     }
 }
@@ -397,7 +430,7 @@ function getInsertOrUpdateSQL()
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE StockQty = IFNULL(StockQty, 0) + ? ;";
 }
-function getRecordInsertSQL($dataArray)
+function getRecordInsertSQL($dataArray, $remark_CodeID)
 {
     return "INSERT INTO drugadd
             (AddTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, 
@@ -405,16 +438,16 @@ function getRecordInsertSQL($dataArray)
             SELECT 
             NOW(),
                 '" . $dataArray["DrugCode"] . "', 
-                'A', 
+                '$remark_CodeID', 
                 '" . $dataArray["LotNumber"] . "', 
-                (SELECT StoreType FROM store WHERE StoreID = '".$dataArray["StoreID"]."'), 
+                (SELECT StoreType FROM store WHERE StoreID = '" . $dataArray["StoreID"] . "'), 
                 '" . $dataArray["StoreID"] . "', 
                 '" . $dataArray["AreaNo"] . "', 
                 '" . $dataArray["BlockNo"] . "', 
                 '" . $dataArray["StockQty"] . "', 
                 druginfo.MakerID, 
                 druginfo.MakerName,
-                '" . $dataArray["Remark"] . "', 
+                (SELECT CodeDesc FROM codetable WHERE CodeID = '$remark_CodeID'), 
                 '" . $dataArray["UserID"] . "', 
                 '1', 
                 druginfo.DrugName, 
@@ -486,7 +519,6 @@ function drugOUT($dataArray, $SQL, $connection)
     // 關閉陳述式
     $stmt->close();
 }
-
 function drugIN($dataArray, $SQL, $connection)
 {
     $stmt = $connection->prepare($SQL);
@@ -588,7 +620,6 @@ function getStockQty($LotNumber, $connection)
         return null;
     }
 }
-
 function getInventory_record($connection)
 {
     $SQL = "SELECT i.*, ed.ElabelType, di.DrugName
@@ -629,6 +660,88 @@ function getInventory_record($connection)
         echo $json . "<br>";
     }
 }
+
+function update_elabeldrug($ElabelNumber, $dataArray, $connection)
+{
+    $SQL = "UPDATE elabeldrug 
+            SET 
+                    DrugCode3 = '" . $dataArray["LotNumber"] . "',
+                    DrugName3 = (
+                                    SELECT EffectDate 
+                                    FROM drugstock 
+                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                    DrugEnglish3 = (SELECT StockQty
+                                    FROM drugstock
+                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "')
+            WHERE 
+                    ElabelNumber = '$ElabelNumber' AND 
+                    DrugCode = '" . $dataArray["DrugCode"] . "'";
+
+    $result = mysqli_query($connection, $SQL);
+
+    if ($result) {
+        if (mysqli_affected_rows($connection) > 0) {
+            //echo "Successfully Update elabeldrug table.<br>";
+        } else {
+            //echo "No rows updated in elabeldrug table.<br>";
+        }
+    } else {
+        //echo "Error Update elabeldrug table: " . mysqli_error($connection) . "<br>";
+    }
+
+
+}
+
+function get_Store_withDrugLabel($dataArray, $connection)
+{
+    $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3
+            FROM elabeldrug
+            WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
+     ";
+
+    $result = mysqli_query($connection, $SQL);
+    $response = array(); // Create an empty array to store the response
+
+    if ($result) {
+        if (mysqli_affected_rows($connection) > 0) {
+            
+            // Fetch and process each row
+            while ($row = mysqli_fetch_assoc($result)) {
+                $item = array(
+                    'Response' => 'Successfully return Search BY DrugLabel.',
+                    'ElabelNumber' => $row['ElabelNumber'],
+                    'StoreID' => $row['StoreID'],
+                    'ElabelType' => $row['ElabelType'],
+                    'DrugCode' => $row['DrugCode'],
+                    'DrugName' => $row['DrugName'],
+                    'DrugEnglish' => $row['DrugEnglish'],
+                    'AreaNo' => $row['AreaNo'],
+                    'BlockNo' => $row['BlockNo'],
+                    'DrugCode3' => $row['DrugCode3'],
+                    'DrugName3' => $row['DrugName3']
+                );
+    
+                $response[] = $item; // Add the item to the response array
+            }
+        } else {
+            // $response['status'] = '不成功';
+            // $response[] = array('status' => '不成功', 'message' => "No rows return Search BY DrugLabel.");
+            $item = array('Response' => 'No rows return Search BY DrugLabel.');
+            $response[] = $item;
+        }
+    } else {
+        // $response['status'] = '不成功';
+        // $response[] = array('status' => '不成功', 'message' => "Error Search table: " . mysqli_error($connection));
+        $item = array('Response' => 'Error Search table: ' . mysqli_error($connection));
+        $response[] = $item;
+
+    }
+
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
+    echo $json . "<br>";
+}
+
+
 
 mysqli_close($connection);
 //echo "結束 以下註解<br>"

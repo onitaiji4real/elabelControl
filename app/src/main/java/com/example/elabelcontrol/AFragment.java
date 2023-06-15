@@ -107,7 +107,7 @@ public class AFragment extends Fragment {
     private View.OnClickListener onClearData = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Toast.makeText(view.getContext(),"權限不足！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(view.getContext(), "權限不足！", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -127,7 +127,6 @@ public class AFragment extends Fragment {
                         List<HashMap<String, String>> inventoryData = new ArrayList<>();
                         // 遍历 JSONArray，提取每个 JSON 对象中的变量值
                         for (int i = 0; i < response.length(); i++) {
-
 
 
                             JSONObject jsonObject = response.getJSONObject(i);
@@ -153,15 +152,15 @@ public class AFragment extends Fragment {
 
                             HashMap<String, String> item = new HashMap<>();
                             item.put("DrugStore", storeId + "-" + areaNo + "-" + blockNo + "-" + blockType);
-                            item.put("DrugName",drugName + "("+ drugCode +")");
+                            item.put("DrugName", drugName + "(" + drugCode + ")");
                             item.put("InventoryQty", inventoryQty);
-                            item.put("AdjQty",adjQty);
-                            item.put("RecordTime",invDate + " " +invTime);
+                            item.put("AdjQty", adjQty);
+                            item.put("RecordTime", invDate + " " + invTime);
 
-                            item.put("LotNumber",lotNumber);
-                            item.put("StockQty",stockQty);
-                            item.put("UserID",userID);
-                            item.put("UserName",user);
+                            item.put("LotNumber", lotNumber);
+                            item.put("StockQty", stockQty);
+                            item.put("UserID", userID);
+                            item.put("UserName", user);
 
                             inventoryData.add(item);
                         }
@@ -246,13 +245,13 @@ public class AFragment extends Fragment {
 
         private ArrayList<HashMap<String, String>> arrayList;
 
-        public MyListAdapter(ArrayList<HashMap<String, String>> arrayList){
+        public MyListAdapter(ArrayList<HashMap<String, String>> arrayList) {
             this.arrayList = arrayList;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
             private TextView tvDrugStore_SA, tvDrugStore_B, tvDrugName,
-                    tvDrugQty, tvInventoryTime,txtStockQty,txtUser,txtLotNumber,StockNum;
+                    tvDrugQty, tvInventoryTime, txtStockQty, txtUser, txtLotNumber, StockNum;
             private String type;
             ImageView ImageShower;
 
@@ -308,180 +307,9 @@ public class AFragment extends Fragment {
 
 
     }
-
-//    private View.OnClickListener onClearData = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            Log.d("clear", "clear");
-//            Inventorys.clear();
-//            try {
-//                File directory = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-//                String uniqueFileName = "/inventory.csv";
-//                File file = new File(directory.getAbsolutePath(), uniqueFileName);
-//                FileWriter fileWriter = null;
-//                fileWriter = new FileWriter(file);
-//                fileWriter.write("");
-//                fileWriter.flush();
-//                fileWriter.close();
-//                Toast.makeText(getActivity(), "File Exported Successfully", Toast.LENGTH_SHORT).show();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            arrayList.clear();
-//            myListAdapter.notifyDataSetChanged();
-//        }
-//    };
-//
-//    private View.OnClickListener onUpdateData = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            BFragment bFragment = new BFragment();
-//            FragmentManager fragmentManager = getFragmentManager();
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            fragmentTransaction.replace(R.id.fl_container, bFragment, "B");
-//            fragmentTransaction.commit();
-//        }
-//    };
-//
-//    public void CSVReadInventory() {
-//        try {
-//            File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-//            Log.d("dir", dir.getAbsolutePath());
-//            // String path =
-//            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/Inventory.csv"));
-//            String[] nextLine;
-//
-//            int i = 0;
-//            String[] record = null;
-//            while ((record = reader.readNext()) != null) {
-//                Inventory inventory = new Inventory();
-//                inventory.setInvDate(record[0]);
-//                inventory.setDrugCode(record[1]);
-//                inventory.setMakerID(record[2]);
-//                inventory.setStoreID(record[3]);
-//                inventory.setAreaNo(record[4]);
-//                inventory.setBlockNo(record[5]);
-//                inventory.setBlockType(record[6]);
-//                inventory.setLotNumber(record[7]);
-//                inventory.setStockQty(record[8]);
-//                inventory.setInventoryQty(record[9]);
-//                inventory.setAdjQty(record[10]);
-//                inventory.setShiftNo(record[11]);
-//                inventory.setInvTime(record[12]);
-//                inventory.setUserID(record[13]);
-//                inventory.setRemark(record[14]);
-//                Inventorys.add(inventory);
-//            }
-//            reader.close();
-//        } catch (IOException e) {
-//            // reader在初始化時可能遭遇問題。記得使用try/catch處理例外情形。
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    public void CSVReadDrugInfo() {
-//        try {
-//            File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-//            Log.d("dir", dir.getAbsolutePath());
-//            // String path =
-//            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath() + "/druginfo.csv"));
-//            String[] nextLine;
-//
-//            int i = 0;
-//            String[] record = null;
-//            while ((record = reader.readNext()) != null) {
-//                Druginfo druginfo = new Druginfo();
-//                druginfo.setMakerID(record[0]);
-//                druginfo.setDrugCode(record[1]);
-//                druginfo.setDrugEnglish(record[2]);
-//                druginfo.setDrugName(record[3]);
-//                Druginfos.add(druginfo);
-//            }
-//            reader.close();
-//        } catch (IOException e) {
-//            // reader在初始化時可能遭遇問題。記得使用try/catch處理例外情形。
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    private View.OnClickListener Search = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            //Toast.makeText(view.getContext(), "搜尋", Toast.LENGTH_SHORT).show();
-//            String Search_str = SearchStr.getText().toString();
-//            if ("".equals(Search_str)) {
-//                Toast.makeText(view.getContext(), "搜尋欄不可為空", Toast.LENGTH_SHORT).show();
-//            } else {
-//                int n = RadG1.getCheckedRadioButtonId();
-//                //Toast.makeText(view.getContext(), String.valueOf(n), Toast.LENGTH_SHORT).show();
-//                String SearchUrl = "";
-//                switch (n) {
-//                    /*
-//                    case R.id.rdo_drugcode:
-//                        SearchUrl = "http://192.168.5.49/"+ServerName+"/SelectByDrugCode.php?DrugCode="+Search_str;
-//                        break;
-//                    case R.id.rdo_drugname:
-//                        SearchUrl = "http://192.168.5.49/"+ServerName+"/SelectByDrugName.php?DrugName="+Search_str;
-//                        break;
-//                    case R.id.rdo_NHI_code:
-//                        SearchUrl = "http://192.168.5.49/"+ServerName+"/SelectByNHI_Code.php?NHI_Code="+Search_str;
-//                        break;*/
-//                }
-//                arrayList.clear();
-//                getFin = false;
-//
-////                sendGET(SearchUrl, new AFragment.VolleyCallback() {
-////                    @Override
-////                    public void onSuccess() {
-////                        getFin = true;
-////                    }
-////                });
-//                while (!getFin) {
-//                    try {
-//                        Thread.sleep(100);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//                myListAdapter.notifyDataSetChanged();
-//                Toast.makeText(view.getContext(), "搜尋完成", Toast.LENGTH_SHORT).show();
-//                hideKeyboard(view.getContext());
-//            }
-//
-//        }
-//    };
-//
-//    private Bitmap getResizedBitmap(String imagePath) {
-//        final int MAX_WIDTH = 100; // 新圖的寬要小於等於這個值
-//
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true; //只讀取寬度和高度
-//        BitmapFactory.decodeFile(imagePath, options);
-//        int width = options.outWidth, height = options.outHeight;
-//
-//        // 求出要縮小的 scale 值，必需是2的次方，ex: 1,2,4,8,16...
-//        int scale = 1;
-//        while (width > MAX_WIDTH * 2) {
-//            width /= 2;
-//            height /= 2;
-//            scale *= 2;
-//        }
-//
-//        // 使用 scale 值產生縮小的圖檔
-//        BitmapFactory.Options scaledOptions = new BitmapFactory.Options();
-//        scaledOptions.inSampleSize = scale;
-//        Bitmap scaledBitmap = BitmapFactory.decodeFile(imagePath, scaledOptions);
-//
-//        Matrix matrix = new Matrix(); // 產生縮圖需要的參數 matrix
-//
-//        // 產生縮小後的圖
-//        Bitmap resizedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, width, height, matrix, true);
-//
-//        return resizedBitmap;
-//    }
-
 }
+//    }
+
+
 
 

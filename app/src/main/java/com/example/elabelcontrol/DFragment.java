@@ -253,7 +253,7 @@ public class DFragment extends Fragment {
     private void lsDrugInfo() {
         String ed = edtElabelNumber.getText().toString();
 
-        String url = "http://192.168.5.41/pda_submit.php?";
+        String url = globaldata.getPHP_SERVER();
         try {
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
             url += "DBoption=GET" + "&";
@@ -388,13 +388,13 @@ public class DFragment extends Fragment {
             hideKeyboard(v.getContext());
             String labelCode = edtElabelNumber.getText().toString();
             OnLight(v, labelCode,"進行支出！"); //亮燈
-            String url = "http://192.168.5.41/pda_submit.php?";
+            String url = globaldata.getPHP_SERVER();
             try {
                 //exportDataToCSV();
 
 
                 url += "DBoption=" + URLEncoder.encode("OUT", "UTF-8") + "&";
-                //url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
+                url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
                 url += "DrugCode=" + URLEncoder.encode(edtDrugCode.getText().toString(), "UTF-8") + "&";
                 url += "StoreID=" + URLEncoder.encode(edtDrugStore.getText().toString(), "UTF-8") + "&";
                 url += "AreaNo=" + URLEncoder.encode(edtAreaNo.getText().toString(), "UTF-8") + "&";

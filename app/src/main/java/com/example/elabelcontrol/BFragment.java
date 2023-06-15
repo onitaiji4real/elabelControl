@@ -154,49 +154,7 @@ public class BFragment extends Fragment {
         textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
         edtEffectDate = view.findViewById(R.id.edtEffectDate);
         edtMakeDate = view.findViewById(R.id.edtMakeDate);
-//        txtInventoryNum = view.findViewById(R.id.txtInventoryNum);
 
-//        edtNumBox.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void afterTextChanged(Editable s) {}
-//
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start,
-//                                          int count, int after) {
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start,
-//                                      int before, int count) {
-//                Log.d("TextChanged","TextChanged");
-//                if(s.length() != 0) {
-//                    try{
-//                        Integer NumBox = Integer.valueOf(edtNumBox.getText().toString())*4*4;
-//                        Integer NumRow = Integer.valueOf(edtNumRow.getText().toString())*4;
-//                        Integer NumPill = Integer.valueOf(edtNumPill.getText().toString());
-//                        Integer Sum = NumBox+NumRow+NumPill;
-//                        txtInventoryQty.setText(Sum.toString());
-//                    }
-//                    catch (NumberFormatException ex){
-//                        ex.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-
-//        Drugstores = new ArrayList<Drugstore>();
-//        CSVReadDrugStore();
-//
-//        Inventorys = new ArrayList<Inventory>();
-//        CSVReadInventory();
-//
-//        Druginfos = new ArrayList<Druginfo>();
-//        CSVReadDrugInfo();
-
-//        String InventoryNum = String.valueOf(Inventorys.size());
-//        String DrugStore = String.valueOf(Drugstores.size());
-//        String ShowNum = " " + InventoryNum + " / " + DrugStore;
-        //txtInventoryNum.setText(ShowNum);
 
         labelAfterScanListener();
 
@@ -222,7 +180,7 @@ public class BFragment extends Fragment {
             edtNumPill.setText("");
             //edtNumRow.setText("");
             //edtNumBox.setText("");
-            txtInventoryQty.setText("");
+            txtInventoryQty.setText("0");
             edtDrugCode.setText("");
         }
     };
@@ -234,7 +192,7 @@ public class BFragment extends Fragment {
 
             String labelCode = edtElabelNumber.getText().toString();
 
-            //String sElabelNumber = edtElabelNumber.getText().toString();
+            String sElabelNumber = edtElabelNumber.getText().toString();
             String sDrugStore = edtDrugStore.getText().toString();
             String sDrugCode = edtDrugCode.getText().toString();
 
@@ -253,7 +211,7 @@ public class BFragment extends Fragment {
 //                url += URLEncoder.encode(DBoption,"UTF-8") + "&";
 
                 //InvDate從資料庫代入當前時間
-                //url += "ElabelNumber=" + URLEncoder.encode(sElabelNumber,"UTF-8") + "&";
+                url += "ElabelNumber=" + URLEncoder.encode(sElabelNumber,"UTF-8") + "&";
                 url += "DrugCode=" + URLEncoder.encode(sDrugCode, "UTF-8") + "&";
                 url += "StoreID=" + URLEncoder.encode(sDrugStore, "UTF-8") + "&";
                 url += "AreaNo=" + URLEncoder.encode(sAreaNo, "UTF-8") + "&";
@@ -405,7 +363,7 @@ public class BFragment extends Fragment {
 
         String ed = edtElabelNumber.getText().toString();
 
-        String url = "http://192.168.5.41/pda_submit.php?";
+        String url = globaldata.getPHP_SERVER();
         try {
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
 //            url += "DBoption=select";
@@ -450,20 +408,7 @@ public class BFragment extends Fragment {
                             effectDates.add(arr.getString(11));
                             makeDates.add(arr.getString(12));
 
-//                            String storeID = arr.getString(0);
-//                            String elabelType = arr.getString(1);
-//                            String drugCode = arr.getString(2);
-//                            String drugName = arr.getString(3);
-//                            String drugEnglish = arr.getString(4);
-//                            String areaNo = arr.getString(5);
-//                            String blockNo = arr.getString(6);
-//                            String stockQty = arr.getString(7);
-//                            String lotNumber = arr.getString(8);
-//                            String makerID = arr.getString(9);
-//                            String makerName = arr.getString(10);
-//                            String effectDate = arr.getString(11);
                             /**擷取取得的陣列*/
-                            //btnStatus.setText("已掃描");
 
                         }
 

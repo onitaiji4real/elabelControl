@@ -74,33 +74,20 @@ public class FragmentActivity extends AppCompatActivity {
         //透過getSupportFragmentManager()，獲取FragmentManager並使用beginTransaction()開啟一個事務。最後將Fragmnet加入容器內的方法，可以使用add。
         getSupportFragmentManager().beginTransaction().add(R.id.fl_container, aFragment, "A").commit();
 
-/*
-
-        bFragment = new BFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container,bFragment,"B").commit();
-
-        cFragment = new CFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, cFragment,"C").commit();
-
-        dFragment = new DFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, dFragment,"D").commit();
-
-        eFragment = new EFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.fl_container, eFragment,"E").commit();
-*/
-
         TabLayout guiTabs;
         guiTabs = findViewById(R.id.tabLayout);
+
         guiTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                getSupportFragmentManager().executePendingTransactions(); // 確保前一個交易已完成
                 switch (tab.getPosition()) {
                     case 0:
                         if (aFragment == null)
                             aFragment = new AFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, aFragment, "A").commit();
+                                .replace(R.id.fl_container, aFragment, "A").commitAllowingStateLoss();
                         break;
                     case 1:
                         if (bFragment == null)
@@ -108,7 +95,7 @@ public class FragmentActivity extends AppCompatActivity {
                         CSVReadDrugStore();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, bFragment, "B").commit();
+                                .replace(R.id.fl_container, bFragment, "B").commitAllowingStateLoss();
 
                         break;
                     case 2:
@@ -116,7 +103,7 @@ public class FragmentActivity extends AppCompatActivity {
                             cFragment = new CFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, cFragment, "C").commit();
+                                .replace(R.id.fl_container, cFragment, "C").commitAllowingStateLoss();
                         break;
 
                     case 3:
@@ -124,7 +111,7 @@ public class FragmentActivity extends AppCompatActivity {
                             dFragment = new DFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, dFragment, "D").commit();
+                                .replace(R.id.fl_container, dFragment, "D").commitAllowingStateLoss();
                         break;
 
                     case 4:
@@ -132,7 +119,7 @@ public class FragmentActivity extends AppCompatActivity {
                             eFragment = new EFragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, eFragment, "E").commit();
+                                .replace(R.id.fl_container, eFragment, "E").commitAllowingStateLoss();
                         break;
                 }
             }
