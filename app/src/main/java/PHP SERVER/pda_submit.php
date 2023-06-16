@@ -692,9 +692,59 @@ function update_elabeldrug($ElabelNumber, $dataArray, $connection)
 
 }
 
+// function get_Store_withDrugLabel($dataArray, $connection)
+// {
+//     $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3
+//             FROM elabeldrug
+//             WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
+//      ";
+
+//     $result = mysqli_query($connection, $SQL);
+//     $response = array(); // Create an empty array to store the response
+
+//     if ($result) {
+//         if (mysqli_affected_rows($connection) > 0) {
+            
+//             // Fetch and process each row
+//             while ($row = mysqli_fetch_assoc($result)) {
+//                 $item = array(
+//                     'Response' => 'Successfully return Search BY DrugLabel.',
+//                     'ElabelNumber' => $row['ElabelNumber'],
+//                     'StoreID' => $row['StoreID'],
+//                     'ElabelType' => $row['ElabelType'],
+//                     'DrugCode' => $row['DrugCode'],
+//                     'DrugName' => $row['DrugName'],
+//                     'DrugEnglish' => $row['DrugEnglish'],
+//                     'AreaNo' => $row['AreaNo'],
+//                     'BlockNo' => $row['BlockNo'],
+//                     'DrugCode3' => $row['DrugCode3'],
+//                     'DrugName3' => $row['DrugName3']
+//                 );
+    
+//                 $response[] = $item; // Add the item to the response array
+//             }
+//         } else {
+//             // $response['status'] = '不成功';
+//             // $response[] = array('status' => '不成功', 'message' => "No rows return Search BY DrugLabel.");
+//             $item = array('Response' => 'No rows return Search BY DrugLabel.');
+//             $response[] = $item;
+//         }
+//     } else {
+//         // $response['status'] = '不成功';
+//         // $response[] = array('status' => '不成功', 'message' => "Error Search table: " . mysqli_error($connection));
+//         $item = array('Response' => 'Error Search table: ' . mysqli_error($connection));
+//         $response[] = $item;
+
+//     }
+
+//     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
+//     echo $json . "<br>";
+    
+    
+// }
 function get_Store_withDrugLabel($dataArray, $connection)
 {
-    $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3
+    $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3,DrugEnglish3
             FROM elabeldrug
             WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
      ";
@@ -704,40 +754,36 @@ function get_Store_withDrugLabel($dataArray, $connection)
 
     if ($result) {
         if (mysqli_affected_rows($connection) > 0) {
-            
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
-                $item = array(
-                    'Response' => 'Successfully return Search BY DrugLabel.',
-                    'ElabelNumber' => $row['ElabelNumber'],
-                    'StoreID' => $row['StoreID'],
-                    'ElabelType' => $row['ElabelType'],
-                    'DrugCode' => $row['DrugCode'],
-                    'DrugName' => $row['DrugName'],
-                    'DrugEnglish' => $row['DrugEnglish'],
-                    'AreaNo' => $row['AreaNo'],
-                    'BlockNo' => $row['BlockNo'],
-                    'DrugCode3' => $row['DrugCode3'],
-                    'DrugName3' => $row['DrugName3']
-                );
-    
+                $item = new stdClass();
+                $item->Response = 'Successfully return Search BY DrugLabel.';
+                $item->ElabelNumber = $row['ElabelNumber'];
+                $item->StoreID = $row['StoreID'];
+                $item->ElabelType = $row['ElabelType'];
+                $item->DrugCode = $row['DrugCode'];
+                $item->DrugName = $row['DrugName'];
+                $item->DrugEnglish = $row['DrugEnglish'];
+                $item->AreaNo = $row['AreaNo'];
+                $item->BlockNo = $row['BlockNo'];
+                $item->DrugCode3 = $row['DrugCode3'];
+                $item->DrugName3 = $row['DrugName3'];
+                $item->DrugEnglish3 = $row['DrugEnglish3'];
+
                 $response[] = $item; // Add the item to the response array
             }
         } else {
-            // $response['status'] = '不成功';
-            // $response[] = array('status' => '不成功', 'message' => "No rows return Search BY DrugLabel.");
-            $item = array('Response' => 'No rows return Search BY DrugLabel.');
+            $item = new stdClass();
+            $item->Response = 'No rows return Search BY DrugLabel.';
             $response[] = $item;
         }
     } else {
-        // $response['status'] = '不成功';
-        // $response[] = array('status' => '不成功', 'message' => "Error Search table: " . mysqli_error($connection));
-        $item = array('Response' => 'Error Search table: ' . mysqli_error($connection));
+        $item = new stdClass();
+        $item->Response = 'Error Search table: ' . mysqli_error($connection);
         $response[] = $item;
-
     }
 
-    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
 

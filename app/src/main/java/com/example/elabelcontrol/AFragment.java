@@ -3,12 +3,8 @@ package com.example.elabelcontrol;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.opencsv.CSVReader;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -37,13 +29,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import data.Druginfo;
 import data.GlobalData;
@@ -234,12 +223,7 @@ public class AFragment extends Fragment {
 
     }
 
-    public static void hideKeyboard(Context context) {
-        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
-        }
-    }
+
 
     private class MyListAdapter extends RecyclerView.Adapter<AFragment.MyListAdapter.ViewHolder> {
 
@@ -263,7 +247,7 @@ public class AFragment extends Fragment {
                 tvInventoryTime = itemView.findViewById(R.id.InventoryTime);
                 txtStockQty = itemView.findViewById(R.id.txtStockQty);
                 txtUser = itemView.findViewById(R.id.txtUser);
-                txtLotNumber = itemView.findViewById(R.id.txtLotNumber);
+                txtLotNumber = itemView.findViewById(R.id.txtLot);
                 StockNum = itemView.findViewById(R.id.StockNum);
             }
         }
@@ -282,13 +266,6 @@ public class AFragment extends Fragment {
 
             HashMap<String, String> item = arrayList.get(position);
 
-//            holder.tvDrugStore_SA.setText(arrayList.get(position).get("DrugStore_SA"));
-//            holder.tvDrugStore_B.setText(arrayList.get(position).get("DrugStore_B"));
-//            holder.tvDrugName.setText(arrayList.get(position).get("DrugName"));
-//            holder.tvDrugQty.setText(arrayList.get(position).get("DrugQty"));
-//            holder.tvInventoryTime.setText(arrayList.get(position).get("InventoryTime"));
-//            HashMap<String, String> item = arrayList.get(position);
-
             holder.tvDrugStore_SA.setText(item.get("DrugStore"));
 //            holder.tvDrugStore_B.setText(item.get("DrugStore_B"));
             holder.tvDrugName.setText(item.get("DrugName"));
@@ -305,10 +282,15 @@ public class AFragment extends Fragment {
             return arrayList.size();
         }
 
-
+    }
+    public static void hideKeyboard(Context context) {
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
+        }
     }
 }
-//    }
+
 
 
 

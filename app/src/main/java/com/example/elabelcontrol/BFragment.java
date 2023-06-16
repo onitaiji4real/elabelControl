@@ -3,8 +3,6 @@ package com.example.elabelcontrol;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -23,10 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -133,7 +129,7 @@ public class BFragment extends Fragment {
         edtBlockNo = view.findViewById(R.id.edtBlockNo);
         edtBlockType = view.findViewById(R.id.edtBlockType);
 
-        txtLotNumber = view.findViewById(R.id.txtLotNumber);
+        txtLotNumber = view.findViewById(R.id.txtLot);
 
 
 //        edtNumBox = view.findViewById(R.id.edtInQty);

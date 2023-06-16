@@ -314,7 +314,7 @@
         app:layout_constraintVertical_bias="0.362" />
 
     <TextView
-        android:id="@+id/txtLotNumber"
+        android:id="@+id/txtLot"
         android:layout_width="375dp"
         android:layout_height="54dp"
         android:ems="10"
@@ -385,8 +385,8 @@
 
     <EditText
         android:id="@+id/edtElabelNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:ems="10"
         android:hint="掃描電子紙條碼"
         android:inputType="textPersonName"

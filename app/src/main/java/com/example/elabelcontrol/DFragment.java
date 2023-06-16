@@ -2,8 +2,6 @@ package com.example.elabelcontrol;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -24,8 +22,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 
 import com.opencsv.CSVReader;
@@ -37,7 +33,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import android.widget.Spinner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -141,7 +136,7 @@ public class DFragment extends Fragment {
         //btnDrugOut.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
 
         textLotNumber_size = view.findViewById(R.id.textLotNumber_size);
-        txtLotNumber = view.findViewById(R.id.txtLotNumber);
+        txtLotNumber = view.findViewById(R.id.txtLot);
 
         btnNextIndex = view.findViewById(R.id.btnNextIndex);
         btnNextIndex.setOnClickListener(nextIndex);

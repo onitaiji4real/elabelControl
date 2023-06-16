@@ -18,7 +18,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -139,7 +138,7 @@ public class CFragment extends Fragment {
         btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
         btnNewDrugIN.setOnClickListener(onNewDrugIN);
 
-        txtLotNumber = view.findViewById(R.id.txtLotNumber);
+        txtLotNumber = view.findViewById(R.id.txtLot);
 
         btnNextIndex = view.findViewById(R.id.btnNextIndex);
         btnNextIndex.setOnClickListener(nextIndex);

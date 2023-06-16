@@ -1,291 +1,250 @@
 package com.example.elabelcontrol;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.fragment.app.FragmentPagerAdapter;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
-import com.opencsv.CSVReader;
-import com.example.elabelcontrol.DrugLabelSearch_Fragment;
-import com.example.elabelcontrol.DrugSearch_Fragment;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import data.Druginfo;
-import data.Drugstore;
 import data.GlobalData;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-
 public class EFragment extends Fragment {
+    RecyclerView mRecyclerView;
+    MyListAdapter myListAdapter;
+    ArrayList<HashMap<String, String>> arrayList;
+    RadioGroup radGroup;
+    RadioButton radSearchLabel, radSearchCode, radSearchEnglish, radSearchName;
+    EditText edtDrugLabel;
+    Button btnSearch;
     GlobalData globaldata;
-    EditText edtSearchDrug;
-    Button btnGetDrugStore,btnGetDrugStore2,btnLight,btnLastData,btnNextData;
-    TextView txtResultNum,txtResultString;
-    List<Druginfo> Druginfos;
-    List<Drugstore> Drugstores;
-    List<Drugstore> ResultDrugStore;
-    Integer ResultIndex;
-    String ElabelNumber;
-
-    EditText edtDrugLabel,edtDrugStore,
-            edtAreaNo,edtBlockNo,edtBlockType,
-            edtDrugCode,edtDrugEnglish,txtLotNumber,edtEffectDate,edtMakeDate;
-    Button btnSearch,btnLightSearch;
-
-    private int currentIndex = 0;
-    private ArrayList<String> storeIDs;
-    private ArrayList<String> elabelTypes;
-    private ArrayList<String> drugCodes;
-    private ArrayList<String> drugNames;
-    private ArrayList<String> drugEnglishs;
-    private ArrayList<String> areaNos;
-    private ArrayList<String> blockNos;
-    private ArrayList<String> stockQtys;
-    private ArrayList<String> lotNumbers;
-    private ArrayList<String> makerIDs;
-    private ArrayList<String> makerNames;
-    private ArrayList<String> effectDates;
-    private ArrayList<String> makeDates;
-    private JSONArray dataArray;
-    private int totalItems;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_e, container, false);
+        globaldata = (GlobalData) getActivity().getApplicationContext();
+
+        mRecyclerView = view.findViewById(R.id.searchList);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
-        edtDrugLabel.requestFocus();
-
-        edtDrugStore = view.findViewById(R.id.edtDrugStore);
-        edtAreaNo = view.findViewById(R.id.edtAreaNo);
-        edtBlockNo = view.findViewById(R.id.edtBlockNo);
-        edtBlockType = view.findViewById(R.id.edtBlockType);
-        edtDrugCode = view.findViewById(R.id.edtDrugCode);
-        edtDrugEnglish = view.findViewById(R.id.edtDrugEnglish);
-        //txtLotNumber = view.findViewById(R.id.txtLotNumber);
-        edtEffectDate = view.findViewById(R.id.edtEffectDate);
-        edtMakeDate = view.findViewById(R.id.edtMakeDate);
-
         btnSearch = view.findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(onSearch);
-        btnLightSearch = view.findViewById(R.id.btnLightSearch);
+
+        radGroup = view.findViewById(R.id.radGroup);
+
+        radSearchLabel = view.findViewById(R.id.radSearchLabel);
+        radSearchCode = view.findViewById(R.id.radSearchCode);
+        radSearchEnglish = view.findViewById(R.id.radSearchEnglish);
+        radSearchName = view.findViewById(R.id.radSearchName);
+
+        radGroup.check(R.id.radSearchLabel); //預設藥物條碼選項
+
+        arrayList = new ArrayList<>();
+
+        // 建立一個預設的ArrayList來儲存預設的資料
+        HashMap<String, String> testData = new HashMap<>();
+        testData.put("DrugStore", "DST01-0-1-D");
+        testData.put("DrugEnglish", "TEST");
+        testData.put("DrugName", "TEST");
+        testData.put("DrugCode", "IHBV001");
+        testData.put("StockNum", "50.00");
+        testData.put("LotNumber", "202306101345");
+        testData.put("InventoryTime", "2023-06-16 13:45");
 
 
-
-
-        globaldata = (GlobalData)getActivity().getApplicationContext();
-
+        myListAdapter = new MyListAdapter(arrayList);
+        mRecyclerView.setAdapter(myListAdapter);
+        makeData(Collections.singletonList(testData));
         return view;
     }
 
-    private View.OnClickListener onSearch = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            lsDrugInfo();
+
+    private class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
+        private ArrayList<HashMap<String, String>> arrayList;
+
+        public MyListAdapter(ArrayList<HashMap<String, String>> arrayList) {
+            this.arrayList = arrayList;
         }
-    };
 
-    private void labelAfterScanListener() {
+        class ViewHolder extends RecyclerView.ViewHolder {
+            private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, inventoryTime;
+            private Button btnLight;
 
-        edtDrugLabel.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //目前不使用到
+            public ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                drugStore = itemView.findViewById(R.id.DrugStore_SA);
+                drugEnglish = itemView.findViewById(R.id.DrugEnglish);
+                drugName = itemView.findViewById(R.id.DrugName);
+                drugCode = itemView.findViewById(R.id.DrugCode);
+                stockNum = itemView.findViewById(R.id.StockNum);
+                lotNumber = itemView.findViewById(R.id.txtLotNumber);
+                btnLight = itemView.findViewById(R.id.btnLight);
+                inventoryTime = itemView.findViewById(R.id.InventoryTime);
             }
+        }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //目前不使用到
-            }
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.search_item_view, parent, false);
 
-            @Override
-            public void afterTextChanged(Editable e) {
-                //String input = e.toString();
-                if (e.length() == 12) {
-                    lsDrugInfo();
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            HashMap<String, String> item = arrayList.get(position);
+            holder.drugStore.setText(item.get("DrugStore"));
+            holder.drugEnglish.setText(item.get("DrugEnglish"));
+            holder.drugName.setText(item.get("DrugName"));
+            holder.drugCode.setText(item.get("DrugCode"));
+            holder.stockNum.setText(item.get("StockNum"));
+            holder.lotNumber.setText(item.get("LotNumber"));
+            holder.inventoryTime.setText(item.get("InventoryTime"));
+
+            holder.btnLight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // 按钮点击事件的逻辑
                 }
-            }
-        });
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return arrayList.size();
+        }
     }
 
-    public void lsDrugInfo() {
-        String ed = edtDrugLabel.getText().toString();
+    private void makeData(List<HashMap<String, String>> searchData) {
+        arrayList.clear();
+        arrayList.addAll(searchData);
+
+
+        myListAdapter.notifyDataSetChanged();
+    }
+
+    private void get_Search_Item() {
         String url = globaldata.getPHP_SERVER();
-
+        String DrugLabel = edtDrugLabel.getText().toString();
         try {
-            url += "DBoption=Search_BY_Drug_Label&";
-            url += "DrugLabel=" + URLEncoder.encode(edtDrugLabel.getText().toString(), "UTF-8") + "&";
-
-            Log.d("TAG", "DBoption=Search_BY_Drug_Label&");
-            Log.d("TAG", "DrugLabel=" + edtDrugLabel.getText().toString());
-
+            url += "DBoption=Search_BY_Drug_Label" + "&";
+            url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
             sendGET(url, new VolleyCallback() {
                 @Override
-                public void onSuccess(JSONObject response) {
+                public void onSuccess(JSONArray response) {
                     try {
-                        String status = response.getString("status");
+                        List<HashMap<String, String>> searchData = new ArrayList<>();
 
-                        if (status.equals("Successfully return Search BY DrugLabel.")) {
-                            JSONArray dataArray = new JSONArray();
+                        JSONObject jsonObject = response.getJSONObject(0);
 
-                            for (int i = 0; i < response.length() - 1; i++) {
-                                JSONObject data = response.getJSONObject(String.valueOf(i));
-                                dataArray.put(data);
-                            }
+                        String message = jsonObject.getString("Response");
+                        String elabelNumber = jsonObject.getString("ElabelNumber");
+                        String storeID = jsonObject.getString("StoreID");
+                        String elabelType = jsonObject.getString("ElabelType");
+                        String drugCode = jsonObject.getString("DrugCode");
+                        String drugName = jsonObject.getString("DrugName");
+                        String StokQty = jsonObject.getString("DrugEnglish");
+                        String areaNo = jsonObject.getString("AreaNo");
+                        String blockNo = jsonObject.getString("BlockNo");
+                        String LotNumber = jsonObject.getString("DrugCode3");
+                        String InventoryDate = jsonObject.getString("DrugName3");
+                        String drugEnlglish = jsonObject.getString("DrugEnglish");
 
-                            int totalItems = dataArray.length(); // 获取返回的对象数量
+                        HashMap<String, String> item = new HashMap<>();
+                        item.put("DrugStore", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                        item.put("DrugName", drugName);
+                        item.put("DrugCode", drugCode);
+                        item.put("DrugEnglish", drugEnlglish);
+                        item.put("StockQty", StokQty);
+                        item.put("LotNumber", LotNumber);
+                        item.put("InventoryDate", InventoryDate);
+                        item.put("elabelNumber", elabelNumber);
+                        item.put("message", message);
 
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
+                        searchData.add(item);
 
-                                    updateUIWithCurrentIndex(dataArray, totalItems);
-                                }
-                            });
-                        } else {
-                            // 处理不成功的情况
-                            String message = status;
-                            // ...
-                        }
+                        makeData(searchData);
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             });
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void updateUIWithCurrentIndex(JSONArray dataArray, int totalItems) {
-        String lotNumber = (currentIndex + 1) + "/" + totalItems;
 
-        if (totalItems > 0 && currentIndex < dataArray.length()) {
-            try {
-                JSONObject data = dataArray.getJSONObject(currentIndex);
-                String elabelNumber = data.getString("ElabelNumber");
-                String storeID = data.getString("StoreID");
-                String elabelType = data.getString("ElabelType");
-                String drugCode = data.getString("DrugCode");
-                String drugName = data.getString("DrugName");
-                String drugEnglish = data.getString("DrugEnglish");
-                String areaNo = data.getString("AreaNo");
-                String blockNo = data.getString("BlockNo");
-                String drugCode3 = data.getString("DrugCode3");
-                String drugName3 = data.getString("DrugName3");
-
-                // 在这里更新UI显示数据
-
-                edtDrugStore.setText(storeID);
-                edtAreaNo.setText(areaNo);
-                edtBlockNo.setText(blockNo);
-                edtBlockType.setText(elabelType);
-                edtDrugCode.setText(drugCode);
-                edtDrugEnglish.setText(drugEnglish);
-                //txtLotNumber.setText(elabelNumber);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else {
-            // 清空相关字段
-        }
-    }
-
-    private View.OnClickListener previewIndex = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateUIWithCurrentIndex(dataArray, totalItems);
-            }
-        }
-    };
-
-    private View.OnClickListener nextIndex = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (currentIndex < totalItems - 1) {
-                currentIndex++;
-                updateUIWithCurrentIndex(dataArray, totalItems);
-            }
-        }
-    };
-
-
-
-
-    public void sendGET(String url, final VolleyCallback callback) {
+    public void sendGET(String Url, final VolleyCallback callback) {
+        /**建立連線*/
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .build();
-
+        /**設置傳送需求*/
         Request request = new Request.Builder()
-                .url(url)
+                .url(Url)
+//                .header("Cookie","")//有Cookie需求的話則可用此發送
+//                .addHeader("","")//如果API有需要header的則可使用此發送
                 .build();
-
+        /**設置回傳*/
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                // 请求失败的处理
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                /**如果傳送過程有發生錯誤*/
+                //Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                /**取得回傳*/
                 try {
                     String responseData = response.body().string();
+                    JSONArray jsonArray;
+
                     try {
-                        JSONObject jsonObject = new JSONObject(responseData);
-                        callback.onSuccess(jsonObject);
+                        jsonArray = new JSONArray(responseData);
+                        callback.onSuccess(jsonArray);
                     } catch (JSONException e) {
                         Log.e("TAG", "Invalid JSON response: " + responseData);
                         e.printStackTrace();
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -293,304 +252,15 @@ public class EFragment extends Fragment {
         });
     }
 
-    public interface VolleyCallback {
-        void onSuccess(JSONObject response);
-        // 可以添加其他方法，如 onFailure 等
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-//    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-//    Boolean GetFin;
-//    public interface VolleyCallback{
-//        void onSuccess();
-//    }
-//    @Override
-//    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
-//    }
-//    private View.OnClickListener onGetDrugStore = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            hideKeyboard(v.getContext());
+    private View.OnClickListener onSearch = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
 //            String DrugLabel = edtDrugLabel.getText().toString();
-//            if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugLabel().equals(DrugLabel))).count() == 0) {
-//                //無此條碼資料
-//                Toast.makeText(v.getContext(), "此包裝條碼無符合結果", Toast.LENGTH_SHORT).show();
-//            } else {
-//                List<Druginfo> MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugLabel().equals(DrugLabel))).collect(Collectors.toList());
-//                if (Drugstores.stream().filter(drugstore -> (drugstore.getDrugCode().equals(MatchDruginfo.get(0).getDrugCode()))).count() == 0) {
-//                    //無此條碼資料
-//                    Toast.makeText(v.getContext(), "此包裝條碼無符合結果", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getDrugCode().equals(MatchDruginfo.get(0).getDrugCode()))).collect(Collectors.toList());
-//                    edtDrugCode.setText(MatchDrugstore.get(0).getDrugCode());
-//                    edtDrugStore.setText(MatchDrugstore.get(0).getStoreID() + "-" + MatchDrugstore.get(0).getAreaNo() + "-" + MatchDrugstore.get(0).getBlockNo() + "-" + MatchDrugstore.get(0).getBlockType());
-//                    edtDrugEnglish.setText(MatchDruginfo.get(0).getDrugEnglish());
-//                    ElabelNumber = MatchDrugstore.get(0).getElabelNumber();
-//                }
-//            }
-//        }
-//    };
-//    private View.OnClickListener onGetDrugStore2 = new View.OnClickListener() {
-////btn.setBackgroundColor(Color.WHITE);
-//        @Override
-//        public void onClick(View v) {
-//            hideKeyboard(v.getContext());
-//            txtResultNum.setVisibility(View.VISIBLE);
-//            txtResultString.setVisibility(View.VISIBLE);
-//            btnLastData.setVisibility(View.VISIBLE);
-//            btnNextData.setVisibility(View.VISIBLE);
-//            String SearchString = edtSearchDrug.getText().toString();
-//            ResultDrugStore.clear();
-//            ResultIndex = 0;
-//            List<Druginfo> MatchDruginfo;
-//            MatchDruginfo = new ArrayList<Druginfo>();  //儲存模糊搜尋結果
-//            Log.d("Druginfos DrugCode比對",String.valueOf(Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().contains(SearchString))).count()));
-//            Log.d("Druginfos DrugEnglish比對",String.valueOf(Druginfos.stream().filter(druginfo -> (druginfo.getDrugEnglish().contains(SearchString))).count()));
-//            //模糊搜尋藥品代碼後放入搜尋結果
-//            if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().contains(SearchString))).count() > 0) {
-//                MatchDruginfo = Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().contains(SearchString))).collect(Collectors.toList());
-//            }
-//            //模糊搜尋藥品英文後再比對已有的搜尋結果後沒重複的再放入
-//            if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugEnglish().contains(SearchString))).count() > 0){
-//                List<Druginfo> MatchDruginfo_English = new ArrayList<Druginfo>();
-//                MatchDruginfo_English = Druginfos.stream().filter(druginfo -> (druginfo.getDrugEnglish().contains(SearchString))).collect(Collectors.toList());
-//                for(int i=0;i<MatchDruginfo_English.size();i++){
-//                    Boolean RepeatData = false;
-//                    for(int j=0;j<MatchDruginfo.size();j++) {
-//                        if (MatchDruginfo_English.get(i).getDrugCode() == MatchDruginfo.get(j).getDrugCode()){
-//                            RepeatData = true;
-//                        }
-//                    }
-//                    if(!RepeatData){
-//                        MatchDruginfo.add(MatchDruginfo_English.get(i));
-//                    }
-//                }
-//            }
-//            //由目前篩選藥品的結果中撈取其儲位資料放入模糊搜尋結果中(ResultDrugStore)
-//            if (MatchDruginfo.size() > 0){
-//                for (int i = 0; i < MatchDruginfo.size(); i++) {
-//                    Log.d("Druginfo比對",MatchDruginfo.get(i).getDrugCode());
-//                    String MatchDrugCode = MatchDruginfo.get(i).getDrugCode();
-//                    if (Drugstores.stream().filter(drugstore -> (drugstore.getDrugCode().equals(MatchDrugCode))).count() > 0) {
-//                        List<Drugstore> MatchDrugstore = Drugstores.stream().filter(drugstore -> (drugstore.getDrugCode().equals(MatchDrugCode))).collect(Collectors.toList());
-//                        MatchDrugstore.forEach(drugstore->{Log.d("Drugstore比對",drugstore.getElabelNumber());
-//                            ResultDrugStore.add(drugstore);
-//                        });
-//                    }
-//                }
-//            }
-//            //若有結果，則預設先顯示第一筆
-//            if(ResultDrugStore.size()==0){
-//                //無搜尋結果
-//                Toast.makeText(v.getContext(), "此搜尋無符合結果", Toast.LENGTH_SHORT).show();
-//                txtResultNum.setText("0");
-//                btnLastData.setBackgroundColor(Color.GRAY);
-//                btnNextData.setBackgroundColor(Color.GRAY);
-//            }
-//            else {
-//                txtResultNum.setText(String.valueOf(ResultDrugStore.size()));
-//                btnLastData.setBackgroundColor(Color.GRAY);
-//                if(ResultDrugStore.size() == 1) {
-//                    btnNextData.setBackgroundColor(Color.GRAY);
-//                }else{
-//                    btnNextData.setBackgroundColor(Color.parseColor("#FF018786"));
-//                }
-//                edtDrugStore.setText(ResultDrugStore.get(ResultIndex).getStoreID() + "-" + ResultDrugStore.get(ResultIndex).getAreaNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockType());
-//                edtDrugCode.setText(ResultDrugStore.get(ResultIndex).getDrugCode());
-//                if(Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(ResultDrugStore.get(0).getDrugCode()))).count()>0) {
-//                    edtDrugEnglish.setText(Druginfos.stream().filter(druginfo ->(druginfo.getDrugCode().equals(ResultDrugStore.get(ResultIndex).getDrugCode()))).collect(Collectors.toList()).get(0).getDrugEnglish());
-//                }
-//                ElabelNumber = ResultDrugStore.get(ResultIndex).getElabelNumber();
-//            }
-//        }
-//    };
-//    private View.OnClickListener onLight = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            String url = globaldata.AIMSServer+"articles/label/"+ElabelNumber;
-//            Log.d("url:",url);
-//            String LightJsonStr = String.format("[\n" +
-//                    "  {\n" +
-//                    "    \"color\": \"RED\",\n" +
-//                    "    \"duration\": \"30s\",\n" +
-//                    "    \"labelCode\": \"%s\"\n" +
-//                    "  }\n" +
-//                    "]",ElabelNumber);
-//            GetFin=false;
-//            putRequestWithHeaderAndBody(url,LightJsonStr,new MainActivity.VolleyCallback(){
-//                @Override
-//                public void onSuccess() {
-//                    GetFin=true;
-//                }
-//            });
-//            while(!GetFin)
-//            {
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    };
-//    private View.OnClickListener onGoLast = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            if(ResultIndex>0) {
-//                ResultIndex--;
-//                if (ResultIndex == 0) {
-//                    btnLastData.setBackgroundColor(Color.GRAY);
-//                }
-//                btnNextData.setBackgroundColor(Color.parseColor("#FF018786"));
-//                edtDrugStore.setText(ResultDrugStore.get(ResultIndex).getStoreID() + "-" + ResultDrugStore.get(ResultIndex).getAreaNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockType());
-//                edtDrugCode.setText(ResultDrugStore.get(ResultIndex).getDrugCode());
-//                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(ResultDrugStore.get(ResultIndex).getDrugCode()))).count() > 0) {
-//                    edtDrugEnglish.setText(Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(ResultDrugStore.get(ResultIndex).getDrugCode()))).collect(Collectors.toList()).get(0).getDrugEnglish());
-//                }
-//                ElabelNumber = ResultDrugStore.get(ResultIndex).getElabelNumber();
-//            }
-//        }
-//    };
-//    private View.OnClickListener onGoNext = new View.OnClickListener() {
-//
-//        @Override
-//        public void onClick(View v) {
-//            if(ResultIndex < ResultDrugStore.size()-1) {
-//                ResultIndex++;
-//                btnLastData.setBackgroundColor(Color.parseColor("#FF018786"));
-//                if (ResultIndex == ResultDrugStore.size() - 1) {
-//                    btnNextData.setBackgroundColor(Color.GRAY);
-//                }
-//                edtDrugStore.setText(ResultDrugStore.get(ResultIndex).getStoreID() + "-" + ResultDrugStore.get(ResultIndex).getAreaNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockNo() + "-" + ResultDrugStore.get(ResultIndex).getBlockType());
-//                edtDrugCode.setText(ResultDrugStore.get(ResultIndex).getDrugCode());
-//                if (Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(ResultDrugStore.get(ResultIndex).getDrugCode()))).count() > 0) {
-//                    edtDrugEnglish.setText(Druginfos.stream().filter(druginfo -> (druginfo.getDrugCode().equals(ResultDrugStore.get(ResultIndex).getDrugCode()))).collect(Collectors.toList()).get(0).getDrugEnglish());
-//                }
-//                ElabelNumber = ResultDrugStore.get(ResultIndex).getElabelNumber();
-//            }
-//        }
-//    };
-//    public void CSVReadDrugInfo(){
-//        try{
-//            File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-//            Log.d("dir", dir.getAbsolutePath());
-//            // String path =
-//            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/druginfo.csv"));
-//            String[] nextLine;
-//
-//            int i = 0;
-//            String[] record = null;
-//            while ((record = reader.readNext()) != null) {
-//                Druginfo druginfo = new Druginfo();
-//                druginfo.setMakerID(record[0]);
-//                druginfo.setDrugCode(record[1]);
-//                druginfo.setDrugEnglish(record[2]);
-//                druginfo.setDrugName(record[3]);
-//                druginfo.setDrugLabel(record[10]);
-//                Druginfos.add(druginfo);
-//            }
-//            reader.close();
-//        } catch (IOException e) {
-//            // reader在初始化時可能遭遇問題。記得使用try/catch處理例外情形。
-//            e.printStackTrace();
-//        }
-//    }
-//    public void CSVReadDrugStore(){
-//        try{
-//            File dir = getActivity().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-//            Log.d("dir", dir.getAbsolutePath());
-//            // String path =
-//            CSVReader reader = new CSVReader(new FileReader(dir.getAbsolutePath()+"/drugstore.csv"));
-//            String[] nextLine;
-//
-//            int i = 0;
-//            String[] record = null;
-//            while ((record = reader.readNext()) != null) {
-//                Drugstore drugstore = new Drugstore();
-//                drugstore.setStoreID(record[0]);
-//                drugstore.setAreaNo(record[1]);
-//                drugstore.setBlockNo(record[2]);
-//                drugstore.setBlockType(record[3]);
-//                drugstore.setDrugCode(record[4]);
-//                drugstore.setMakerID(record[5]);
-//                drugstore.setElabelNumber(record[6]);
-//                drugstore.setTemPt_Kind(record[7]);
-//                drugstore.setSafeStock(record[8]);
-//                drugstore.setTotalQty(record[9]);
-//                drugstore.setSetTime(record[10]);
-//                drugstore.setSetUserID(record[11]);
-//                drugstore.setInvQtyTime(record[12]);
-//                drugstore.setInvQtyUserID(record[13]);
-//                drugstore.setLotNumber(record[14]);
-//                drugstore.setEffectDate(record[15]);
-//                drugstore.setStockQty(record[16]);
-//                drugstore.setUpdateUserID(record[17]);
-//                drugstore.setUpdateTime(record[18]);
-//                Drugstores.add(drugstore);
-//            }
-//            reader.close();
-//        } catch (IOException e) {
-//            // reader在初始化時可能遭遇問題。記得使用try/catch處理例外情形。
-//            e.printStackTrace();
-//        }
-//    }
-//    public static void hideKeyboard(Context context) {
-//        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//        if (imm != null) {
-//            imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
-//        }
-//    }
-//    public void putRequestWithHeaderAndBody(String url, String jsonstr,final MainActivity.VolleyCallback callback) {
-//
-//        RequestBody body = RequestBody.create(jsonstr, JSON);
-//
-//        OkHttpClient client = new OkHttpClient();
-//
-//        Request request = new Request.Builder()
-//                .url(url)
-//                .put(body) //PUT
-//                .build();
-//
-//        Call call = client.newCall(request);
-//        call.enqueue(new Callback() {
-//            @Override
-//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-//                /**如果傳送過程有發生錯誤*/
-//                System.out.println("發生錯誤");
-//                System.out.println(e.toString());
-//            }
-//            @Override
-//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-//                /**取得回傳*/
-//                GetFin=true;
-//                callback.onSuccess();
-//                if(response.isSuccessful()){
-//                    System.out.println("有結果");
-//
-//
-//                    //adapter.notifyDataSetChanged();
-//                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            //return response from here to update any UI
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//    }
+            get_Search_Item();
+        }
+    };
+
+    public interface VolleyCallback {
+        void onSuccess(JSONArray  response);
+    }
 }

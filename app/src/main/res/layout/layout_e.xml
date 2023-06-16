@@ -11,255 +11,47 @@
         android:id="@+id/btnSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="搜尋"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.916"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
-
-    <Button
-        android:id="@+id/btnLightSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="亮燈指引"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.525" />
-
-    <TextView
-        android:id="@+id/drugQty14"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="目前狀態:"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.158"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.022" />
+        app:layout_constraintTop_toBottomOf="@+id/radGroup" />
 
     <Button
         android:id="@+id/btnStatus"
         android:layout_width="130dp"
         android:layout_height="36dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="12dp"
         android:backgroundTint="@color/green"
         android:text="藥物條碼搜尋中"
         android:textAlignment="center"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.562"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.01" />
-
-    <EditText
-        android:id="@+id/edtDrugEnglish"
-        android:layout_width="375dp"
-        android:layout_height="54dp"
-        android:ems="10"
-        android:hint="藥物英文名稱"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.245" />
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/drugQty14"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/drugQty13"
+        android:id="@+id/drugQty14"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="效期:"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.035"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.382" />
-
-    <EditText
-        android:id="@+id/edtDrugCode"
-        android:layout_width="100dp"
-        android:layout_height="46dp"
-        android:layout_marginStart="8dp"
-        android:ems="10"
-        android:hint="藥品代碼"
-        android:inputType="phone"
+        android:layout_height="36dp"
+        android:layout_marginTop="12dp"
+        android:text="目前狀態:"
         android:textAlignment="center"
-        android:textColor="#3F51B5"
         android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.544"
+        app:layout_constraintHorizontal_bias="0.168"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
-
-    <TextView
-        android:id="@+id/drugQty15"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="製造日期:"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.04"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.441" />
-
-    <EditText
-        android:id="@+id/edtBlockNo"
-        android:layout_width="30dp"
-        android:layout_height="46dp"
-        android:ems="10"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#FF5722"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.278"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
-
-    <EditText
-        android:id="@+id/edtDrugStore"
-        android:layout_width="63dp"
-        android:layout_height="46dp"
-        android:ems="10"
-        android:hint="儲位"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#FF5722"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.025"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
-
-    <EditText
-        android:id="@+id/edtEffectDate"
-        android:layout_width="375dp"
-        android:layout_height="54dp"
-        android:ems="10"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.367" />
-
-    <EditText
-        android:id="@+id/edtMakeDate"
-        android:layout_width="375dp"
-        android:layout_height="54dp"
-        android:ems="10"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.437" />
-
-    <EditText
-        android:id="@+id/edtAreaNo"
-        android:layout_width="30dp"
-        android:layout_height="46dp"
-        android:ems="10"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#FF5722"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.199"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
-
-    <TextView
-        android:id="@+id/drugQty16"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="批號:"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.035"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.326" />
-
-    <TextView
-        android:id="@+id/txtLotNumber"
-        android:layout_width="375dp"
-        android:layout_height="54dp"
-        android:ems="10"
-        android:hint="批號"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#3F51B5"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.338" />
-
-    <EditText
-        android:id="@+id/edtBlockType"
-        android:layout_width="30dp"
-        android:layout_height="46dp"
-        android:ems="10"
-        android:inputType="phone"
-        android:textAlignment="center"
-        android:textColor="#FF5722"
-        android:textSize="20sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.356"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.159" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edtDrugLabel"
         android:layout_width="375dp"
         android:layout_height="54dp"
+        android:layout_marginTop="48dp"
         android:ems="10"
         android:hint="請掃描藥品條碼"
         android:inputType="phone"
@@ -267,11 +59,62 @@
         android:textColor="#3F51B5"
         android:textSize="20sp"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.081" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radGroup"
+        android:layout_width="0dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="116dp"
+        android:orientation="horizontal"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/radSearchLabel"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="藥物條碼" />
+
+        <RadioButton
+            android:id="@+id/radSearchCode"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="藥物代碼" />
+
+        <RadioButton
+            android:id="@+id/radSearchEnglish"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="英文名稱" />
+
+        <RadioButton
+            android:id="@+id/radSearchName"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="中文名稱" />
+
+    </RadioGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchList"
+        android:layout_width="340dp"
+        android:layout_height="450dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnSearch" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
