@@ -49,6 +49,7 @@ public class FragmentActivity extends AppCompatActivity {
     private CFragment cFragment;
     private DFragment dFragment;
     private EFragment eFragment;
+    private DrugIn_Fragment drugIn_fragment;
     Button btnLogout, btnDownloadData;
     GlobalData globaldata;
     List<Drugstore> Drugstores;
@@ -98,12 +99,19 @@ public class FragmentActivity extends AppCompatActivity {
                                 .replace(R.id.fl_container, bFragment, "B").commitAllowingStateLoss();
 
                         break;
+//                    case 2:
+//                        if (cFragment == null)
+//                            cFragment = new CFragment();
+//                        //這裡要做到替換的效果，所以我們用replace做到取代。
+//                        getSupportFragmentManager().beginTransaction()
+//                                .replace(R.id.fl_container, cFragment, "C").commitAllowingStateLoss();
+//                        break;
                     case 2:
-                        if (cFragment == null)
-                            cFragment = new CFragment();
+                        if (drugIn_fragment == null)
+                            drugIn_fragment = new DrugIn_Fragment();
                         //這裡要做到替換的效果，所以我們用replace做到取代。
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fl_container, cFragment, "C").commitAllowingStateLoss();
+                                .replace(R.id.fl_container, drugIn_fragment, "C").commitAllowingStateLoss();
                         break;
 
                     case 3:
