@@ -69,18 +69,19 @@ public class EFragment extends Fragment {
         radSearchName = view.findViewById(R.id.radSearchName);
 
         radGroup.check(R.id.radSearchLabel); //預設藥物條碼選項
+        edtDrugLabel.requestFocus();
 
         arrayList = new ArrayList<>();
 
         // 建立一個預設的ArrayList來儲存預設的資料
         HashMap<String, String> testData = new HashMap<>();
-        testData.put("DrugStore", "DST01-0-1-D");
-        testData.put("DrugEnglish", "TEST");
-        testData.put("DrugName", "TEST");
-        testData.put("DrugCode", "IHBV001");
-        testData.put("StockNum", "50.00");
-        testData.put("LotNumber", "202306101345");
-        testData.put("InventoryTime", "2023-06-16 13:45");
+        testData.put("DrugStore", "目前無搜尋結果");
+//        testData.put("DrugEnglish", "TEST");
+//        testData.put("DrugName", "TEST");
+//        testData.put("DrugCode", "IHBV001");
+//        testData.put("StockNum", "50.00");
+//        testData.put("LotNumber", "202306101345");
+//        testData.put("InventoryTime", "2023-06-16 13:45");
 
 
         myListAdapter = new MyListAdapter(arrayList);
@@ -98,7 +99,7 @@ public class EFragment extends Fragment {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, inventoryTime;
+            private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, txtElabelNumber,inventoryTime;
             private Button btnLight;
 
             public ViewHolder(@NonNull View itemView) {
@@ -110,7 +111,8 @@ public class EFragment extends Fragment {
                 stockNum = itemView.findViewById(R.id.StockNum);
                 lotNumber = itemView.findViewById(R.id.txtLotNumber);
                 btnLight = itemView.findViewById(R.id.btnLight);
-                inventoryTime = itemView.findViewById(R.id.InventoryTime);
+                txtElabelNumber = itemView.findViewById(R.id.txtElabelNumber);
+                //inventoryTime = itemView.findViewById(R.id.InventoryTime);
             }
         }
 
@@ -132,12 +134,15 @@ public class EFragment extends Fragment {
             holder.drugCode.setText(item.get("DrugCode"));
             holder.stockNum.setText(item.get("StockNum"));
             holder.lotNumber.setText(item.get("LotNumber"));
-            holder.inventoryTime.setText(item.get("InventoryTime"));
 
+            holder.txtElabelNumber.setText(item.get("elabelNumber"));
+
+
+            Toast.makeText(getContext(), item.get("message"), Toast.LENGTH_SHORT).show();
             holder.btnLight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // 按钮点击事件的逻辑
+
                 }
             });
         }
@@ -151,6 +156,8 @@ public class EFragment extends Fragment {
     private void makeData(List<HashMap<String, String>> searchData) {
         arrayList.clear();
         arrayList.addAll(searchData);
+        Log.d("TAG", "makeData: "+searchData);
+
 
 
         myListAdapter.notifyDataSetChanged();
@@ -176,7 +183,7 @@ public class EFragment extends Fragment {
                         String elabelType = jsonObject.getString("ElabelType");
                         String drugCode = jsonObject.getString("DrugCode");
                         String drugName = jsonObject.getString("DrugName");
-                        String StokQty = jsonObject.getString("DrugEnglish");
+                        String StokQty = jsonObject.getString("DrugEnglish3");
                         String areaNo = jsonObject.getString("AreaNo");
                         String blockNo = jsonObject.getString("BlockNo");
                         String LotNumber = jsonObject.getString("DrugCode3");
@@ -184,11 +191,11 @@ public class EFragment extends Fragment {
                         String drugEnlglish = jsonObject.getString("DrugEnglish");
 
                         HashMap<String, String> item = new HashMap<>();
-                        item.put("DrugStore", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                        item.put("DrugStore", storeID + " - " + areaNo + "-" + blockNo + "-" + elabelType);
                         item.put("DrugName", drugName);
                         item.put("DrugCode", drugCode);
                         item.put("DrugEnglish", drugEnlglish);
-                        item.put("StockQty", StokQty);
+                        item.put("StockNum", StokQty);
                         item.put("LotNumber", LotNumber);
                         item.put("InventoryDate", InventoryDate);
                         item.put("elabelNumber", elabelNumber);
@@ -196,7 +203,12 @@ public class EFragment extends Fragment {
 
                         searchData.add(item);
 
-                        makeData(searchData);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                makeData(searchData);
+                            }
+                        });
 
 
                     } catch (JSONException e) {
@@ -257,6 +269,7 @@ public class EFragment extends Fragment {
         public void onClick(View v) {
 //            String DrugLabel = edtDrugLabel.getText().toString();
             get_Search_Item();
+
         }
     };
 

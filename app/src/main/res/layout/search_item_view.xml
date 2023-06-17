@@ -18,7 +18,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.307"
+        app:layout_constraintVertical_bias="0.209"
         tools:text="DrugEnglish" />
 
     <TextView
@@ -33,7 +33,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.483"
+        app:layout_constraintVertical_bias="0.385"
         tools:text="泰格莎(阿斯特捷利康)(drugName)" />
 
     <TextView
@@ -48,7 +48,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.66"
+        app:layout_constraintVertical_bias="0.562"
         tools:text="(DrugCode)" />
 
     <TextView
@@ -67,64 +67,34 @@
         tools:text="DSTS-23-24-D" />
 
     <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        android:layout_marginEnd="4dp"
-        android:text="更新時間:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/InventoryTime"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.012" />
-
-    <TextView
         android:id="@+id/txtLot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="批號:"
+        android:textAlignment="viewStart"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.572"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.13" />
+        app:layout_constraintVertical_bias="0.701" />
 
     <TextView
         android:id="@+id/txtLotNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:text="202306160946"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="8dp"
+        android:text="202306101345"
+        android:textAlignment="viewStart"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.053"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/txtLot"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.13" />
-
-    <TextView
-        android:id="@+id/InventoryTime"
-        android:layout_width="wrap_content"
-        android:layout_height="18dp"
-        app:layout_constraintBottom_toBottomOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.012"
-        tools:text="2023-01-07 09:00:00" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="345dp"
-        android:layout_height="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.701" />
 
     <TextView
         android:id="@+id/txtStockQty"
@@ -138,13 +108,14 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.936" />
+        app:layout_constraintVertical_bias="0.835" />
 
     <TextView
         android:id="@+id/StockNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginEnd="44dp"
         android:text="2251.00"
         android:textColor="#C31919"
         android:textSize="16sp"
@@ -154,7 +125,17 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/txtStockQty"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.936" />
+        app:layout_constraintVertical_bias="0.835" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="345dp"
+        android:layout_height="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.929" />
 
     <Button
         android:id="@+id/btnLight"
@@ -166,6 +147,18 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.925" />
+        app:layout_constraintVertical_bias="0.837" />
+
+    <TextView
+        android:id="@+id/txtElabelNumber"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
+        android:text="txtElabelNumber"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.514"
+        app:layout_constraintStart_toEndOf="@+id/DrugStore_SA"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

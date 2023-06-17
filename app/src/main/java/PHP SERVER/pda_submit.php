@@ -757,7 +757,7 @@ function get_Store_withDrugLabel($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Response = 'Successfully return Search BY DrugLabel.';
+                $item->Response = '成功執行搜尋';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
                 $item->ElabelType = $row['ElabelType'];
