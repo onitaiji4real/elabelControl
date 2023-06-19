@@ -94,7 +94,7 @@ public class DFragment extends Fragment {
         Druginfos = new ArrayList<Druginfo>();
         CSVReadDrugInfo();
 
-        btnSumit = view.findViewById(R.id.btnSumit);
+        btnSumit = view.findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(OnSubmit);
         spinner = view.findViewById(R.id.spOutCode);
 
@@ -188,7 +188,7 @@ public class DFragment extends Fragment {
             OkHttpClient client = new OkHttpClient().newBuilder().build();
             MediaType mediaType = MediaType.parse("application/json");
             String labelCode = edtElabelNumber.getText().toString();
-            String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
+            String jsonString = "[\n{\n\"color\": \"RED\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
             RequestBody body = RequestBody.create(mediaType, jsonString);
             Request request = new Request.Builder()
                     .url("http://192.168.5.137:9003/labels/contents/led")

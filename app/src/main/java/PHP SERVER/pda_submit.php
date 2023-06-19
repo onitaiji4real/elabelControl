@@ -327,7 +327,7 @@ if (isset($_GET["DBoption"])) {
 
 
 
-        case "IN": {
+        case "IN": {//收入
 
                 if (isset($_GET["ElabelNumber"])) {
                     $ElabelNumber = $_GET["ElabelNumber"];
@@ -543,7 +543,8 @@ function drugIN($dataArray, $SQL, $connection)
 
     // 執行陳述式
     if ($stmt->execute() === true) {
-        echo "收入作業資料插入成功<br>";
+        $affectedRows = $stmt->affected_rows;
+        echo "收入作業資料插入成功，影響了 {$affectedRows} 行<br>";
     } else {
         echo "收入作業插入資料時發生錯誤: " . $stmt->error . "<br>";
     }
@@ -551,6 +552,7 @@ function drugIN($dataArray, $SQL, $connection)
     // 關閉陳述式
     $stmt->close();
 }
+
 function getJSON($ElabelNumber, $connection)
 {
     $sql = "SELECT 
@@ -692,62 +694,19 @@ function update_elabeldrug($ElabelNumber, $dataArray, $connection)
 
 }
 
-// function get_Store_withDrugLabel($dataArray, $connection)
-// {
-//     $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3
-//             FROM elabeldrug
-//             WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
-//      ";
 
-//     $result = mysqli_query($connection, $SQL);
-//     $response = array(); // Create an empty array to store the response
 
-//     if ($result) {
-//         if (mysqli_affected_rows($connection) > 0) {
-            
-//             // Fetch and process each row
-//             while ($row = mysqli_fetch_assoc($result)) {
-//                 $item = array(
-//                     'Response' => 'Successfully return Search BY DrugLabel.',
-//                     'ElabelNumber' => $row['ElabelNumber'],
-//                     'StoreID' => $row['StoreID'],
-//                     'ElabelType' => $row['ElabelType'],
-//                     'DrugCode' => $row['DrugCode'],
-//                     'DrugName' => $row['DrugName'],
-//                     'DrugEnglish' => $row['DrugEnglish'],
-//                     'AreaNo' => $row['AreaNo'],
-//                     'BlockNo' => $row['BlockNo'],
-//                     'DrugCode3' => $row['DrugCode3'],
-//                     'DrugName3' => $row['DrugName3']
-//                 );
-    
-//                 $response[] = $item; // Add the item to the response array
-//             }
-//         } else {
-//             // $response['status'] = '不成功';
-//             // $response[] = array('status' => '不成功', 'message' => "No rows return Search BY DrugLabel.");
-//             $item = array('Response' => 'No rows return Search BY DrugLabel.');
-//             $response[] = $item;
-//         }
-//     } else {
-//         // $response['status'] = '不成功';
-//         // $response[] = array('status' => '不成功', 'message' => "Error Search table: " . mysqli_error($connection));
-//         $item = array('Response' => 'Error Search table: ' . mysqli_error($connection));
-//         $response[] = $item;
-
-//     }
-
-//     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT);
-//     echo $json . "<br>";
-    
-    
-// }
 function get_Store_withDrugLabel($dataArray, $connection)
 {
-    $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3,DrugEnglish3
-            FROM elabeldrug
-            WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
-     ";
+    // $SQL = "SELECT ElabelNumber, StoreID, ElabelType, DrugCode, DrugName, DrugEnglish, AreaNo, BlockNo, DrugCode3, DrugName3,DrugEnglish3
+    //         FROM elabeldrug
+    //         WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
+    //  ";
+     $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+        FROM elabeldrug ed
+        JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber
+        WHERE ed.DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')";
+
 
     $result = mysqli_query($connection, $SQL);
     $response = array(); // Create an empty array to store the response
@@ -757,7 +716,7 @@ function get_Store_withDrugLabel($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Response = '成功執行搜尋';
+                $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
                 $item->ElabelType = $row['ElabelType'];
@@ -769,6 +728,7 @@ function get_Store_withDrugLabel($dataArray, $connection)
                 $item->DrugCode3 = $row['DrugCode3'];
                 $item->DrugName3 = $row['DrugName3'];
                 $item->DrugEnglish3 = $row['DrugEnglish3'];
+                $item->MakeDate = $row['MakeDate'];
 
                 $response[] = $item; // Add the item to the response array
             }

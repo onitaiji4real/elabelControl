@@ -128,7 +128,7 @@ public class CFragment extends Fragment {
         edtDrugStore = view.findViewById(R.id.edtDrugStore);
         edtInQty = view.findViewById(R.id.edtInQty);
 
-        btnSumit = view.findViewById(R.id.btnSumit);
+        btnSumit = view.findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(OnSubmit);
 
         btnLight = view.findViewById(R.id.btnLight);

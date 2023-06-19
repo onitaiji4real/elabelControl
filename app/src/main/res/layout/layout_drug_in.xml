@@ -7,13 +7,42 @@
     tools:context=".MainActivity">
 
 
+    <TextView
+
+        android:id="@+id/checkSearchItem"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
+        android:layout_marginTop="388dp"
+        android:text="無"
+        android:textColor="#FF9800"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+
+        android:id="@+id/textView21"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
+        android:layout_marginTop="388dp"
+        android:text="選擇儲區："
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.068"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/edtDrugLabel"
         android:layout_width="320dp"
         android:layout_height="54dp"
         android:layout_marginTop="52dp"
         android:ems="10"
-        android:hint="請掃描藥品條碼"
+        android:hint="請掃描藥品條碼或搜尋"
         android:inputType="phone"
         android:textAlignment="center"
         android:textColor="#3F51B5"
@@ -108,8 +137,8 @@
     <TextView
 
         android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:layout_marginTop="424dp"
         android:text="入庫原因 : "
         android:textSize="20sp"
@@ -120,9 +149,9 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnSumit"
-        android:layout_width="130dp"
-        android:layout_height="50dp"
+        android:id="@+id/btnSubmit"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:layout_marginTop="536dp"
         android:text="入庫"
         android:textSize="20sp"
@@ -131,22 +160,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/spOutCode"
-        android:layout_width="100dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="416dp"
-        android:textAlignment="gravity"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.581"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <Spinner-->
+<!--        android:id="@+id/spOutCode"-->
+<!--        android:layout_width="0.1dp"-->
+<!--        android:layout_height="0.1dp"-->
+<!--        android:layout_marginTop="416dp"-->
+<!--        android:textAlignment="gravity"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.581"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <TextView
 
         android:id="@+id/textView19"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:layout_marginTop="476dp"
         android:text="單位入庫量 : "
         android:textSize="20sp"
@@ -158,8 +187,8 @@
 
     <EditText
         android:id="@+id/edtInQty"
-        android:layout_width="154dp"
-        android:layout_height="45dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:layout_marginTop="464dp"
         android:ems="10"
         android:inputType="phone"
@@ -311,7 +340,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchList"
         android:layout_width="340dp"
-        android:layout_height="220dp"
+        android:layout_height="450dp"
         android:layout_marginTop="148dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"

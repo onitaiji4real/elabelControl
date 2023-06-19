@@ -20,7 +20,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnSumit"
+        android:id="@+id/btnSubmit"
         android:layout_width="130dp"
         android:layout_height="50dp"
         android:layout_marginBottom="16dp"

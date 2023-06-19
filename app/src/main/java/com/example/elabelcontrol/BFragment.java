@@ -116,7 +116,7 @@ public class BFragment extends Fragment {
         edtDrugCode = view.findViewById(R.id.edtDrugCode);
         edtDrugEnglish = view.findViewById(R.id.edtDrugEnglish);
 
-        btnSumit = view.findViewById(R.id.btnSumit);
+        btnSumit = view.findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(onSubmit);
         btnLight = view.findViewById(R.id.btnLight);
         btnLight.setOnClickListener(OnLight);

@@ -1,4 +1,5 @@
 package com.example.elabelcontrol;
+
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -38,6 +40,7 @@ import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,22 +61,22 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class DrugIn_Fragment extends Fragment {
     MyListAdapter myListAdapter;
     Spinner spinner;
-    Button btnStatus,btnSearch,btnNewDrugIN;
+    Button btnStatus, btnSearch, btnNewDrugIN;
     EditText edtDrugLabel;
     RecyclerView mRecyclerView;
 
     ArrayList<HashMap<String, String>> arrayList;
 
-    RadioGroup radGroup;
+
     RadioButton radSearchLabel, radSearchCode, radSearchEnglish, radSearchName;
-    EditText edtDrugStore,edtAreaNo,edtBlockNo,edtBlockType,edtDrugCode,edtInQty;
+    EditText edtDrugStore, edtAreaNo, edtBlockNo, edtBlockType, edtDrugCode, edtInQty;
 
     GlobalData globaldata;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle saveInstanceState){
-        View view  = inflater.inflate(R.layout.layout_drug_in,container,false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle saveInstanceState) {
+        View view = inflater.inflate(R.layout.layout_drug_in, container, false);
         globaldata = (GlobalData) getActivity().getApplicationContext();
         edtAreaNo = view.findViewById(R.id.edtAreaNo);
         edtBlockNo = view.findViewById(R.id.edtBlockNo);
@@ -81,7 +84,10 @@ public class DrugIn_Fragment extends Fragment {
         edtDrugCode = view.findViewById(R.id.edtDrugCode);
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
         edtDrugLabel.requestFocus();
-        radGroup = view.findViewById(R.id.radGroup);
+
+        RadioGroup radGroup = view.findViewById(R.id.radGroup);
+        radGroup.check(R.id.radSearchLabel);
+
         radSearchLabel = view.findViewById(R.id.radSearchLabel);
         radSearchCode = view.findViewById(R.id.radSearchCode);
         radSearchEnglish = view.findViewById(R.id.radSearchEnglish);
@@ -89,16 +95,15 @@ public class DrugIn_Fragment extends Fragment {
         btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
 
 
+        //spinner = view.findViewById(R.id.spOutCode);
 
-        spinner = view.findViewById(R.id.spOutCode);
-
-        ArrayAdapter<CharSequence> adapter =
-                ArrayAdapter.createFromResource(view.getContext(),
-                        R.array.InCode,
-                        android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setSelection(1, false);
+//        ArrayAdapter<CharSequence> adapter =
+//                ArrayAdapter.createFromResource(view.getContext(),
+//                        R.array.InCode,
+//                        android.R.layout.simple_spinner_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinner.setAdapter(adapter);
+//        spinner.setSelection(1, false);
 
         btnSearch = view.findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener(onSearch);
@@ -107,12 +112,22 @@ public class DrugIn_Fragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         edtInQty = view.findViewById(R.id.edtInQty);
         arrayList = new ArrayList<>();
-        // 建立一個預設的ArrayList來儲存預設的資料
-        HashMap<String, String> testData = new HashMap<>();
-        testData.put("DrugStore", "目前無搜尋結果");
+
         myListAdapter = new MyListAdapter(arrayList);
         mRecyclerView.setAdapter(myListAdapter);
-        makeData(Collections.singletonList(testData));
+//      建立一個預設的ArrayList來儲存預設的資料
+//        HashMap<String, String> testData = new HashMap<>();
+//        testData.put("DrugStore", "目前無搜尋結果");
+//        makeData(Collections.singletonList(testData));
+
+        radGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                onRadioButtonClicked(group);
+            }
+        });
+
+
         return view;
     }
 
@@ -122,6 +137,7 @@ public class DrugIn_Fragment extends Fragment {
             get_Search_Item();
         }
     };
+
     private class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
         private ArrayList<HashMap<String, String>> arrayList;
 
@@ -130,12 +146,17 @@ public class DrugIn_Fragment extends Fragment {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, txtElabelNumber,txtEffectDate;
-            private Button btnLight;
+            private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, txtElabelNumber, txtEffectDate;
+            private Button btnLight,btnSubmit;
+            private HashMap<String, String> SelectedItem;
+            private Spinner spOutCode;
+            private EditText edtInQty;
+            private String url = "";
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
                 drugStore = itemView.findViewById(R.id.DrugStore_SA);
+                //drugStore.setText("目前無搜尋結果");
                 drugEnglish = itemView.findViewById(R.id.DrugEnglish);
                 drugName = itemView.findViewById(R.id.DrugName);
                 drugCode = itemView.findViewById(R.id.DrugCode);
@@ -144,7 +165,15 @@ public class DrugIn_Fragment extends Fragment {
                 btnLight = itemView.findViewById(R.id.btnLight);
                 txtElabelNumber = itemView.findViewById(R.id.txtElabelNumber);
                 txtEffectDate = itemView.findViewById(R.id.txtEffectDate);
-                //inventoryTime = itemView.findViewById(R.id.InventoryTime);
+                spOutCode = itemView.findViewById(R.id.spOutCode);
+                edtInQty = itemView.findViewById(R.id.edtInQty);
+                btnSubmit = itemView.findViewById(R.id.btnSubmit);
+
+
+                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(itemView.getContext(),
+                        R.array.InCode, android.R.layout.simple_spinner_item);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spOutCode.setAdapter(adapter);
             }
         }
 
@@ -154,32 +183,36 @@ public class DrugIn_Fragment extends Fragment {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.search_item_view, parent, false);
 
-            View.OnClickListener itemOnSubmit = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
 
-                }
-            };
 
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull DrugIn_Fragment.MyListAdapter.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
             HashMap<String, String> item = arrayList.get(position);
+            holder.url = globaldata.getPHP_SERVER();
             String elabelnumber = item.get("elabelNumber");
-            String drugStore = item.get("DrugStore");
-            String areaNo = item.get("areaNo");
-            String blockNo = item.get("blockNo");
+            String drugStore_SA = item.get("DrugStore_SA");
+            String drugStoreID = item.get("DrugStoreID");
+            String areaNo = item.get("AreaNo");
+            String blockNo = item.get("BlockNo");
+            String elabelType = item.get("ElabelType");
+            String MakeDate = item.get("MakeDate");
 
             String drugEnglish = item.get("DrugEnglish");
-            String DrugName= item.get("DrugName");
-            String DrugCode= item.get("DrugCode");
-            String StockNum= item.get("StockNum");
+            String DrugName = item.get("DrugName");
+            String DrugCode = item.get("DrugCode");
+            String StockNum = item.get("StockNum");
             String LotNumber = item.get("LotNumber");
-            String EffectDate= item.get("EffectDate");
+            String EffectDate = item.get("EffectDate");
 
-            holder.drugStore.setText(drugStore);
+            String StockQty = holder.edtInQty.getText().toString();
+
+
+            //holder.drugStore.setText(drugStoreID+"-"+areaNo+"-"+blockNo+"-"+elabelType);
+            holder.drugStore.setText(drugStore_SA);
             holder.drugEnglish.setText(drugEnglish);
             holder.drugName.setText(DrugName);
             holder.drugCode.setText(DrugCode);
@@ -188,28 +221,49 @@ public class DrugIn_Fragment extends Fragment {
             holder.txtEffectDate.setText(EffectDate);
             holder.txtElabelNumber.setText(elabelnumber);
 
+            holder.url = globaldata.getPHP_SERVER();
+            try {
+
+                holder.url += "DBoption=" + URLEncoder.encode("IN","UTF-8") + "&";
+                holder.url += "ElabelNumber=" + URLEncoder.encode(elabelnumber, "UTF-8") + "&";
+                holder.url += "DrugCode=" + URLEncoder.encode(DrugCode, "UTF-8") + "&";
+                holder.url += "StoreID=" + URLEncoder.encode(DrugCode, "UTF-8") + "&";
+                holder.url += "AreaNo=" + URLEncoder.encode(areaNo, "UTF-8") + "&";
+                holder.url += "BlockNo=" + URLEncoder.encode(blockNo, "UTF-8") + "&";
+                holder.url += "LotNumber=" + URLEncoder.encode(LotNumber, "UTF-8") + "&";
+                holder.url += "MakeDate=" + URLEncoder.encode(MakeDate, "UTF-8") + "&";
+                holder.url += "EffectDate=" + URLEncoder.encode(EffectDate, "UTF-8") + "&";
+                //holder.url += "StockQty=" + URLEncoder.encode(StockQty, "UTF-8") + "&";
+                holder.url += "StoreType=" + URLEncoder.encode(elabelType, "UTF-8") + "&";
+                holder.url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
+
+                Log.d("ITEM的URL",holder.url);
+
+            }catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
 
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // 處理點擊事件
-//
                     v.setBackgroundColor(ContextCompat.getColor(getContext(), com.google.android.material.R.color.design_default_color_primary_dark));
 
-                    // 其他字段...
-                    Toast.makeText(getContext(),elabelnumber, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), elabelnumber, Toast.LENGTH_SHORT).show();
+                    String url = globaldata.getPHP_SERVER();
+
 
                     v.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             v.setBackgroundColor(Color.TRANSPARENT);
                         }
-                    }, 500); // 500毫秒后恢复背景颜色
+                    }, 500);
 
-                    // 在这里进行处理，例如显示对话框、跳转到其他界面等
+                    // 其他处理...
                 }
             });
+
             holder.btnLight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -227,9 +281,9 @@ public class DrugIn_Fragment extends Fragment {
                     client.newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
-                            //Toast.makeText(getContext(), "網路異常: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
+
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             if (!response.isSuccessful()) {
@@ -238,7 +292,7 @@ public class DrugIn_Fragment extends Fragment {
                                 v.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(v.getContext(),"亮燈", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(v.getContext(), drugStore_SA + " 進行亮燈", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             }
@@ -246,9 +300,34 @@ public class DrugIn_Fragment extends Fragment {
                     });
                 }
             });
+            holder.btnSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String StockQty = holder.edtInQty.getText().toString();
+
+                    try {
+                        holder.url += "StockQty=" + URLEncoder.encode(StockQty, "UTF-8") + "&";
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        return; // Abort the onClick operation if encoding fails
+                    }
+
+                    sendGET(holder.url, new VolleyCallback() {
+                        @Override
+                        public void onSuccess(JSONArray response) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Handle the response
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
 
             Toast.makeText(getContext(), item.get("message"), Toast.LENGTH_SHORT).show();
-
         }
 
         @Override
@@ -257,10 +336,34 @@ public class DrugIn_Fragment extends Fragment {
         }
     }
 
+    public void onRadioButtonClicked(RadioGroup radGroup) {
+        int checkedRadioButtonId = radGroup.getCheckedRadioButtonId();
+
+        String searchID = "";
+        switch (checkedRadioButtonId) {
+            case R.id.radSearchLabel:
+                searchID = "DrugLabel";
+                break;
+            case R.id.radSearchCode:
+                searchID = "DrugCode";
+                break;
+            case R.id.radSearchEnglish:
+                searchID = "DrugEnglish";
+                break;
+            case R.id.radSearchName:
+                searchID = "DrugName";
+                break;
+        }
+
+        Log.d("radGroup", searchID);
+        // 执行其他操作...
+    }
+
 
     private void get_Search_Item() {
         String url = globaldata.getPHP_SERVER();
         String DrugLabel = edtDrugLabel.getText().toString();
+
         try {
             url += "DBoption=Search_BY_Drug_Label" + "&";
             url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
@@ -285,9 +388,15 @@ public class DrugIn_Fragment extends Fragment {
                             String LotNumber = jsonObject.getString("DrugCode3");
                             String EffectDate = jsonObject.getString("DrugName3");
                             String drugEnlglish = jsonObject.getString("DrugEnglish");
+                            String MakeDate = jsonObject.getString("MakeDate");
+
 
                             HashMap<String, String> item = new HashMap<>();
-                            item.put("DrugStore", storeID + " - " + areaNo + "-" + blockNo + "-" + elabelType);
+                            item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                            item.put("DrugStoreID", storeID);
+                            item.put("AreaNo", areaNo);
+                            item.put("BlockNo", blockNo);
+                            item.put("ElabelType", elabelType);
                             item.put("DrugName", drugName);
                             item.put("DrugCode", drugCode);
                             item.put("DrugEnglish", drugEnlglish);
@@ -295,7 +404,8 @@ public class DrugIn_Fragment extends Fragment {
                             item.put("LotNumber", LotNumber);
                             item.put("elabelNumber", elabelNumber);
                             item.put("message", message);
-                            item.put("EffectDate",EffectDate);
+                            item.put("EffectDate", EffectDate);
+                            item.put("MakeDate",MakeDate);
 
                             searchData.add(item);
                         }
@@ -315,13 +425,15 @@ public class DrugIn_Fragment extends Fragment {
             e.printStackTrace();
         }
     }
+
     private void makeData(List<HashMap<String, String>> searchData) {
         arrayList.clear();
         arrayList.addAll(searchData);
-        Log.d("TAG", "makeData: "+searchData);
+        Log.d("TAG", "makeData: " + searchData);
 
         myListAdapter.notifyDataSetChanged();
     }
+
     public void sendGET(String Url, final VolleyCallback callback) {
         /**建立連線*/
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -363,8 +475,9 @@ public class DrugIn_Fragment extends Fragment {
             }
         });
     }
+
     public interface VolleyCallback {
-        void onSuccess(JSONArray  response);
+        void onSuccess(JSONArray response);
     }
 }
 

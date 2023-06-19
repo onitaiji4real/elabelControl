@@ -80,7 +80,7 @@ public class MainActivity<textView> extends AppCompatActivity {
         edtDrugCode = findViewById(R.id.edtDrugCode);
         edtDrugEnglish = findViewById(R.id.edtDrugEnglish);
 
-        btnSumit = findViewById(R.id.btnSumit);
+        btnSumit = findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(onPOST);
         btnLight = findViewById(R.id.btnLight);
         btnLight.setOnClickListener(OnLight);
