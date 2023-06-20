@@ -327,23 +327,26 @@ if (isset($_GET["DBoption"])) {
 
 
 
-        case "IN": {//收入
+        case "IN": { //收入
 
                 if (isset($_GET["ElabelNumber"])) {
                     $ElabelNumber = $_GET["ElabelNumber"];
                 }
-
-                $remark_CodeID = "B";
-
                 $dataArray = getDataArray();
+                //$remark_CodeID = "B";
+                drugIN($connection, $dataArray, $ElabelNumber);
 
-                $SQL = getInsertOrUpdateSQL();
-                drugIN($dataArray, $SQL, $connection);
+                // $remark_CodeID = "B";
 
-                $record_SQL = getRecordInsertSQL($dataArray, $remark_CodeID);
-                drugIN_record($dataArray, $record_SQL, $connection);
-                echo "CASE IN";
-                update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                // $dataArray = getDataArray();
+
+                // $SQL = getInsertOrUpdateSQL();
+                // drugIN($dataArray, $SQL, $connection);
+
+                // $record_SQL = getRecordInsertSQL($dataArray, $remark_CodeID);
+                // drugIN_record($dataArray, $record_SQL, $connection);
+                // echo "CASE IN";
+                // update_elabeldrug($ElabelNumber, $dataArray, $connection);
 
                 break;
             }
@@ -420,9 +423,29 @@ if (isset($_GET["DBoption"])) {
                 );
 
                 get_Store_withDrugLabel($dataArray, $connection);
+                break;
             }
+        case "Search_BY_DrugCode": {
+                $dataArray = getDataArray();
+                get_Store_with_DrugCode($dataArray, $connection);
+                break;
+            }
+
+        case "Search_BY_DrugEnglish": {
+                $dataArray = getDataArray();
+                get_Store_with_DrugEnlgish($dataArray, $connection);
+                break;
+            }
+
+        case "Search_BY_DrugName": {
+                $dataArray = getDataArray();
+                get_Store_with_DrugName($dataArray, $connection);
+                break;
+            }
+
     }
 }
+
 
 function getInsertOrUpdateSQL()
 {
@@ -430,6 +453,194 @@ function getInsertOrUpdateSQL()
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE StockQty = IFNULL(StockQty, 0) + ? ;";
 }
+function drugIN($connection, $dataArray, $ElabelNumber) //收入function
+{
+    $response = array();
+    $insertOrUpdateSQL = "INSERT INTO drugstock (DrugCode, StoreID, AreaNo, BlockNo, LotNumber, MakeDate, EffectDate, StockQty)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                          ON DUPLICATE KEY UPDATE StockQty = IFNULL(StockQty, 0) + ?";
+
+    $recordInsertSQL = "INSERT INTO drugadd
+                        (AddTime, DrugCode, CodeID, LotNumber, StoreType, StoreID, AreaNo, BlockNo, AddQty, MakerID, MakerName, Remark, UserID, ShiftNo, DrugName, DrugEnglish, EffectDate, StockQty) 
+                        SELECT 
+                            NOW(),
+                            ?,
+                            ?,
+                            ?,
+                            (SELECT StoreType FROM store WHERE StoreID = ?),
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            druginfo.MakerID,
+                            druginfo.MakerName,
+                            CONCAT(?, '-', (SELECT CodeDesc FROM codetable WHERE CodeID = ?)),
+                            ?,
+                            (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM drugadd AS temp WHERE LotNumber = ?),
+                            druginfo.DrugName,
+                            druginfo.DrugEnglish,
+                            drugstock.EffectDate,
+                            drugstock.StockQty
+                        FROM 
+                            druginfo 
+                        JOIN 
+                            drugstock ON druginfo.DrugCode = drugstock.DrugCode
+                        WHERE 
+                            druginfo.DrugCode = ?
+                            AND drugstock.LotNumber = ?";
+
+
+
+    $updateElabelDrugSQL = "UPDATE elabeldrug 
+                            SET 
+                                DrugCode3 = ?,
+                                DrugName3 = (SELECT EffectDate FROM drugstock WHERE LotNumber = ?), 
+                                DrugEnglish3 = (SELECT StockQty FROM drugstock WHERE LotNumber = ?)
+                            WHERE 
+                                ElabelNumber = ?
+                                AND DrugCode3 = ?";
+    //AND DrugCode = ?
+    $stmt = $connection->prepare($insertOrUpdateSQL);
+
+    if ($stmt === false) {
+        // $item = new stdClass;
+        // $item -> response = '"收入作業準備陳述式失敗: "' . $connection->error;
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+
+        //die("收入作業準備陳述式失敗: " . $connection->error . "<br>");
+
+    }
+
+    $stmt->bind_param(
+        "sssssssss",
+        $dataArray["DrugCode"],
+        $dataArray["StoreID"],
+        $dataArray["AreaNo"],
+        $dataArray["BlockNo"],
+        $dataArray["LotNumber"],
+        $dataArray["MakeDate"],
+        $dataArray["EffectDate"],
+        $dataArray["StockQty"],
+        $dataArray["StockQty"]
+    );
+
+    if ($stmt->execute() === true) {
+        //$affectedRows = $stmt->affected_rows;
+        //$item -> response1 = '"drugStock收入作業資料插入成功，影響了"'. $affectedRows." 行";
+        //echo "drugStock收入作業資料插入成功，影響了 {$affectedRows} 行<br>";
+        echo "[{}]";
+    } else {
+        //$affectedRows = $stmt->affected_rows;
+        //$item -> response1 = 'drugStock收入作業插入資料時發生錯誤: "' . $stmt->error;
+        //echo "drugStock收入作業插入資料時發生錯誤: " . $stmt->error . "<br>";
+    }
+
+    $stmt->close();
+
+    $recordStmt = $connection->prepare($recordInsertSQL);
+    if ($recordStmt === false) {
+        // $affectedRows = $stmt->affected_rows;
+        // $item = new stdClass;
+        // $item -> response = 'drugadd 表準備陳述式失敗: "' . $connection->error  ;
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+        //die("drugadd 表準備陳述式失敗: " . $connection->error . "<br>");
+    }
+    $recordStmt->bind_param(
+        "ssssssssssssss",
+        $dataArray["DrugCode"],
+        $dataArray["ReMark_CodeID"],
+        $dataArray["LotNumber"],
+        $dataArray["StoreID"],
+        $dataArray["StoreID"],
+        $dataArray["AreaNo"],
+        $dataArray["BlockNo"],
+        $dataArray["StockQty"],
+        $dataArray["ReMark_CodeID"],
+        $dataArray["ReMark_CodeID"],
+        $dataArray["UserID"],
+        $dataArray["LotNumber"],
+        $dataArray["DrugCode"],
+        $dataArray["LotNumber"]
+
+    );
+
+
+    if ($recordStmt->execute() === true) {
+        // $affectedRows = $stmt->affected_rows;
+        // //$item = new stdClass;
+        // $item -> response = 'drugADD紀錄成功"';
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+        // //echo "drugADD紀錄成功<br>";
+    } else {
+        // $affectedRows = $stmt->affected_rows;
+        // $item = new stdClass;
+        // $item -> response = 'drugADD紀錄成功'.$recordStmt->error;
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+        // //echo "drugADD紀錄失敗: " . $recordStmt->error . "<br>";
+    }
+
+    $recordStmt->close();
+
+    $updateStmt = $connection->prepare($updateElabelDrugSQL);
+
+    if ($updateStmt === false) {
+        // $affectedRows = $stmt->affected_rows;
+        // $item = new stdClass;
+        // $item -> response = '更新 elabeldrug 表準備陳述式失敗: '.$connection->error;
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+        // //die("更新 elabeldrug 表準備陳述式失敗: " . $connection->error . "<br>");
+    }
+
+    $updateStmt->bind_param(
+        "sssss",
+        $dataArray["LotNumber"],
+        $dataArray["LotNumber"],
+        $dataArray["LotNumber"],
+        $ElabelNumber,
+        $dataArray["LotNumber"]
+    );
+
+    if ($updateStmt->execute() === true) {
+        if ($updateStmt->affected_rows > 0) {
+            //     $affectedRows = $stmt->affected_rows;
+            // //$item = new stdClass;
+            // $item -> response = 'Successfully Update elabeldrug table.';
+            // $response[] = $item;
+            // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            // echo $json . "<br>";
+            //echo "Successfully Update elabeldrug table.<br>";
+        } else {
+            //     $affectedRows = $stmt->affected_rows;
+            // $item = new stdClass;
+            // $item -> response = 'No rows updated in elabeldrug table.';
+            // $response[] = $item;
+            // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            // echo $json . "<br>";
+            //     //echo "No rows updated in elabeldrug table.<br>";
+        }
+    } else {
+        // $affectedRows = $stmt->affected_rows;
+        // $item = new stdClass;
+        // $item -> response = 'Error Update elabeldrug table: '.$updateStmt->error;
+        // $response[] = $item;
+        // $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // echo $json . "<br>";
+        // echo "Error Update elabeldrug table: " . $updateStmt->error . "<br>";
+    }
+
+    $updateStmt->close();
+}
+
 function getRecordInsertSQL($dataArray, $remark_CodeID)
 {
     return "INSERT INTO drugadd
@@ -476,6 +687,8 @@ function getDataArray()
         "StoreType" => $_GET["StoreType"],
         "Remark" => $_GET["Remark"],
         "UserID" => $_GET["UserID"],
+        "ReMark_CodeID" => $_GET["ReMark_CodeID"],
+        "Search_KEY" => $_GET["Search_KEY"]
     );
 }
 function drugOUT_record($dataArray, $record_SQL, $connection)
@@ -519,7 +732,7 @@ function drugOUT($dataArray, $SQL, $connection)
     // 關閉陳述式
     $stmt->close();
 }
-function drugIN($dataArray, $SQL, $connection)
+function drugIN_2($dataArray, $SQL, $connection)
 {
     $stmt = $connection->prepare($SQL);
 
@@ -702,7 +915,7 @@ function get_Store_withDrugLabel($dataArray, $connection)
     //         FROM elabeldrug
     //         WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
     //  ";
-     $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
         FROM elabeldrug ed
         JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber
         WHERE ed.DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')";
@@ -746,6 +959,158 @@ function get_Store_withDrugLabel($dataArray, $connection)
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
+
+
+
+//搜尋不同的關鍵字
+function get_Store_with_DrugCode($dataArray, $connection)
+{
+    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+            FROM elabeldrug ed
+            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber
+            WHERE ed.DrugCode LIKE '%" . $dataArray["Search_KEY"] . "%'";
+
+
+
+    $result = mysqli_query($connection, $SQL);
+    $response = array(); // Create an empty array to store the response
+
+    if ($result) {
+        if (mysqli_affected_rows($connection) > 0) {
+            // Fetch and process each row
+            while ($row = mysqli_fetch_assoc($result)) {
+                $item = new stdClass();
+                $item->Response = '成功執行搜尋!!';
+                $item->ElabelNumber = $row['ElabelNumber'];
+                $item->StoreID = $row['StoreID'];
+                $item->ElabelType = $row['ElabelType'];
+                $item->DrugCode = $row['DrugCode'];
+                $item->DrugName = $row['DrugName'];
+                $item->DrugEnglish = $row['DrugEnglish'];
+                $item->AreaNo = $row['AreaNo'];
+                $item->BlockNo = $row['BlockNo'];
+                $item->DrugCode3 = $row['DrugCode3'];
+                $item->DrugName3 = $row['DrugName3'];
+                $item->DrugEnglish3 = $row['DrugEnglish3'];
+                $item->MakeDate = $row['MakeDate'];
+
+                $response[] = $item; // Add the item to the response array
+            }
+        } else {
+            $item = new stdClass();
+            $item->Response = 'No rows return Search BY DrugCode.';
+            $response[] = $item;
+        }
+    } else {
+        $item = new stdClass();
+        $item->Response = 'Error Search table: ' . mysqli_error($connection);
+        $response[] = $item;
+    }
+
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo $json . "<br>";
+
+}
+
+function get_Store_with_DrugEnlgish($dataArray, $connection)
+{
+    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+            FROM elabeldrug ed
+            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber
+            WHERE ed.DrugEnglish LIKE '%" . $dataArray["Search_KEY"] . "%'";
+
+
+
+    $result = mysqli_query($connection, $SQL);
+    $response = array(); // Create an empty array to store the response
+
+    if ($result) {
+        if (mysqli_affected_rows($connection) > 0) {
+            // Fetch and process each row
+            while ($row = mysqli_fetch_assoc($result)) {
+                $item = new stdClass();
+                $item->Response = '成功執行搜尋!!';
+                $item->ElabelNumber = $row['ElabelNumber'];
+                $item->StoreID = $row['StoreID'];
+                $item->ElabelType = $row['ElabelType'];
+                $item->DrugCode = $row['DrugCode'];
+                $item->DrugName = $row['DrugName'];
+                $item->DrugEnglish = $row['DrugEnglish'];
+                $item->AreaNo = $row['AreaNo'];
+                $item->BlockNo = $row['BlockNo'];
+                $item->DrugCode3 = $row['DrugCode3'];
+                $item->DrugName3 = $row['DrugName3'];
+                $item->DrugEnglish3 = $row['DrugEnglish3'];
+                $item->MakeDate = $row['MakeDate'];
+
+                $response[] = $item; // Add the item to the response array
+            }
+        } else {
+            $item = new stdClass();
+            $item->Response = 'No rows return Search BY DrugCode.';
+            $response[] = $item;
+        }
+    } else {
+        $item = new stdClass();
+        $item->Response = 'Error Search table: ' . mysqli_error($connection);
+        $response[] = $item;
+    }
+
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo $json . "<br>";
+
+}
+
+function get_Store_with_DrugName($dataArray, $connection)
+{
+    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+    FROM elabeldrug ed
+    JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber
+    WHERE ed.DrugName LIKE '%" . $dataArray["Search_KEY"] . "%'";
+
+
+
+    $result = mysqli_query($connection, $SQL);
+    $response = array(); // Create an empty array to store the response
+
+    if ($result) {
+        if (mysqli_affected_rows($connection) > 0) {
+            // Fetch and process each row
+            while ($row = mysqli_fetch_assoc($result)) {
+                $item = new stdClass();
+                $item->Response = '成功執行搜尋!!';
+                $item->ElabelNumber = $row['ElabelNumber'];
+                $item->StoreID = $row['StoreID'];
+                $item->ElabelType = $row['ElabelType'];
+                $item->DrugCode = $row['DrugCode'];
+                $item->DrugName = $row['DrugName'];
+                $item->DrugEnglish = $row['DrugEnglish'];
+                $item->AreaNo = $row['AreaNo'];
+                $item->BlockNo = $row['BlockNo'];
+                $item->DrugCode3 = $row['DrugCode3'];
+                $item->DrugName3 = $row['DrugName3'];
+                $item->DrugEnglish3 = $row['DrugEnglish3'];
+                $item->MakeDate = $row['MakeDate'];
+
+                $response[] = $item; // Add the item to the response array
+            }
+        } else {
+            $item = new stdClass();
+            $item->Response = 'No rows return Search BY DrugCode.';
+            $response[] = $item;
+        }
+    } else {
+        $item = new stdClass();
+        $item->Response = 'Error Search table: ' . mysqli_error($connection);
+        $response[] = $item;
+    }
+
+    $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo $json . "<br>";
+
+}
+
+
 
 
 

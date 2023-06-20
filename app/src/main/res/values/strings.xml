@@ -10,12 +10,22 @@
         <item>6</item>
         <item>7</item>
     </string-array>
+
     <string-array name="InCode">
         <item>購買</item>
         <item>入庫</item>
         <item>初期庫存量</item>
         <item>新藥收入(新批)</item>
     </string-array>
+
+    <string-array name="InCodeIDs">
+        <item>A</item>
+        <item>B</item>
+        <item>L</item>
+        <item>E</item>
+    </string-array>
+
+
     <string-array name="OutCode">
         <item>退藥</item>
         <item>調撥</item>

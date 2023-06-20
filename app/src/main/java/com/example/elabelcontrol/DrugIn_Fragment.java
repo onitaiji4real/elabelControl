@@ -1,9 +1,9 @@
 package com.example.elabelcontrol;
 
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -13,16 +13,8 @@ import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,14 +28,11 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -61,7 +50,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class DrugIn_Fragment extends Fragment {
     MyListAdapter myListAdapter;
     Spinner spinner;
-    Button btnStatus, btnSearch, btnNewDrugIN;
+    Button btnStatus, btnLabelSearch, btnNewDrugIN, btnSearchDrugCode, btnSearchDrugEnglish, btnSearchDrugName;
     EditText edtDrugLabel;
     RecyclerView mRecyclerView;
 
@@ -85,14 +74,14 @@ public class DrugIn_Fragment extends Fragment {
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
         edtDrugLabel.requestFocus();
 
-        RadioGroup radGroup = view.findViewById(R.id.radGroup);
-        radGroup.check(R.id.radSearchLabel);
+//        RadioGroup radGroup = view.findViewById(R.id.radGroup);
+//        radGroup.check(R.id.radSearchLabel);
 
-        radSearchLabel = view.findViewById(R.id.radSearchLabel);
-        radSearchCode = view.findViewById(R.id.radSearchCode);
-        radSearchEnglish = view.findViewById(R.id.radSearchEnglish);
-        radSearchName = view.findViewById(R.id.radSearchName);
-        btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
+//        radSearchLabel = view.findViewById(R.id.radSearchLabel);
+//        radSearchCode = view.findViewById(R.id.radSearchCode);
+//        radSearchEnglish = view.findViewById(R.id.radSearchEnglish);
+//        radSearchName = view.findViewById(R.id.radSearchName);
+//        btnNewDrugIN = view.findViewById(R.id.btnNewDrugIN);
 
 
         //spinner = view.findViewById(R.id.spOutCode);
@@ -105,8 +94,18 @@ public class DrugIn_Fragment extends Fragment {
 //        spinner.setAdapter(adapter);
 //        spinner.setSelection(1, false);
 
-        btnSearch = view.findViewById(R.id.btnSearch);
-        btnSearch.setOnClickListener(onSearch);
+        btnLabelSearch = view.findViewById(R.id.btnLabelSearch);
+        btnLabelSearch.setOnClickListener(onSearch);
+
+        btnSearchDrugCode = view.findViewById(R.id.btnSearchDrugCode);
+        btnSearchDrugCode.setOnClickListener(onSearchDrugCode);
+
+        btnSearchDrugEnglish = view.findViewById(R.id.btnSearchDrugEnglish);
+        btnSearchDrugEnglish.setOnClickListener(onSearchDrugEnglish);
+
+        btnSearchDrugName = view.findViewById(R.id.btnSearchDrugName);
+        btnSearchDrugName.setOnClickListener(onSearchDrugName);
+
 
         mRecyclerView = view.findViewById(R.id.searchList);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -120,13 +119,6 @@ public class DrugIn_Fragment extends Fragment {
 //        testData.put("DrugStore", "目前無搜尋結果");
 //        makeData(Collections.singletonList(testData));
 
-        radGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                onRadioButtonClicked(group);
-            }
-        });
-
 
         return view;
     }
@@ -135,6 +127,27 @@ public class DrugIn_Fragment extends Fragment {
         @Override
         public void onClick(View v) {
             get_Search_Item();
+        }
+    };
+
+    private View.OnClickListener onSearchDrugCode = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            get_Search_Item_BY_DrugCode();
+        }
+    };
+
+    private View.OnClickListener onSearchDrugEnglish = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            get_Search_Item_BY_DrugEnglish();
+        }
+    };
+
+    private View.OnClickListener onSearchDrugName = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            get_Search_Item_BY_DrugName();
         }
     };
 
@@ -147,11 +160,12 @@ public class DrugIn_Fragment extends Fragment {
 
         class ViewHolder extends RecyclerView.ViewHolder {
             private TextView drugStore, drugEnglish, drugName, drugCode, stockNum, lotNumber, txtElabelNumber, txtEffectDate;
-            private Button btnLight,btnSubmit;
+            private Button btnLight, btnSubmit;
             private HashMap<String, String> SelectedItem;
             private Spinner spOutCode;
             private EditText edtInQty;
             private String url = "";
+            private String selectedId = "";  // Add this variable
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -174,6 +188,22 @@ public class DrugIn_Fragment extends Fragment {
                         R.array.InCode, android.R.layout.simple_spinner_item);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spOutCode.setAdapter(adapter);
+                spOutCode.setSelection(1);
+
+                spOutCode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String[] inCodeIds = getResources().getStringArray(R.array.InCodeIDs);
+                        selectedId = inCodeIds[position];
+
+                        Log.d("SELECTID", selectedId);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
             }
         }
 
@@ -184,7 +214,6 @@ public class DrugIn_Fragment extends Fragment {
                     .inflate(R.layout.search_item_view, parent, false);
 
 
-
             return new ViewHolder(view);
         }
 
@@ -193,6 +222,7 @@ public class DrugIn_Fragment extends Fragment {
 
             HashMap<String, String> item = arrayList.get(position);
             holder.url = globaldata.getPHP_SERVER();
+            String CodeID = holder.selectedId;
             String elabelnumber = item.get("elabelNumber");
             String drugStore_SA = item.get("DrugStore_SA");
             String drugStoreID = item.get("DrugStoreID");
@@ -207,6 +237,7 @@ public class DrugIn_Fragment extends Fragment {
             String StockNum = item.get("StockNum");
             String LotNumber = item.get("LotNumber");
             String EffectDate = item.get("EffectDate");
+
 
             String StockQty = holder.edtInQty.getText().toString();
 
@@ -224,10 +255,10 @@ public class DrugIn_Fragment extends Fragment {
             holder.url = globaldata.getPHP_SERVER();
             try {
 
-                holder.url += "DBoption=" + URLEncoder.encode("IN","UTF-8") + "&";
+                holder.url += "DBoption=" + URLEncoder.encode("IN", "UTF-8") + "&";
                 holder.url += "ElabelNumber=" + URLEncoder.encode(elabelnumber, "UTF-8") + "&";
                 holder.url += "DrugCode=" + URLEncoder.encode(DrugCode, "UTF-8") + "&";
-                holder.url += "StoreID=" + URLEncoder.encode(DrugCode, "UTF-8") + "&";
+                holder.url += "StoreID=" + URLEncoder.encode(drugStoreID, "UTF-8") + "&";
                 holder.url += "AreaNo=" + URLEncoder.encode(areaNo, "UTF-8") + "&";
                 holder.url += "BlockNo=" + URLEncoder.encode(blockNo, "UTF-8") + "&";
                 holder.url += "LotNumber=" + URLEncoder.encode(LotNumber, "UTF-8") + "&";
@@ -237,9 +268,10 @@ public class DrugIn_Fragment extends Fragment {
                 holder.url += "StoreType=" + URLEncoder.encode(elabelType, "UTF-8") + "&";
                 holder.url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
 
-                Log.d("ITEM的URL",holder.url);
 
-            }catch (UnsupportedEncodingException e) {
+                Log.d("ITEM的URL", holder.url);
+
+            } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
 
@@ -304,9 +336,10 @@ public class DrugIn_Fragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     String StockQty = holder.edtInQty.getText().toString();
-
+                    String CodeID = holder.selectedId;
                     try {
                         holder.url += "StockQty=" + URLEncoder.encode(StockQty, "UTF-8") + "&";
+                        holder.url += "ReMark_CodeID=" + URLEncoder.encode(CodeID, "UTF-8") + "&";
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                         return; // Abort the onClick operation if encoding fails
@@ -315,12 +348,15 @@ public class DrugIn_Fragment extends Fragment {
                     sendGET(holder.url, new VolleyCallback() {
                         @Override
                         public void onSuccess(JSONArray response) {
+
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    // Handle the response
+                                    // Display the Toast message
+                                    Toast.makeText(v.getContext(), drugStore_SA + " 收入 " + StockQty + " 單位", Toast.LENGTH_SHORT).show();
                                 }
                             });
+
                         }
                     });
                 }
@@ -336,37 +372,14 @@ public class DrugIn_Fragment extends Fragment {
         }
     }
 
-    public void onRadioButtonClicked(RadioGroup radGroup) {
-        int checkedRadioButtonId = radGroup.getCheckedRadioButtonId();
 
-        String searchID = "";
-        switch (checkedRadioButtonId) {
-            case R.id.radSearchLabel:
-                searchID = "DrugLabel";
-                break;
-            case R.id.radSearchCode:
-                searchID = "DrugCode";
-                break;
-            case R.id.radSearchEnglish:
-                searchID = "DrugEnglish";
-                break;
-            case R.id.radSearchName:
-                searchID = "DrugName";
-                break;
-        }
-
-        Log.d("radGroup", searchID);
-        // 执行其他操作...
-    }
-
-
-    private void get_Search_Item() {
+    private void get_Search_Item_BY_DrugCode() {
         String url = globaldata.getPHP_SERVER();
-        String DrugLabel = edtDrugLabel.getText().toString();
+        String Search_KEY = edtDrugLabel.getText().toString();
 
         try {
-            url += "DBoption=Search_BY_Drug_Label" + "&";
-            url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
+            url += "DBoption=Search_BY_DrugCode" + "&";
+            url += "Search_KEY=" + URLEncoder.encode(Search_KEY, "UTF-8") + "&";
             sendGET(url, new VolleyCallback() {
                 @Override
                 public void onSuccess(JSONArray response) {
@@ -405,7 +418,7 @@ public class DrugIn_Fragment extends Fragment {
                             item.put("elabelNumber", elabelNumber);
                             item.put("message", message);
                             item.put("EffectDate", EffectDate);
-                            item.put("MakeDate",MakeDate);
+                            item.put("MakeDate", MakeDate);
 
                             searchData.add(item);
                         }
@@ -420,6 +433,225 @@ public class DrugIn_Fragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void get_Search_Item_BY_DrugEnglish() {
+        String url = globaldata.getPHP_SERVER();
+        //String DrugLabel = edtDrugLabel.getText().toString();
+        String Search_KEY = edtDrugLabel.getText().toString();
+        try {
+            url += "DBoption=Search_BY_DrugEnglish" + "&";
+            //url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
+            url += "Search_KEY=" + URLEncoder.encode(Search_KEY, "UTF-8") + "&";
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONArray response) {
+                    try {
+                        List<HashMap<String, String>> searchData = new ArrayList<>();
+
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject jsonObject = response.getJSONObject(i);
+
+                            String message = jsonObject.getString("Response");
+                            String elabelNumber = jsonObject.getString("ElabelNumber");
+                            String storeID = jsonObject.getString("StoreID");
+                            String elabelType = jsonObject.getString("ElabelType");
+                            String drugCode = jsonObject.getString("DrugCode");
+                            String drugName = jsonObject.getString("DrugName");
+                            String StokQty = jsonObject.getString("DrugEnglish3");
+                            String areaNo = jsonObject.getString("AreaNo");
+                            String blockNo = jsonObject.getString("BlockNo");
+                            String LotNumber = jsonObject.getString("DrugCode3");
+                            String EffectDate = jsonObject.getString("DrugName3");
+                            String drugEnlglish = jsonObject.getString("DrugEnglish");
+                            String MakeDate = jsonObject.getString("MakeDate");
+
+
+                            HashMap<String, String> item = new HashMap<>();
+                            item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                            item.put("DrugStoreID", storeID);
+                            item.put("AreaNo", areaNo);
+                            item.put("BlockNo", blockNo);
+                            item.put("ElabelType", elabelType);
+                            item.put("DrugName", drugName);
+                            item.put("DrugCode", drugCode);
+                            item.put("DrugEnglish", drugEnlglish);
+                            item.put("StockNum", StokQty);
+                            item.put("LotNumber", LotNumber);
+                            item.put("elabelNumber", elabelNumber);
+                            item.put("message", message);
+                            item.put("EffectDate", EffectDate);
+                            item.put("MakeDate", MakeDate);
+
+                            searchData.add(item);
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                makeData(searchData);
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void get_Search_Item_BY_DrugName() {
+        String url = globaldata.getPHP_SERVER();
+        String DrugLabel = edtDrugLabel.getText().toString();
+        String Search_KEY = edtDrugLabel.getText().toString();
+        try {
+            url += "DBoption=Search_BY_DrugName" + "&";
+            //url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
+            url += "Search_KEY=" + URLEncoder.encode(Search_KEY, "UTF-8") + "&";
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONArray response) {
+                    try {
+                        List<HashMap<String, String>> searchData = new ArrayList<>();
+
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject jsonObject = response.getJSONObject(i);
+
+                            String message = jsonObject.getString("Response");
+                            String elabelNumber = jsonObject.getString("ElabelNumber");
+                            String storeID = jsonObject.getString("StoreID");
+                            String elabelType = jsonObject.getString("ElabelType");
+                            String drugCode = jsonObject.getString("DrugCode");
+                            String drugName = jsonObject.getString("DrugName");
+                            String StokQty = jsonObject.getString("DrugEnglish3");
+                            String areaNo = jsonObject.getString("AreaNo");
+                            String blockNo = jsonObject.getString("BlockNo");
+                            String LotNumber = jsonObject.getString("DrugCode3");
+                            String EffectDate = jsonObject.getString("DrugName3");
+                            String drugEnlglish = jsonObject.getString("DrugEnglish");
+                            String MakeDate = jsonObject.getString("MakeDate");
+
+
+                            HashMap<String, String> item = new HashMap<>();
+                            item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                            item.put("DrugStoreID", storeID);
+                            item.put("AreaNo", areaNo);
+                            item.put("BlockNo", blockNo);
+                            item.put("ElabelType", elabelType);
+                            item.put("DrugName", drugName);
+                            item.put("DrugCode", drugCode);
+                            item.put("DrugEnglish", drugEnlglish);
+                            item.put("StockNum", StokQty);
+                            item.put("LotNumber", LotNumber);
+                            item.put("elabelNumber", elabelNumber);
+                            item.put("message", message);
+                            item.put("EffectDate", EffectDate);
+                            item.put("MakeDate", MakeDate);
+
+                            searchData.add(item);
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                makeData(searchData);
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void get_Search_Item() {
+        String url = globaldata.getPHP_SERVER();
+        String DrugLabel = edtDrugLabel.getText().toString().replaceAll("[\n\r]", "");
+
+
+        try {
+            url += "DBoption=Search_BY_Drug_Label" + "&";
+            url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONArray response) {
+                    try {
+                        List<HashMap<String, String>> searchData = new ArrayList<>();
+
+//                        if(response != null && response.length()>0){
+//                            JSONObject jsonObject = response.getJSONObject(0);
+//                            String message = jsonObject.getString("message");
+//                            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+//                        }
+
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject jsonObject = response.getJSONObject(i);
+
+                            String message = jsonObject.getString("Response");
+
+                            String elabelNumber = jsonObject.getString("ElabelNumber");
+                            String storeID = jsonObject.getString("StoreID");
+                            String elabelType = jsonObject.getString("ElabelType");
+                            String drugCode = jsonObject.getString("DrugCode");
+                            String drugName = jsonObject.getString("DrugName");
+                            String StokQty = jsonObject.getString("DrugEnglish3");
+                            String areaNo = jsonObject.getString("AreaNo");
+                            String blockNo = jsonObject.getString("BlockNo");
+                            String LotNumber = jsonObject.getString("DrugCode3");
+                            String EffectDate = jsonObject.getString("DrugName3");
+                            String drugEnlglish = jsonObject.getString("DrugEnglish");
+                            String MakeDate = jsonObject.getString("MakeDate");
+
+
+                            HashMap<String, String> item = new HashMap<>();
+                            item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                            item.put("DrugStoreID", storeID);
+                            item.put("AreaNo", areaNo);
+                            item.put("BlockNo", blockNo);
+                            item.put("ElabelType", elabelType);
+                            item.put("DrugName", drugName);
+                            item.put("DrugCode", drugCode);
+                            item.put("DrugEnglish", drugEnlglish);
+                            item.put("StockNum", StokQty);
+                            item.put("LotNumber", LotNumber);
+                            item.put("elabelNumber", elabelNumber);
+                            item.put("message", message);
+                            item.put("EffectDate", EffectDate);
+                            item.put("MakeDate", MakeDate);
+
+                            searchData.add(item);
+                        }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                makeData(searchData);
+                                Toast.makeText(getContext(), "message", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+//                public void onFailure(JSONArray response) {
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(getContext(), "Search failed", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//                }
             });
         } catch (Exception e) {
             e.printStackTrace();

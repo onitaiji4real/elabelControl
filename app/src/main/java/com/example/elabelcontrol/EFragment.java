@@ -58,7 +58,7 @@ public class EFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
-        btnSearch = view.findViewById(R.id.btnSearch);
+        btnSearch = view.findViewById(R.id.btnLabelSearch);
         btnSearch.setOnClickListener(onSearch);
 
         radGroup = view.findViewById(R.id.radGroup);
