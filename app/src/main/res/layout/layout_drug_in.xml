@@ -8,30 +8,6 @@
 
 
     <Button
-        android:id="@+id/btnSearchDrugName"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginTop="108dp"
-        android:text="中文名稱"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.949"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnSearchDrugCode"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginTop="108dp"
-        android:text="藥品代碼"
-        android:textAlignment="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
         android:id="@+id/btnLabelSearch"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
@@ -46,11 +22,35 @@
     <Button
         android:id="@+id/btnSearchDrugEnglish"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginTop="108dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
         android:text="英文名稱"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSearchDrugName"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
+        android:text="中文名稱"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.949"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSearchDrugCode"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
+        android:text="藥品代碼"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

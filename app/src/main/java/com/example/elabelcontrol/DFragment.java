@@ -1,9 +1,12 @@
 package com.example.elabelcontrol;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.CalendarContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 
@@ -31,7 +35,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.DateTimeException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -77,6 +83,7 @@ public class DFragment extends Fragment {
     private ArrayList<String> makerNames;
     private ArrayList<String> effectDates;
     private ArrayList<String> makeDates;
+    //private DateTimePicker dateTimePicker;
 
 
 
@@ -87,12 +94,15 @@ public class DFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         globaldata = (GlobalData) getActivity().getApplicationContext();
         View view = inflater.inflate(R.layout.layout_d, container, false);
-        Drugstores = new ArrayList<Drugstore>();
-        CSVReadDrugStore();
-        DrugInOuts = new ArrayList<DrugInOut>();
+//        Drugstores = new ArrayList<Drugstore>();
+//
+//        CSVReadDrugStore();
+//        DrugInOuts = new ArrayList<DrugInOut>();
+//
+//        Druginfos = new ArrayList<Druginfo>();
+//        CSVReadDrugInfo();
 
-        Druginfos = new ArrayList<Druginfo>();
-        CSVReadDrugInfo();
+
 
         btnSumit = view.findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(OnSubmit);
@@ -157,6 +167,10 @@ public class DFragment extends Fragment {
 
         return view;
     }
+
+
+
+
     private View.OnClickListener onClearField = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
