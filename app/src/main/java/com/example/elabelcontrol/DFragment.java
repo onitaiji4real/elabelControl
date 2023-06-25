@@ -67,7 +67,7 @@ public class DFragment extends Fragment {
     List<Druginfo> Druginfos;
     boolean getFin;
     GlobalData globalData;
-    EditText edtDrugStore,edtBlockNo,edtBlockType,edtAreaNo,edtDrugCode,edtDrugEnglish,edtInQty,edtElabelNumber;
+    EditText edtDrugStore,edtBlockNo,edtBlockType,edtAreaNo,edtDrugCode,edtDrugEnglish,edtInQty,edtElabelNumber,edtReMark;
     TextView textLotNumber_size,txtLotNumber,textNum,edtMakeDate,edtEffectDate;
     private int currentIndex = 0;
     private ArrayList<String> storeIDs;
@@ -84,6 +84,7 @@ public class DFragment extends Fragment {
     private ArrayList<String> effectDates;
     private ArrayList<String> makeDates;
     //private DateTimePicker dateTimePicker;
+    private String selectedId = "";  // Add this variable
 
 
 
@@ -103,6 +104,7 @@ public class DFragment extends Fragment {
 //        CSVReadDrugInfo();
 
 
+        edtReMark = view.findViewById(R.id.edtReMark);
 
         btnSumit = view.findViewById(R.id.btnSubmit);
         btnSumit.setOnClickListener(OnSubmit);
@@ -130,16 +132,33 @@ public class DFragment extends Fragment {
         btnLight.setOnClickListener(OnLight);
 
 //      Spinner spinner = view.findViewById(R.id.spOutCode);
-        spinner.setOnItemSelectedListener(spnOnItemSelected);
+        //spinner.setOnItemSelectedListener(spnOnItemSelected);
 
         CodeID = "A";
+
+        //調撥原因的adapter
         ArrayAdapter<CharSequence> adapter =
                 ArrayAdapter.createFromResource(view.getContext(),
                         R.array.OutCode,
                         android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setSelection(2, false);
+        spinner.setSelection(1, false);
+
+        //選擇調撥原因的IDs
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                String[] outCodeIds = getResources().getStringArray(R.array.OutCodeIDs);
+                selectedId = outCodeIds[position];
+                Log.d("SELECTID", selectedId);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         btnDrugOut = view.findViewById(R.id.btnDrugOut);
         btnDrugOut.setEnabled(false);
@@ -398,6 +417,7 @@ public class DFragment extends Fragment {
             String labelCode = edtElabelNumber.getText().toString();
             OnLight(v, labelCode,"進行支出！"); //亮燈
             String url = globaldata.getPHP_SERVER();
+            String CodeID = selectedId;
             try {
                 //exportDataToCSV();
 
@@ -413,9 +433,10 @@ public class DFragment extends Fragment {
                 url += "EffectDate=" + URLEncoder.encode(edtEffectDate.getText().toString(), "UTF-8") + "&";
                 url += "StockQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
                 url += "StoreType=" + URLEncoder.encode(edtBlockType.getText().toString(), "UTF-8") + "&";
-                url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(), "UTF-8") + "&";
+                //url += "Remark=" + URLEncoder.encode(spinner.getSelectedItem().toString(), "UTF-8") + "&";
                 url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
-
+                url += "ReMark_CodeID=" + URLEncoder.encode(CodeID, "UTF-8") + "&";
+                url +="Remark="+URLEncoder.encode(edtReMark.getText().toString(),"UTF-8")+"&";
 
                 url += "TotalQty=" + URLEncoder.encode(edtInQty.getText().toString(), "UTF-8") + "&";
                 url += "UserID=" + globaldata.getLoginUserID() + "&";

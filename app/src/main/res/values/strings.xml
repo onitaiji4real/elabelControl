@@ -31,6 +31,12 @@
         <item>調撥</item>
         <item>銷毀</item>
     </string-array>
+    <string-array name="OutCodeIDs">
+        <item>F</item>
+        <item>G</item>
+        <item>I</item>
+    </string-array>
+
     <style name="Spinner" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
         <item name="android:paddingStart">0dp</item>
         <item name="android:paddingEnd">0dp</item>

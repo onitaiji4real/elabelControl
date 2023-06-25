@@ -234,8 +234,8 @@
 
     <TextView
         android:id="@+id/textLotNumber_size"
-        android:layout_width="48dp"
-        android:layout_height="26dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:ems="10"
         android:inputType="phone"
         android:text="0/0"
@@ -291,8 +291,8 @@
 
     <Button
         android:id="@+id/btnNextIndex"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:text="下一筆"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -334,8 +334,8 @@
 
     <Button
         android:id="@+id/btnPreViewIndex"
-        android:layout_width="80dp"
-        android:layout_height="46dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:text="上一筆"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

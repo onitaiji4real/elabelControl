@@ -7,6 +7,39 @@
     tools:context=".MainActivity">
 
 
+    <EditText
+        android:id="@+id/edtReMark"
+        android:layout_width="375dp"
+        android:layout_height="54dp"
+        android:ems="10"
+        android:hint="請輸入調撥之儲區"
+        android:inputType="text"
+        android:textAlignment="center"
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.555"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.745" />
+
+    <TextView
+
+        android:id="@+id/textView25"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-------------- 調撥備註 : --------------"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.569"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.677" />
+
     <Button
         android:id="@+id/btnSubmit"
         android:layout_width="130dp"
@@ -41,10 +74,22 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.581"
+        app:layout_constraintHorizontal_bias="0.569"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.673" />
+        app:layout_constraintVertical_bias="0.537" />
+
+    <Spinner
+        android:id="@+id/spOutCode"
+        android:layout_width="293dp"
+        android:layout_height="41dp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.55"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.611" />
 
     <TextView
 
@@ -77,18 +122,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.873" />
 
-    <Spinner
-        android:id="@+id/spOutCode"
-        android:layout_width="293dp"
-        android:layout_height="41dp"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.559"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.749" />
-
     <EditText
         android:id="@+id/edtBlockNo"
         android:layout_width="30dp"
@@ -108,8 +141,8 @@
 
     <Button
         android:id="@+id/btnPreViewIndex"
-        android:layout_width="80dp"
-        android:layout_height="46dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:text="上一筆"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -139,8 +172,8 @@
 
     <Button
         android:id="@+id/btnNextIndex"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:text="下一筆"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -216,8 +249,8 @@
 
     <TextView
         android:id="@+id/textLotNumber_size"
-        android:layout_width="48dp"
-        android:layout_height="26dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:ems="10"
         android:inputType="phone"
         android:text="0/0"
