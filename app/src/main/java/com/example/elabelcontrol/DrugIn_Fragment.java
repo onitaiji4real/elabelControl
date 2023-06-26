@@ -1,5 +1,6 @@
 package com.example.elabelcontrol;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -74,6 +75,8 @@ public class DrugIn_Fragment extends Fragment {
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
         edtDrugLabel.requestFocus();
 
+//        btnStatus = view.findViewById(R.id.btnStatus);
+//        btnStatus.setOnClickListener(onChangeMode);
 //        RadioGroup radGroup = view.findViewById(R.id.radGroup);
 //        radGroup.check(R.id.radSearchLabel);
 
@@ -122,6 +125,12 @@ public class DrugIn_Fragment extends Fragment {
 
         return view;
     }
+    private View.OnClickListener onChangeMode = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(v.getContext(), CFragment.class));
+        }
+    };
 
     private View.OnClickListener onSearch = new View.OnClickListener() {
         @Override
@@ -635,7 +644,7 @@ public class DrugIn_Fragment extends Fragment {
                             @Override
                             public void run() {
                                 makeData(searchData);
-                                Toast.makeText(getContext(), "message", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getContext(), "message", Toast.LENGTH_SHORT).show();
                             }
                         });
                     } catch (JSONException e) {

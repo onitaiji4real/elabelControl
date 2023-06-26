@@ -10,8 +10,8 @@ public class GlobalData extends Application {
     public String Server = "http://192.168.5.77:8080/";
     public String AIMSServer = "http://192.168.5.137:9003/";
 
-    //public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
-    public String PHP_SERVER = "http://192.168.5.41/pda_submit.php?";
+    public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
+    //public String PHP_SERVER = "http://192.168.5.41/pda_submit.php?";
     private String LoginUserID;
     private String LoginUserName;
     private List<User> users;

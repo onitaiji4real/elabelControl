@@ -42,20 +42,20 @@
 
     <Button
         android:id="@+id/btnSubmit"
-        android:layout_width="130dp"
+        android:layout_width="200dp"
         android:layout_height="50dp"
         android:layout_marginBottom="16dp"
         android:text="調撥"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.811"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnLight"
-        android:layout_width="130dp"
-        android:layout_height="50dp"
+        android:layout_width="0.1dp"
+        android:layout_height="0.1dp"
         android:layout_marginBottom="16dp"
         android:text="亮燈"
         android:textSize="20sp"

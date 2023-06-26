@@ -72,7 +72,7 @@ public class AFragment extends Fragment {
 
         //設置RecycleView
         mRecyclerView = view.findViewById(R.id.recyclerView);
-
+        globaldata = (GlobalData) getActivity().getApplicationContext();
         //btnClearData.setOnClickListener(onClearData);
 
         //btnUpdateData.setOnClickListener(onUpdateData);
@@ -101,7 +101,7 @@ public class AFragment extends Fragment {
     };
 
     private void getInventory_record() {
-        String url = "http://192.168.5.41/pda_submit.php?";
+        String url = globaldata.getPHP_SERVER();
         String option = "GET_Inventory_Record";
 
         try {

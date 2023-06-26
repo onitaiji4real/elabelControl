@@ -7,114 +7,106 @@
     tools:context=".MainActivity">
 
 
-    <Button
-        android:id="@+id/btnLabelSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="搜尋"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radGroup" />
-
-    <Button
-        android:id="@+id/btnStatus"
-        android:layout_width="130dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="@color/green"
-        android:text="藥物條碼搜尋中"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/drugQty14"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/drugQty14"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="12dp"
-        android:text="目前狀態:"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.168"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/edtDrugLabel"
-        android:layout_width="375dp"
+        android:layout_width="280dp"
         android:layout_height="54dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="52dp"
         android:ems="10"
-        android:hint="請掃描藥品條碼"
-        android:inputType="phone"
+        android:hint="請掃描條碼或輸入關鍵字"
+        android:inputType="text"
         android:textAlignment="center"
         android:textColor="#3F51B5"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSearchDrugCode"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
+        android:text="藥品代碼"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnStatus2"
+        android:layout_width="110dp"
+        android:layout_height="36dp"
+        android:backgroundTint="@color/zxing_possible_result_points"
+        android:text="請搜尋藥品"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.574"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.01" />
+
+    <Button
+        android:id="@+id/btnSearchDrugEnglish"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
+        android:text="英文名稱"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <RadioGroup
-        android:id="@+id/radGroup"
-        android:layout_width="0dp"
-        android:layout_height="54dp"
-        android:layout_marginTop="116dp"
-        android:orientation="horizontal"
-        android:paddingStart="3dp"
-        android:paddingEnd="3dp"
+    <Button
+        android:id="@+id/btnLabelSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="56dp"
+        android:text="條碼搜尋"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <RadioButton
-            android:id="@+id/radSearchLabel"
-            android:layout_width="0dp"
-            android:layout_height="54dp"
-            android:layout_weight="1"
-            android:text="藥物條碼" />
-
-        <RadioButton
-            android:id="@+id/radSearchCode"
-            android:layout_width="0dp"
-            android:layout_height="54dp"
-            android:layout_weight="1"
-            android:text="藥物代碼" />
-
-        <RadioButton
-            android:id="@+id/radSearchEnglish"
-            android:layout_width="0dp"
-            android:layout_height="54dp"
-            android:layout_weight="1"
-            android:text="英文名稱" />
-
-        <RadioButton
-            android:id="@+id/radSearchName"
-            android:layout_width="0dp"
-            android:layout_height="54dp"
-            android:layout_weight="1"
-            android:text="中文名稱" />
-
-    </RadioGroup>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchList"
         android:layout_width="340dp"
         android:layout_height="450dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="148dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLabelSearch" />
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/btnSearchDrugName"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="104dp"
+        android:text="中文名稱"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.949"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/drugQty6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="目前狀態:"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.158"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.022" />
 </androidx.constraintlayout.widget.ConstraintLayout>

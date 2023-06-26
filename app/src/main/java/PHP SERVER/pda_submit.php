@@ -73,7 +73,7 @@ if (isset($_GET["DBoption"])) {
             echo "<br>";
 
             if ($AdjQty > 0) {
-                echo "盤盈<br>";
+                //echo "盤盈<br>";
                 $remark_CodeID = "D"; // 藥品盤盈
                 // 寫入該筆盤點紀錄至 inventory 表內
                 $SQL = "INSERT INTO inventory 
@@ -96,9 +96,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventory table.<br>";
+                    //echo "Successfully inserted into inventory table.<br>";
                 } else {
-                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                    //echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 寫入盤點班次至 inventoryshift 表內
@@ -116,9 +116,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventoryshift table.<br>";
+                    //echo "Successfully inserted into inventoryshift table.<br>";
                 } else {
-                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                    //echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 依據盤點數量更新 drugstock 的 StockQty 值
@@ -129,9 +129,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully updated drugstock table.<br>";
+                    //echo "Successfully updated drugstock table.<br>";
                 } else {
-                    echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
+                    //echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
                 }
 
                 $record_SQL = "INSERT INTO drugadd
@@ -171,7 +171,7 @@ if (isset($_GET["DBoption"])) {
                     $ElabelNumber = $_GET["ElabelNumber"];
                 }
 
-                echo "盤虧<br>";
+                //echo "盤虧<br>";
                 $remark_CodeID = "H"; // 藥品盤虧
 
                 // 寫入該筆盤點紀錄至 inventory 表內
@@ -195,9 +195,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventory table.<br>";
+                    //echo "Successfully inserted into inventory table.<br>";
                 } else {
-                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                    //echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 寫入盤點班次至 inventoryshift 表內
@@ -215,9 +215,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully inserted into inventoryshift table.<br>";
+                    //echo "Successfully inserted into inventoryshift table.<br>";
                 } else {
-                    echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
+                    //echo "JJJError inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 依據盤點數量更新 drugstock 的 StockQty 值
@@ -228,9 +228,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    echo "Successfully updated drugstock table.<br>";
+                    //echo "Successfully updated drugstock table.<br>";
                 } else {
-                    echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
+                    //echo "Error updating drugstock table: " . mysqli_error($connection) . "<br>";
                 }
 
                 $record_SQL = "INSERT INTO drugpay

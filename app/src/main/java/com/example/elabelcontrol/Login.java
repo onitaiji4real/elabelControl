@@ -106,6 +106,7 @@ public class Login extends AppCompatActivity {
             String encodePassword = PasswordEncoder.encodePassword(edtPassword.getText().toString());
             Log.d("ENCODE PASSWORD", encodePassword);
             String url = globalData.getPHP_SERVER();
+
             try {
                 url += "DBoption=" + URLEncoder.encode("LOGIN", "UTF-8") + "&";
                 url += "Account=" + URLEncoder.encode(edtAccount.getText().toString(), "UTF-8") + "&";

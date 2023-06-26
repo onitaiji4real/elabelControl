@@ -201,14 +201,14 @@ public class BFragment extends Fragment {
             String sedtNumPill = edtNumPill.getText().toString();
 
 
-            String DBoption = "DBoption=INVENTORY";
+            String DBoption = "INVENTORY";
             String url = globaldata.getPHP_SERVER();
 
             try {
 //                url += URLEncoder.encode(DBoption,"UTF-8") + "&";
 
                 //InvDate從資料庫代入當前時間
-                url += "DBoption" + URLEncoder.encode(DBoption,"UTF-8")+"&";
+                url += "DBoption=" + URLEncoder.encode(DBoption,"UTF-8")+"&";
                 url += "ElabelNumber=" + URLEncoder.encode(sElabelNumber,"UTF-8") + "&";
                 url += "DrugCode=" + URLEncoder.encode(sDrugCode, "UTF-8") + "&";
                 url += "StoreID=" + URLEncoder.encode(sDrugStore, "UTF-8") + "&";
