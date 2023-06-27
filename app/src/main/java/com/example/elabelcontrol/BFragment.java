@@ -135,6 +135,8 @@ public class BFragment extends Fragment {
 //        edtNumBox = view.findViewById(R.id.edtInQty);
 //        edtNumRow = view.findViewById(R.id.edtNumRow);
         edtNumPill = view.findViewById(R.id.edtNumPill);
+        edtNumBox = view.findViewById(R.id.edtNumBox);
+        edtNumRow = view.findViewById(R.id.edtNumRow);
 
         txtInventoryQty = view.findViewById(R.id.txtInventoryQty);
 
@@ -178,6 +180,7 @@ public class BFragment extends Fragment {
             //edtNumBox.setText("");
             txtInventoryQty.setText("0");
             edtDrugCode.setText("");
+
         }
     };
 
@@ -199,7 +202,8 @@ public class BFragment extends Fragment {
             String sDrugEnglish = edtDrugEnglish.getText().toString();
             String sLotNumber = txtLotNumber.getText().toString();
             String sedtNumPill = edtNumPill.getText().toString();
-
+            String numRow = edtNumRow.getText().toString();
+            String numBox = edtNumBox.getText().toString();
 
             String DBoption = "INVENTORY";
             String url = globaldata.getPHP_SERVER();
@@ -221,7 +225,10 @@ public class BFragment extends Fragment {
                 //Shift從PHP固定填1
                 //InvTime從資料庫代入
                 url += "UserId=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
-                url += "User=" + URLEncoder.encode(globaldata.getLoginUserName(), "UTF-8");
+                url += "User=" + URLEncoder.encode(globaldata.getLoginUserName(), "UTF-8")+"&";
+
+                url += "numRow=" + URLEncoder.encode(numRow,"UTF-8")+"&";
+                url += "numBox=" + URLEncoder.encode(numBox,"UTF-8")+"&";
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();

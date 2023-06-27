@@ -43,7 +43,20 @@ if (isset($_GET["DBoption"])) {
             isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
             $LotNumber = $_GET["LotNumber"];
             $InventoryQty = $_GET["InventoryQty"];
-            $StockQty = getStockQty($LotNumber, $connection); // 取得當前庫存
+
+            if (isset($_GET["numRow"]) && isset($_GET["numBox"])) {
+                $dataArray["numRow"] = $_GET["numRow"];
+                $dataArray["numBox"] = $_GET["numBox"];
+
+                $data = countTotalNumber($dataArray, $connection);
+                $countNum = $dataArray["numBox"] * $data["NumBox"];
+                $countNum += $dataArray["numRow"] * $data["NumRow"];
+
+                $InventoryQty += $countNum;
+
+            }
+
+            $StockQty = getStockQty($dataArray,$LotNumber, $connection); // 取得當前庫存
 
             $AdjQty = $InventoryQty - $StockQty; // 計算盤營盤虧量 會有負數
             $PayQty = abs($InventoryQty - $StockQty); //只會有正數
@@ -64,6 +77,12 @@ if (isset($_GET["DBoption"])) {
                 "User" => $_GET["User"],
                 "UserID" => $_GET["UserId"],
             );
+
+
+
+            // echo "這是SWITCH DATA".$data["NumBox"];
+            // echo "這是SWITCH DATA".$data["NumRow"];
+            //echo "這是計算後的總量".$countNum;
 
             $InvDateTime = $dataArray["InvDate"] . " " . $dataArray["InvTime"];
 
@@ -107,10 +126,10 @@ if (isset($_GET["DBoption"])) {
                         SELECT
                                     '" . $dataArray["StoreID"] . "',
                                     '" . $dataArray["InvDate"] . "',
-                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    (SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
                                     '" . $dataArray["AreaNo"] . "',
                                     '" . $dataArray["InvTime"] . "',
-                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
                                     '" . $dataArray["StoreID"] . "',
                                     ''";
                 $result = mysqli_query($connection, $SQL);
@@ -123,8 +142,12 @@ if (isset($_GET["DBoption"])) {
 
                 // 依據盤點數量更新 drugstock 的 StockQty 值
                 $SQL = "UPDATE drugstock 
-                            SET StockQty = '" . $dataArray["InventoryQty"] . "'
-                            WHERE LotNumber = '" . $dataArray["LotNumber"] . "'";
+                SET StockQty = '" . $dataArray["InventoryQty"] . "'
+                WHERE LotNumber = '" . $dataArray["LotNumber"] . "'
+                AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                AND StoreID = '" . $dataArray["StoreID"] . "'
+                AND AreaNo = '" . $dataArray["AreaNo"] . "'
+                AND BlockNo = '" . $dataArray["BlockNo"] . "'";
 
                 $result = mysqli_query($connection, $SQL);
 
@@ -150,7 +173,7 @@ if (isset($_GET["DBoption"])) {
                             druginfo.MakerName,
                             (SELECT CodeDesc FROM codetable WHERE CodeID = '$remark_CodeID'),
                             '" . $dataArray["UserID"] . "', 
-                            (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                            (SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), 
                             druginfo.DrugName, 
                             druginfo.DrugEnglish, 
                             drugstock.EffectDate,
@@ -163,7 +186,7 @@ if (isset($_GET["DBoption"])) {
                             druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                             AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
-                drugOUT_record($dataArray, $record_SQL, $connection);
+                drugIN_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
             } else if ($AdjQty < 0) {
 
@@ -206,10 +229,10 @@ if (isset($_GET["DBoption"])) {
                         SELECT
                                     '" . $dataArray["StoreID"] . "',
                                     '" . $dataArray["InvDate"] . "',
-                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    (SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
                                     '" . $dataArray["AreaNo"] . "',
                                     '" . $dataArray["InvTime"] . "',
-                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
                                     '" . $dataArray["StoreID"] . "',
                                     ''";
                 $result = mysqli_query($connection, $SQL);
@@ -223,7 +246,11 @@ if (isset($_GET["DBoption"])) {
                 // 依據盤點數量更新 drugstock 的 StockQty 值
                 $SQL = "UPDATE drugstock 
                             SET StockQty = '" . $dataArray["InventoryQty"] . "'
-                            WHERE LotNumber = '" . $dataArray["LotNumber"] . "'";
+                            WHERE LotNumber = '" . $dataArray["LotNumber"] . "'
+                            AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                            AND StoreID = '" . $dataArray["StoreID"] . "'
+                            AND AreaNo = '" . $dataArray["AreaNo"] . "'
+                            AND BlockNo = '" . $dataArray["BlockNo"] . "'";
 
                 $result = mysqli_query($connection, $SQL);
 
@@ -290,9 +317,9 @@ if (isset($_GET["DBoption"])) {
                 $result = mysqli_query($connection, $SQL);
 
                 if ($result) {
-                    //echo "Successfully inserted into inventory table.<br>";
+                    echo "Successfully inserted into inventory table.<br>";
                 } else {
-                    //echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
+                    echo "HHError inserting into inventory table: " . mysqli_error($connection) . "<br>";
                 }
 
                 // 寫入盤點班次至 inventoryshift 表內
@@ -301,10 +328,10 @@ if (isset($_GET["DBoption"])) {
                         SELECT
                                     '" . $dataArray["StoreID"] . "',
                                     '" . $dataArray["InvDate"] . "',
-                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
+                                    (SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'),
                                     '" . $dataArray["AreaNo"] . "',
                                     '" . $dataArray["InvTime"] . "',
-                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
+                                    CONCAT((SELECT IFNULL(MAX(ShiftNo) + 0, 1) FROM (SELECT ShiftNo, InvDate, LotNumber FROM inventory) AS temp WHERE InvDate = '" . $dataArray["InvDate"] . "' AND LotNumber = '" . $dataArray["LotNumber"] . "'), ' - " . $dataArray["InvTime"] . " " . $dataArray["UserID"] . "'),
                                     '" . $dataArray["StoreID"] . "',
                                     ''";
                 $result = mysqli_query($connection, $SQL);
@@ -395,7 +422,7 @@ if (isset($_GET["DBoption"])) {
                                     druginfo.MakerName,
                                     CONCAT('" . $dataArray["ReMark_CodeID"] . "', '-', (SELECT CodeDesc FROM codetable WHERE CodeID = '" . $dataArray["ReMark_CodeID"] . "'), ' 至 " . $dataArray["Remark"] . "'),
                                     '" . $dataArray["UserID"] . "', 
-                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM drugpay AS temp WHERE LotNumber = '".$dataArray["LotNumber"]."'), 
+                                    (SELECT IFNULL(MAX(ShiftNo) + 1, 1) FROM drugpay AS temp WHERE LotNumber = '" . $dataArray["LotNumber"] . "'), 
                                     druginfo.DrugName, 
                                     druginfo.DrugEnglish, 
                                     drugstock.EffectDate,
@@ -530,6 +557,31 @@ if (isset($_GET["DBoption"])) {
             }
     }
 }
+
+
+function countTotalNumber($dataArray, $connection)
+{
+
+    $SQL = "SELECT NumBox,NumRow FROM druginfo WHERE DrugCode = '" . $dataArray["DrugCode"] . "'";
+
+    // 执行 SQL 查询
+    $result = mysqli_query($connection, $SQL);
+
+    // 检查是否有结果
+    if ($result) {
+        // 获取结果
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data["NumRow"] = $row["NumRow"];
+            $data["NumBox"] = $row["NumBox"];
+            // echo $data["NumBox"].$data["NumRow"];
+        }
+    } else {
+        echo "druginfo 無結果";
+    }
+
+    return $data;
+}
+
 
 
 function getInsertOrUpdateSQL()
@@ -776,10 +828,10 @@ function getDataArray()
         "Search_KEY" => $_GET["Search_KEY"]
     );
 
-        // 檢查 Search_KEY 是否存在
-        if (isset($_GET["Search_KEY"])) {
-            $dataArray["Search_KEY"] = $_GET["Search_KEY"];
-        }
+    // 檢查 Search_KEY 是否存在
+    if (isset($_GET["Search_KEY"])) {
+        $dataArray["Search_KEY"] = $_GET["Search_KEY"];
+    }
 }
 function drugOUT_record($dataArray, $record_SQL, $connection)
 {
@@ -907,11 +959,22 @@ function getJSON($ElabelNumber, $connection)
         echo $json . "<br>";
     }
 }
-function getStockQty($LotNumber, $connection)
+function getStockQty($dataArray, $LotNumber, $connection)
 {
-    $sql = "SELECT StockQty FROM drugstock WHERE LotNumber = ?";
+    $sql = "SELECT StockQty FROM drugstock WHERE LotNumber = ?
+            AND DrugCode = ?
+            AND AreaNo = ?
+            AND BlockNo =?
+            AND StoreID = ?";
     $stmt = $connection->prepare($sql);
-    $stmt->bind_param("s", $LotNumber);
+    $stmt->bind_param(
+        "sssss",
+        $LotNumber,
+        $dataArray["DrugCode"],
+        $dataArray["AreaNo"],
+        $dataArray["BlockNo"],
+        $dataArray["StoreID"]
+    );
 
     $stmt->execute();
 
@@ -972,24 +1035,36 @@ function update_elabeldrug($ElabelNumber, $dataArray, $connection)
                     DrugName3 = (
                                     SELECT EffectDate 
                                     FROM drugstock 
-                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "'), 
+                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "'
+                                    AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                                    AND StoreID = '" . $dataArray["StoreID"] . "'
+                                    AND AreaNo = '" . $dataArray["AreaNo"] . "'
+                                    AND BlockNo = '" . $dataArray["BlockNo"] . "'), 
                     DrugEnglish3 = (SELECT StockQty
                                     FROM drugstock
-                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "')
+                                    WHERE LotNumber = '" . $dataArray["LotNumber"] . "'
+                                    AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                                    AND StoreID = '" . $dataArray["StoreID"] . "'
+                                    AND AreaNo = '" . $dataArray["AreaNo"] . "'
+                                    AND BlockNo = '" . $dataArray["BlockNo"] . "')
             WHERE 
-                    ElabelNumber = '$ElabelNumber' AND 
-                    DrugCode = '" . $dataArray["DrugCode"] . "'";
+                    ElabelNumber = '$ElabelNumber' 
+                    AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                    AND StoreID = '" . $dataArray["StoreID"] . "'
+                    AND AreaNo = '" . $dataArray["AreaNo"] . "'
+                    AND BlockNo = '" . $dataArray["BlockNo"] . "'
+                    ";
 
     $result = mysqli_query($connection, $SQL);
 
     if ($result) {
         if (mysqli_affected_rows($connection) > 0) {
-            //echo "Successfully Update elabeldrug table.<br>";
+            echo "Successfully Update elabeldrug table.<br>";
         } else {
-            //echo "No rows updated in elabeldrug table.<br>";
+            echo "No rows updated in elabeldrug table.<br>";
         }
     } else {
-        //echo "Error Update elabeldrug table: " . mysqli_error($connection) . "<br>";
+        echo "Error Update elabeldrug table: " . mysqli_error($connection) . "<br>";
     }
 }
 

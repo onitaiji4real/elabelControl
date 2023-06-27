@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -78,13 +80,24 @@ public class Login extends AppCompatActivity {
     private TextView edtAccount, edtPassword, edtScannedPassword;
     private GlobalData globalData;
     private ProgressDialog progressDialog;
+//    TelephonyManager mTelManager;
+//    String imei;
+//    private static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+
         requestWriteExternalStoragePermission();
+//        requestREAD_PHONE_STATE();
+//        // 取得 IMEI
+//        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+//        String imei = telephonyManager.getImei();
+//        Log.d("IMEI",imei);
 
         initializeViews();
         btnLogin.setOnClickListener(onLogin);
@@ -98,6 +111,8 @@ public class Login extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 
     private View.OnClickListener onLogin = new View.OnClickListener() {
@@ -205,7 +220,7 @@ public class Login extends AppCompatActivity {
                                 public void run() {
                                     globalData.setLoginUserID(edtAccount.getText().toString());
                                     Log.d("TAG", globalData.getLoginUserID());
-                                    globalData.setLoginUserName(globalData.getLoginUserID());
+                                    globalData.setLoginUserName(globalData.getLoginUserName());
                                     Log.d("TAG", globalData.getLoginUserName());
                                     startActivity(new Intent(Login.this, FragmentActivity.class));
                                     Toast.makeText(Login.this, message, Toast.LENGTH_LONG).show();
@@ -231,6 +246,16 @@ public class Login extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+//    private void requestREAD_PHONE_STATE(){
+//
+//        if ( ContextCompat.checkSelfPermission(Login.this,
+//                Manifest.permission.READ_PHONE_STATE ) != PackageManager.PERMISSION_GRANTED){
+//            ActivityCompat.requestPermissions(Login.this,
+//                    new String[]{Manifest.permission.READ_PHONE_STATE},
+//                    PERMISSIONS_REQUEST_READ_PHONE_STATE);
+//        }
+//    }
 
     private void requestWriteExternalStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

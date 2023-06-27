@@ -1,8 +1,10 @@
 package com.example.elabelcontrol;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -16,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,8 +79,9 @@ public class DrugIn_Fragment extends Fragment {
         edtDrugLabel = view.findViewById(R.id.edtDrugLabel);
         edtDrugLabel.requestFocus();
 
-//        btnStatus = view.findViewById(R.id.btnStatus);
-//        btnStatus.setOnClickListener(onChangeMode);
+        btnStatus = view.findViewById(R.id.btnStatus);
+        btnStatus.setOnClickListener(onChangeMode);
+
 //        RadioGroup radGroup = view.findViewById(R.id.radGroup);
 //        radGroup.check(R.id.radSearchLabel);
 
@@ -117,6 +122,8 @@ public class DrugIn_Fragment extends Fragment {
 
         myListAdapter = new MyListAdapter(arrayList);
         mRecyclerView.setAdapter(myListAdapter);
+
+
 //      建立一個預設的ArrayList來儲存預設的資料
 //        HashMap<String, String> testData = new HashMap<>();
 //        testData.put("DrugStore", "目前無搜尋結果");
@@ -128,7 +135,12 @@ public class DrugIn_Fragment extends Fragment {
     private View.OnClickListener onChangeMode = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(v.getContext(), CFragment.class));
+
+            Intent intent = new Intent(getActivity(), FragmentActivity.class);
+            intent.putExtra("fragment", CFragment.class.getName());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+
         }
     };
 
