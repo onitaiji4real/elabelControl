@@ -12,6 +12,10 @@ public class GlobalData extends Application {
 
     public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
     //public String PHP_SERVER = "http://192.168.5.41/pda_submit.php?";
+
+    public String AIMS_SERVER = "192.168.5.130";
+    public String AIMS_BLINK_URL = String.format("http://%s:9003/labels/contents/led", AIMS_SERVER);
+
     private String LoginUserID;
     private String LoginUserName;
     private List<User> users;
@@ -41,4 +45,6 @@ public class GlobalData extends Application {
         return Drugstores;
     }
     public String getPHP_SERVER(){return PHP_SERVER;}
+
+    public String getAIMS_BLINK_URL(){return AIMS_BLINK_URL;}
 }

@@ -143,12 +143,13 @@ public class DFragment extends Fragment {
                         android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setSelection(1, false);
+        spinner.setSelection(1);
+
 
         //選擇調撥原因的IDs
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String[] outCodeIds = getResources().getStringArray(R.array.OutCodeIDs);
                 selectedId = outCodeIds[position];
                 Log.d("SELECTID", selectedId);
@@ -418,6 +419,7 @@ public class DFragment extends Fragment {
             OnLight(v, labelCode,"進行支出！"); //亮燈
             String url = globaldata.getPHP_SERVER();
             String CodeID = selectedId;
+            Log.d("ID=",CodeID);
             try {
                 //exportDataToCSV();
 
@@ -477,8 +479,9 @@ public class DFragment extends Fragment {
         MediaType mediaType = MediaType.parse("application/json");
         String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
         RequestBody body = RequestBody.create(mediaType, jsonString);
+
         Request request = new Request.Builder()
-                .url("http://192.168.5.137:9003/labels/contents/led")
+                .url(globaldata.getAIMS_BLINK_URL())
                 .method("PUT", body)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "*/*")
