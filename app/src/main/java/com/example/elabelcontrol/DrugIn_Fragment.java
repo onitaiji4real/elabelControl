@@ -326,7 +326,7 @@ public class DrugIn_Fragment extends Fragment {
                     String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
                     RequestBody body = RequestBody.create(mediaType, jsonString);
                     Request request = new Request.Builder()
-                            .url("http://192.168.5.137:9003/labels/contents/led")
+                            .url(globaldata.getAIMS_BLINK_URL())
                             .method("PUT", body)
                             .addHeader("Content-Type", "application/json")
                             .addHeader("Accept", "*/*")

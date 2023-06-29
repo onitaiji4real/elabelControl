@@ -146,7 +146,7 @@ public class Login extends AppCompatActivity {
                                         globalData.setLoginUserID(edtAccount.getText().toString());
                                         Log.d("TAG", globalData.getLoginUserID());
                                         globalData.setLoginUserName(globalData.getLoginUserID());
-                                        Log.d("TAG", globalData.getLoginUserName());
+                                        //Log.d("TAG", globalData.getLoginUserName());
                                         startActivity(new Intent(Login.this, FragmentActivity.class));
                                         Toast.makeText(Login.this, message, Toast.LENGTH_LONG).show();
                                     }
