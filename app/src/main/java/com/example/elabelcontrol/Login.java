@@ -172,7 +172,7 @@ public class Login extends AppCompatActivity {
             }
         }
     };
-
+//掃員工證條碼進入 設定為長度等於11才執行
     private void accountAfterScanListener() {
         edtAccount.addTextChangedListener(new TextWatcher() {
             @Override
@@ -193,7 +193,7 @@ public class Login extends AppCompatActivity {
             }
         });
     }
-
+//掃描登入的驗證
     public void scanLogin(){
         String account = edtAccount.getText().toString();
         String url = globalData.getPHP_SERVER();
@@ -221,7 +221,7 @@ public class Login extends AppCompatActivity {
                                     globalData.setLoginUserID(edtAccount.getText().toString());
                                     Log.d("TAG", globalData.getLoginUserID());
                                     globalData.setLoginUserName(globalData.getLoginUserName());
-                                    Log.d("TAG", globalData.getLoginUserName());
+                                    //Log.d("TAG", globalData.getLoginUserName());
                                     startActivity(new Intent(Login.this, FragmentActivity.class));
                                     Toast.makeText(Login.this, message, Toast.LENGTH_LONG).show();
                                 }
@@ -247,16 +247,8 @@ public class Login extends AppCompatActivity {
         }
     }
 
-//    private void requestREAD_PHONE_STATE(){
-//
-//        if ( ContextCompat.checkSelfPermission(Login.this,
-//                Manifest.permission.READ_PHONE_STATE ) != PackageManager.PERMISSION_GRANTED){
-//            ActivityCompat.requestPermissions(Login.this,
-//                    new String[]{Manifest.permission.READ_PHONE_STATE},
-//                    PERMISSIONS_REQUEST_READ_PHONE_STATE);
-//        }
-//    }
 
+//詢問裝置的讀取存取裝置權限
     private void requestWriteExternalStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
