@@ -164,6 +164,7 @@ public class EFragment extends Fragment {
             private EditText edtInQty;
             private String url = "";
             private String selectedId = "";  // Add this variable
+            private String BLINK_URL = "";
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -220,6 +221,7 @@ public class EFragment extends Fragment {
 
             HashMap<String, String> item = arrayList.get(position);
             holder.url = globaldata.getPHP_SERVER();
+            holder.BLINK_URL =  globaldata.getPHP_SERVER();
             String CodeID = holder.selectedId;
             String elabelnumber = item.get("elabelNumber");
             String drugStore_SA = item.get("DrugStore_SA");
@@ -267,7 +269,11 @@ public class EFragment extends Fragment {
                 holder.url += "UserID=" + URLEncoder.encode(globaldata.getLoginUserID(), "UTF-8") + "&";
 
 
+                holder.BLINK_URL += "DBoption="+URLEncoder.encode("ITEM_BLINK","UTF-8")+"&";
+                holder.BLINK_URL += "ElabelNumber=" + URLEncoder.encode(elabelnumber, "UTF-8") + "&";
+
                 Log.d("ITEM的URL", holder.url);
+                Log.d("BLINK的URL",holder.BLINK_URL);
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -297,35 +303,22 @@ public class EFragment extends Fragment {
             holder.btnLight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MediaType mediaType = MediaType.parse("application/json");
-                    OkHttpClient client = new OkHttpClient().newBuilder().build();
-                    String labelCode = item.get("elabelNumber");
-                    String jsonString = "[\n{\n\"color\": \"CYAN\",\n\"duration\": \"1\",\n\"labelCode\": \"" + labelCode + "\"\n}\n]";
-                    RequestBody body = RequestBody.create(mediaType, jsonString);
-                    Request request = new Request.Builder()
-                            .url(globaldata.getAIMS_BLINK_URL())
-                            .method("PUT", body)
-                            .addHeader("Content-Type", "application/json")
-                            .addHeader("Accept", "*/*")
-                            .build();
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            e.printStackTrace();
-                        }
 
+
+
+
+                    send_BLINK_GET(holder.BLINK_URL, new DrugIn_Fragment.VolleyCallback() {
                         @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            if (!response.isSuccessful()) {
-                                throw new IOException("Unexpected code " + response);
-                            } else {
-                                v.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(v.getContext(), drugStore_SA + " 進行亮燈", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
+                        public void onSuccess(JSONArray response) {
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Display the Toast message
+                                    Toast.makeText(v.getContext(), drugStore_SA +"進行亮燈", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
                         }
                     });
                 }
@@ -672,6 +665,47 @@ public class EFragment extends Fragment {
         /**設置傳送需求*/
         Request request = new Request.Builder()
                 .url(Url)
+//                .header("Cookie","")//有Cookie需求的話則可用此發送
+//                .addHeader("","")//如果API有需要header的則可使用此發送
+                .build();
+        /**設置回傳*/
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                /**如果傳送過程有發生錯誤*/
+                //Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                /**取得回傳*/
+                try {
+                    String responseData = response.body().string();
+                    JSONArray jsonArray;
+
+                    try {
+                        jsonArray = new JSONArray(responseData);
+                        callback.onSuccess(jsonArray);
+                    } catch (JSONException e) {
+                        Log.e("TAG", "Invalid JSON response: " + responseData);
+                        e.printStackTrace();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    public void send_BLINK_GET(String BLINK_URL, final DrugIn_Fragment.VolleyCallback callback) {
+        /**建立連線*/
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .build();
+        /**設置傳送需求*/
+        Request request = new Request.Builder()
+                .url(BLINK_URL)
 //                .header("Cookie","")//有Cookie需求的話則可用此發送
 //                .addHeader("","")//如果API有需要header的則可使用此發送
                 .build();

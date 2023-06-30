@@ -10,10 +10,11 @@ public class GlobalData extends Application {
     public String Server = "http://192.168.5.77:8080/";
     public String AIMSServer = "http://192.168.5.137:9003/";
 
-    public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
+    //public String PHP_SERVER = "http://10.0.0.11:8080/pda_submit.php?";
     //public String PHP_SERVER = "http://192.168.5.41/pda_submit.php?";
+    public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
 
-    public String AIMS_SERVER = "192.168.5.130";
+    public String AIMS_SERVER = "192.168.219.100";
     public String AIMS_BLINK_URL = String.format("http://%s:9003/labels/contents/led", AIMS_SERVER);
 
     private String LoginUserID;

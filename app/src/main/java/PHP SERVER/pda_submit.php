@@ -3,6 +3,7 @@ $host = '192.168.5.42';
 $name = 'root';
 $pwd = 'myt855myt855';
 $db = 'baiguo_demo';
+$aims_host = '192.168.219.100';
 date_default_timezone_set('Asia/Taipei');
 //header('Content-Type: application/json; charset=UTF-8');
 
@@ -201,6 +202,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugIN_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else if ($AdjQty < 0) {
 
                 if (isset($_GET["ElabelNumber"])) {
@@ -304,6 +306,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else {
 
                 isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
@@ -355,6 +358,7 @@ if (isset($_GET["DBoption"])) {
                     //echo "Error inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             }
 
 
@@ -373,6 +377,7 @@ if (isset($_GET["DBoption"])) {
                 $dataArray = getDataArray();
                 //$remark_CodeID = "B";
                 drugIN($connection, $dataArray, $ElabelNumber);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
 
                 // $remark_CodeID = "B";
 
@@ -454,6 +459,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
                 break;
             }
 
@@ -464,6 +470,10 @@ if (isset($_GET["DBoption"])) {
                 break;
             }
         case "Search_BY_Drug_Label": {
+
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
                 $dataArray = array(
                     "DrugLabel" => $_GET["DrugLabel"]
                 );
@@ -472,18 +482,27 @@ if (isset($_GET["DBoption"])) {
                 break;
             }
         case "Search_BY_DrugCode": {
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
                 $dataArray = getDataArray();
                 get_Store_with_DrugCode($dataArray, $connection);
                 break;
             }
 
         case "Search_BY_DrugEnglish": {
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
                 $dataArray = getDataArray();
                 get_Store_with_DrugEnlgish($dataArray, $connection);
                 break;
             }
 
         case "Search_BY_DrugName": {
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
                 $dataArray = getDataArray();
                 get_Store_with_DrugName($dataArray, $connection);
                 break;
@@ -572,6 +591,52 @@ if (isset($_GET["DBoption"])) {
                 echo $json;
                 break;
             }
+            case "ITEM_BLINK":{
+                if (isset($_GET["ElabelNumber"])) {
+                    $ElabelNumber = $_GET["ElabelNumber"];
+                }
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+                
+                break;
+            }
+    }
+}
+//BlinkElabel("CYAN","1","05DBCD6FB69F",$aims_host);
+function blinkElabel($color, $duration, $labelCode, $aimsHost)
+{
+    $url = "http://{$aimsHost}/labels/contents/led";
+    $data = array(
+        array(
+            'color' => $color,
+            'duration' => $duration,
+            'labelCode' => $labelCode,
+        ),
+    );
+    $headers = array(
+        'Content-Type: application/json',
+        'Accept: */*',
+    );
+    $postData = json_encode($data);
+
+    $ch = curl_init();
+    curl_setopt_array(
+        $ch,
+        array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_HTTPHEADER => $headers,
+        )
+    );
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode == 202) {
+        echo "執行成功！　執行結果為：${httpCode} 顏色：${color} 、持續時間：{$duration}0秒 >>> {$labelCode} 進行亮燈<br>";
+    } else {
+        echo "執行不成功！　執行結果為：${httpCode}、 >>> ${labelCode} 不進行亮燈<br>";
     }
 }
 
