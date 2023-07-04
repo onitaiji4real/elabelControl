@@ -1,15 +1,73 @@
 <?php
-$host = '192.168.5.42';
-$name = 'root';
-$pwd = 'myt855myt855';
-$db = 'baiguo_demo';
-$aims_host = '192.168.219.100';
 date_default_timezone_set('Asia/Taipei');
-//header('Content-Type: application/json; charset=UTF-8');
+$DB_CONNECT_STATUS = True;
+ini_set('default_charset', 'UTF-8'); //編碼
+ini_set('json_encode_options', JSON_UNESCAPED_UNICODE); //JSON 編碼
+$func = new func_Collect();
 
-// 建立与MySQL数据库的连接
-$connection = mysqli_connect($host, $name, $pwd, $db) or die("Error " . mysqli_error($connection));
-mysqli_set_charset($connection, "utf8");
+class func_Collect
+{
+    function my_json_encode($data)
+    {
+        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+}
+
+
+
+$DB_HOST = '192.168.5.42'; //DB位置
+$DB_USER = 'root'; //DB的登入帳號
+$DB_NAME = 'baiguo.v2'; //DB名稱
+$DB_PASSWORD = 'myt855myt855'; //DB密碼
+$AIMS_HOST = '192.168.5.130'; //AIMS 位置
+
+$SERVER_STATUS = true;
+
+try {
+    // 建立mysqli物件
+    $connection = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME);
+    $connection->set_charset("utf8");
+
+    // 檢查是否成功連線
+    if ($connection->connect_error) {
+
+        $DB_CONNECT_STATUS = False;
+        $MESSAGE = ("連線失敗: " . $connection->connect_error);
+
+    } else {
+        mysqli_set_charset($connection, "utf8");
+        $DB_CONNECT_STATUS = True;
+        $MESSAGE = "連線成功";
+
+    }
+
+} catch (Exception $e) {
+
+    $DB_CONNECT_STATUS = False;
+    $MESSAGE = "連線失敗: " . $e->getMessage();
+
+    
+    $connection = null;
+}
+
+//echo $func->my_json_encode($SERVER_RESPONSE);//打印是否連上該PHP伺服器 其實你看的到瀏覽器或終端機顯示的內容 就代表有連線了 只是這個是給裝置查詢狀態用的ㄏㄏ
+
+//echo $func->my_json_encode($RESPONSE);//打印是否成功連線
+
+$RESPONSE = [
+    'SERVER_STATUS' => $SERVER_STATUS,
+    'DB_CONNECT_STATUS' => $DB_CONNECT_STATUS,
+    'MESSAGE' => $MESSAGE
+];
+
+
+
+echo $func->my_json_encode($RESPONSE);
+
+
+
+
+
 //ini_set('display_errors', '0');
 
 // $AreaNo = isset($_GET["AreaNo"]) ? $_GET["AreaNo"] : null;
@@ -591,12 +649,12 @@ if (isset($_GET["DBoption"])) {
                 echo $json;
                 break;
             }
-            case "ITEM_BLINK":{
+        case "ITEM_BLINK": {
                 if (isset($_GET["ElabelNumber"])) {
                     $ElabelNumber = $_GET["ElabelNumber"];
                 }
                 BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
-                
+
                 break;
             }
     }
@@ -634,9 +692,9 @@ function blinkElabel($color, $duration, $labelCode, $aimsHost)
     curl_close($ch);
 
     if ($httpCode == 202) {
-        echo "執行成功！　執行結果為：${httpCode} 顏色：${color} 、持續時間：{$duration}0秒 >>> {$labelCode} 進行亮燈<br>";
+        //echo "執行成功！　執行結果為：${httpCode} 顏色：${color} 、持續時間：{$duration}0秒 >>> {$labelCode} 進行亮燈<br>";
     } else {
-        echo "執行不成功！　執行結果為：${httpCode}、 >>> ${labelCode} 不進行亮燈<br>";
+        //echo "執行不成功！　執行結果為：${httpCode}、 >>> ${labelCode} 不進行亮燈<br>";
     }
 }
 
@@ -1377,7 +1435,9 @@ function get_Store_with_DrugName($dataArray, $connection)
 
 
 
+if ($connection !== null) {
+    mysqli_close($connection);
+}
 
 
-mysqli_close($connection);
 //echo "結束 以下註解<br>"

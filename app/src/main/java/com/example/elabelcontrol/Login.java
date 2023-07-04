@@ -12,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import java.net.SocketTimeoutException;
+import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -29,6 +31,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.opencsv.CSVReader;
@@ -56,6 +60,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import data.GlobalData;
@@ -77,13 +82,12 @@ public class Login extends AppCompatActivity {
 
     private Button btnLogin, btnDownloadData, btnScan;
     private List<User> users;
-    private TextView edtAccount, edtPassword, edtScannedPassword;
+    private TextView edtAccount, edtPassword, edtScannedPassword, txtNetworkConnectStatus, txtDBConnectStatus;
     private GlobalData globalData;
     private ProgressDialog progressDialog;
 //    TelephonyManager mTelManager;
 //    String imei;
 //    private static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
-
 
 
     @Override
@@ -93,6 +97,9 @@ public class Login extends AppCompatActivity {
 
 
         requestWriteExternalStoragePermission();
+        txtNetworkConnectStatus = findViewById(R.id.txtNetworkConnectStatus);
+        txtDBConnectStatus = findViewById(R.id.txtDBConnectStatus);
+
 //        requestREAD_PHONE_STATE();
 //        // 取得 IMEI
 //        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -103,14 +110,13 @@ public class Login extends AppCompatActivity {
         btnLogin.setOnClickListener(onLogin);
         edtAccount.requestFocus();
 
-        globalData = (GlobalData) getApplicationContext();
+        //globalData = (GlobalData) getApplicationContext();
+        globalData = new GlobalData(this.getApplicationContext());
+
+
         accountAfterScanListener();
-        users = new ArrayList<>();
-        try {
-            openCSVUser();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        checkConnection();
 
 
     }
@@ -158,13 +164,13 @@ public class Login extends AppCompatActivity {
                                         Toast.makeText(Login.this, message, Toast.LENGTH_LONG).show();
                                     }
                                 });
-
                             }
-
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }
+                    public void onFailure(VolleyError error) {
+
                     }
                 });
             } catch (UnsupportedEncodingException e) {
@@ -172,7 +178,8 @@ public class Login extends AppCompatActivity {
             }
         }
     };
-//掃員工證條碼進入 設定為長度等於11才執行
+
+    //掃員工證條碼進入 設定為長度等於11才執行
     private void accountAfterScanListener() {
         edtAccount.addTextChangedListener(new TextWatcher() {
             @Override
@@ -187,14 +194,15 @@ public class Login extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(s.length() == 11){
+                if (s.length() == 11) {
                     scanLogin();
                 }
             }
         });
     }
-//掃描登入的驗證
-    public void scanLogin(){
+
+    //掃描登入的驗證
+    public void scanLogin() {
         String account = edtAccount.getText().toString();
         String url = globalData.getPHP_SERVER();
         try {
@@ -241,14 +249,108 @@ public class Login extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+                public void onFailure(VolleyError error) {
+
+                }
             });
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
+    public void setConnectStatus(boolean server, int textViewId) {
+        TextView textView = findViewById(textViewId);
 
-//詢問裝置的讀取存取裝置權限
+        if (server == true) {
+            textView.setText("已連線");
+            textView.setTextColor(Color.parseColor("#ff99cc00"));
+        } else {
+            textView.setText("未連線");
+            textView.setTextColor(Color.parseColor("#ffcc0000"));
+        }
+    }
+
+    public void checkConnection() {
+        boolean NetworkConnectStatus = globalData.getNetworkConnectStatus(); // 裝置連線狀態(WIFI)
+        Log.d("NetworkConnectStatus", String.valueOf(NetworkConnectStatus));
+
+        if (NetworkConnectStatus) {
+            String url = globalData.getPHP_SERVER();
+
+            sendGET(url, new VolleyCallback() {
+                @Override
+                public void onSuccess(JSONObject response) {
+                    try {
+                        if (response.has("SERVER_STATUS")) {
+                            boolean SERVER_STATUS = response.getBoolean("SERVER_STATUS");
+                            Log.d("SERVER_STATUS", "伺服器狀態: " + SERVER_STATUS);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
+                                }
+                            });
+                        }
+                        if (response.has("DB_CONNECT_STATUS")) {
+                            boolean DB_CONNECT_STATUS = response.getBoolean("DB_CONNECT_STATUS");
+                            String MESSAGE = response.getString("MESSAGE");
+                            Log.d("DB_CONNECT_STATUS", "資料庫狀態: " + DB_CONNECT_STATUS);
+                            Log.d("MESSAGE", "資料庫: " + MESSAGE);
+
+                            setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(DB_CONNECT_STATUS != true){
+                                        Toast.makeText(getApplicationContext(), "資料庫未正確連接，請洽詢開發商。", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                @Override
+                public void onFailure(VolleyError error) {
+                    Log.d("onFailure", "onFailure triggered with error: " + error.toString());
+                    if (error instanceof TimeoutError || error.getCause() instanceof SocketTimeoutException) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                boolean SERVER_STATUS = false;
+                                boolean DB_CONNECT_STATUS = false;
+                                String MESSAGE = "連線超時！";
+                                Log.d("SERVER_STATUS", "伺服器狀態: " + SERVER_STATUS);
+                                Log.d("DB_CONNECT_STATUS", "資料庫狀態: " + DB_CONNECT_STATUS);
+                                Log.d("MESSAGE", "資料庫: " + MESSAGE);
+
+                                setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
+                                setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
+                                Toast.makeText(getApplicationContext(), "連線超時，請檢查您的網路設定或者稍後再試。", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    } else {
+                        // other exception handling
+                        // ...
+                    }
+                }
+
+            });
+        } else {
+            boolean SERVER_STATUS = false;
+            boolean DB_CONNECT_STATUS = false;
+            setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
+            setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
+            Toast.makeText(getApplicationContext(), "請連接至無線網路！", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+
+    //詢問裝置的讀取存取裝置權限
     private void requestWriteExternalStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
@@ -396,8 +498,10 @@ public class Login extends AppCompatActivity {
 
     public void sendGET(String Url, final VolleyCallback callback) {
         /**建立連線*/
-        OkHttpClient client = new OkHttpClient().newBuilder()
+        OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .connectTimeout(7, TimeUnit.SECONDS)  // connect timeout
+                .readTimeout(7, TimeUnit.SECONDS)     // read timeout
                 .build();
         /**設置傳送需求*/
         Request request = new Request.Builder()
@@ -412,6 +516,8 @@ public class Login extends AppCompatActivity {
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 /**如果傳送過程有發生錯誤*/
                 //Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("TAG", "Error in get request: " + e.getMessage());
+                callback.onFailure(new VolleyError(e)); //
             }
 
             @Override
@@ -440,6 +546,7 @@ public class Login extends AppCompatActivity {
 
     public interface VolleyCallback {
         void onSuccess(JSONObject response);
+        void onFailure(VolleyError error);
     }
 
     public static class PasswordEncoder {

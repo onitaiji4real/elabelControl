@@ -3,6 +3,10 @@ package com.example.elabelcontrol;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -81,6 +85,12 @@ public class DrugIn_Fragment extends Fragment {
 
         btnStatus = view.findViewById(R.id.btnStatus);
         btnStatus.setOnClickListener(onChangeMode);
+
+
+
+
+
+
 
 //        RadioGroup radGroup = view.findViewById(R.id.radGroup);
 //        radGroup.check(R.id.radSearchLabel);
