@@ -12,33 +12,32 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+
 import java.net.SocketTimeoutException;
+
 import android.os.Handler;
-import android.os.Looper;
-import android.telephony.TelephonyManager;
+import android.os.HandlerThread;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
+
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+
 import com.opencsv.CSVReader;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,7 +48,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -57,11 +56,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+
 
 import data.GlobalData;
 import data.User;
@@ -72,10 +71,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 public class Login extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1000;
     private static final int PROGRESS_DIALOG_TYPE = 0;
@@ -85,6 +80,9 @@ public class Login extends AppCompatActivity {
     private TextView edtAccount, edtPassword, edtScannedPassword, txtNetworkConnectStatus, txtDBConnectStatus;
     private GlobalData globalData;
     private ProgressDialog progressDialog;
+    private checkConnection_Class checkConnectionClass; // 宣告成員變數
+
+
 //    TelephonyManager mTelManager;
 //    String imei;
 //    private static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
@@ -95,31 +93,30 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        globalData = new GlobalData(this.getApplicationContext());
 
         requestWriteExternalStoragePermission();
         txtNetworkConnectStatus = findViewById(R.id.txtNetworkConnectStatus);
         txtDBConnectStatus = findViewById(R.id.txtDBConnectStatus);
 
-//        requestREAD_PHONE_STATE();
-//        // 取得 IMEI
-//        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-//        String imei = telephonyManager.getImei();
-//        Log.d("IMEI",imei);
-
         initializeViews();
         btnLogin.setOnClickListener(onLogin);
         edtAccount.requestFocus();
 
-        //globalData = (GlobalData) getApplicationContext();
-        globalData = new GlobalData(this.getApplicationContext());
-
-
         accountAfterScanListener();
 
-        checkConnection();
-
+        // 建立實例並開始檢查連線
+        checkConnectionClass = new checkConnection_Class(); //初始化
+        checkConnectionClass.startRepeatingTask();
 
     }
+
+    @Override
+    protected void onDestroy() {// 在 Activity 被銷毀時停止任務以避免內存洩漏
+        super.onDestroy();
+        checkConnectionClass.startRepeatingTask();
+    }
+
 
     private View.OnClickListener onLogin = new View.OnClickListener() {
         @Override
@@ -169,6 +166,7 @@ public class Login extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
+
                     public void onFailure(VolleyError error) {
 
                     }
@@ -249,6 +247,7 @@ public class Login extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+
                 public void onFailure(VolleyError error) {
 
                 }
@@ -259,95 +258,131 @@ public class Login extends AppCompatActivity {
     }
 
     public void setConnectStatus(boolean server, int textViewId) {
-        TextView textView = findViewById(textViewId);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView textView = findViewById(textViewId);
 
-        if (server == true) {
-            textView.setText("已連線");
-            textView.setTextColor(Color.parseColor("#ff99cc00"));
-        } else {
-            textView.setText("未連線");
-            textView.setTextColor(Color.parseColor("#ffcc0000"));
-        }
+                if (server) {
+                    textView.setText("已連線");
+                    textView.setTextColor(Color.parseColor("#ff99cc00"));
+                } else {
+                    textView.setText("未連線");
+                    textView.setTextColor(Color.parseColor("#ffcc0000"));
+                }
+            }
+        });
     }
 
-    public void checkConnection() {
-        boolean NetworkConnectStatus = globalData.getNetworkConnectStatus(); // 裝置連線狀態(WIFI)
-        Log.d("NetworkConnectStatus", String.valueOf(NetworkConnectStatus));
 
-        if (NetworkConnectStatus) {
-            String url = globalData.getPHP_SERVER();
+    public class checkConnection_Class {
+        private int repeatCount = 0;
+        private HandlerThread handlerThread;
+        private Handler handler;
+        private boolean SERVER_STATUS;
+        private boolean DB_CONNECT_STATUS;
 
-            sendGET(url, new VolleyCallback() {
+        public checkConnection_Class() {
+            handlerThread = new HandlerThread("CheckConnection_Thread");
+            handlerThread.start();
+            handler = new Handler(handlerThread.getLooper());
+        }
+
+        private Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                checkConnection(); // 执行检查连接
+            }
+        };
+
+        public void startRepeatingTask() {
+            handler.post(runnable);
+        }
+
+        public void stopRepeatingTask() {
+            handler.removeCallbacks(runnable);
+            handlerThread.quitSafely();
+        }
+
+        public void checkConnection() {
+            boolean NetworkConnectStatus = globalData.getNetworkConnectStatus(); // Check if WiFi connect
+
+            // 更新UI状态，表示正在尝试连接
+            runOnUiThread(new Runnable() {
                 @Override
-                public void onSuccess(JSONObject response) {
-                    try {
-                        if (response.has("SERVER_STATUS")) {
-                            boolean SERVER_STATUS = response.getBoolean("SERVER_STATUS");
-                            Log.d("SERVER_STATUS", "伺服器狀態: " + SERVER_STATUS);
-
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
-                                }
-                            });
-                        }
-                        if (response.has("DB_CONNECT_STATUS")) {
-                            boolean DB_CONNECT_STATUS = response.getBoolean("DB_CONNECT_STATUS");
-                            String MESSAGE = response.getString("MESSAGE");
-                            Log.d("DB_CONNECT_STATUS", "資料庫狀態: " + DB_CONNECT_STATUS);
-                            Log.d("MESSAGE", "資料庫: " + MESSAGE);
-
-                            setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
-
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(DB_CONNECT_STATUS != true){
-                                        Toast.makeText(getApplicationContext(), "資料庫未正確連接，請洽詢開發商。", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                public void run() {
+                    TextView textViewNetwork = findViewById(R.id.txtNetworkConnectStatus);
+                    TextView textViewDB = findViewById(R.id.txtDBConnectStatus);
+                    textViewNetwork.setText("連線中...");
+                    textViewDB.setText("連線中...");
+                    textViewNetwork.setTextColor(Color.parseColor("#ff9a00")); // Set Connecting text
+                    textViewDB.setTextColor(Color.parseColor("#ff9a00")); // Set Connecting text
                 }
-                @Override
-                public void onFailure(VolleyError error) {
-                    Log.d("onFailure", "onFailure triggered with error: " + error.toString());
-                    if (error instanceof TimeoutError || error.getCause() instanceof SocketTimeoutException) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                boolean SERVER_STATUS = false;
-                                boolean DB_CONNECT_STATUS = false;
-                                String MESSAGE = "連線超時！";
-                                Log.d("SERVER_STATUS", "伺服器狀態: " + SERVER_STATUS);
-                                Log.d("DB_CONNECT_STATUS", "資料庫狀態: " + DB_CONNECT_STATUS);
-                                Log.d("MESSAGE", "資料庫: " + MESSAGE);
-
-                                setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
-                                setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
-                                Toast.makeText(getApplicationContext(), "連線超時，請檢查您的網路設定或者稍後再試。", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    } else {
-                        // other exception handling
-                        // ...
-                    }
-                }
-
             });
-        } else {
-            boolean SERVER_STATUS = false;
-            boolean DB_CONNECT_STATUS = false;
-            setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
-            setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
-            Toast.makeText(getApplicationContext(), "請連接至無線網路！", Toast.LENGTH_LONG).show();
+
+            if (NetworkConnectStatus) {
+                String url = globalData.getPHP_SERVER();
+
+                sendGET(url, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(JSONObject response) {
+                        try {
+                            if (response.has("SERVER_STATUS") && response.has("DB_CONNECT_STATUS")) { //Check Sever Status n DB Status
+
+                                SERVER_STATUS = response.getBoolean("SERVER_STATUS");
+                                DB_CONNECT_STATUS = response.getBoolean("DB_CONNECT_STATUS");
+
+                                String toastMessage;
+                                if (SERVER_STATUS && DB_CONNECT_STATUS) {
+                                    toastMessage = "成功連線。";
+                                    repeatCount = 3;
+                                    handler.removeCallbacks(runnable); //
+                                } else if (repeatCount < 3) {
+                                    toastMessage = "連線超時，10秒後系統將嘗試重新連線一次。";
+                                    repeatCount++;
+                                    handler.postDelayed(runnable, 10000); //Delay 10 sec.
+                                } else {
+                                    toastMessage = "連線失敗，請檢查網路設定或洽詢開發商。";
+                                }
+
+                                // 更新UI
+                                final String finalToastMessage = toastMessage;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
+                                        setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
+                                        Toast.makeText(getApplicationContext(), finalToastMessage, Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(VolleyError error) {
+                        SERVER_STATUS = false;
+                        DB_CONNECT_STATUS = false;
+                        handler.postDelayed(runnable, 10000); //Delay 10 sec.
+                    }
+                });
+            } else {
+                SERVER_STATUS = false;
+                DB_CONNECT_STATUS = false;
+                // 更新UI状态
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setConnectStatus(SERVER_STATUS, R.id.txtNetworkConnectStatus);
+                        setConnectStatus(DB_CONNECT_STATUS, R.id.txtDBConnectStatus);
+                        Toast.makeText(getApplicationContext(), "請連接至無線網路！", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
         }
     }
-
 
 
     //詢問裝置的讀取存取裝置權限
@@ -546,6 +581,7 @@ public class Login extends AppCompatActivity {
 
     public interface VolleyCallback {
         void onSuccess(JSONObject response);
+
         void onFailure(VolleyError error);
     }
 

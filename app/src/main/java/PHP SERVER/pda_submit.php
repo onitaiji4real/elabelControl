@@ -583,6 +583,8 @@ if (isset($_GET["DBoption"])) {
                         // 密碼正確
                         $response["success"] = true;
                         $response["message"] = $account . " 成功登入";
+
+                        
                     } else {
                         // 密碼錯誤
                         $response["success"] = false;
