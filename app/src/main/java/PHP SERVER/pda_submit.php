@@ -1,86 +1,15 @@
 <?php
+include("pda_connection.php");
+$connection = $GLOBALS['connection'];
+
 date_default_timezone_set('Asia/Taipei');
-$DB_CONNECT_STATUS = True;
+
 ini_set('default_charset', 'UTF-8'); //編碼
 ini_set('json_encode_options', JSON_UNESCAPED_UNICODE); //JSON 編碼
-$func = new func_Collect();
-
-class func_Collect
-{
-    function my_json_encode($data)
-    {
-        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    }
-}
 
 
-
-$DB_HOST = '192.168.5.42'; //DB位置
-$DB_USER = 'root'; //DB的登入帳號
-$DB_NAME = 'baiguo.v2'; //DB名稱
-$DB_PASSWORD = 'myt855myt855'; //DB密碼
-$AIMS_HOST = '192.168.5.130'; //AIMS 位置
-
-$SERVER_STATUS = true;
-
-try {
-    // 建立mysqli物件
-    $connection = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME);
-    $connection->set_charset("utf8");
-
-    // 檢查是否成功連線
-    if ($connection->connect_error) {
-
-        $DB_CONNECT_STATUS = False;
-        $MESSAGE = ("連線失敗: " . $connection->connect_error);
-
-    } else {
-        mysqli_set_charset($connection, "utf8");
-        $DB_CONNECT_STATUS = True;
-        $MESSAGE = "連線成功";
-
-    }
-
-} catch (Exception $e) {
-
-    $DB_CONNECT_STATUS = False;
-    $MESSAGE = "連線失敗: " . $e->getMessage();
-
-    
-    $connection = null;
-}
-
-//echo $func->my_json_encode($SERVER_RESPONSE);//打印是否連上該PHP伺服器 其實你看的到瀏覽器或終端機顯示的內容 就代表有連線了 只是這個是給裝置查詢狀態用的ㄏㄏ
-
-//echo $func->my_json_encode($RESPONSE);//打印是否成功連線
-
-$RESPONSE = [
-    'SERVER_STATUS' => $SERVER_STATUS,
-    'DB_CONNECT_STATUS' => $DB_CONNECT_STATUS,
-    'MESSAGE' => $MESSAGE
-];
-
-
-
-echo $func->my_json_encode($RESPONSE);
-
-
-
-
-
-//ini_set('display_errors', '0');
-
-// $AreaNo = isset($_GET["AreaNo"]) ? $_GET["AreaNo"] : null;
-// $BlockNo = $_GET["BlockNo"];
-// $BlockType = $_GET["BlockType"];
-// $DrugCode = $_GET["DrugCode"];
-// $StoreID = $_GET["StoreID"];
-//$TotalQty = $_GET["TotalQty"];
-
-//Android studio 傳送的五個GET值
 isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
-// $ElabelNumber = $_GET["ElabelNumber"];
-// $DrugEnglish = $_GET["DrugEnglish"];
+
 isset($_GET["UserID"]) ? $UserID = $_GET["UserID"] : null;
 isset($_GET["TotalQty"]) ? $TotalQty = $_GET["TotalQty"] : null;
 isset($_GET["spinnerText"]) ? $spinnerText = $_GET["spinnerText"] : null;
