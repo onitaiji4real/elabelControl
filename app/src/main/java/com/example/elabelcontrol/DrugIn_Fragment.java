@@ -86,6 +86,8 @@ public class DrugIn_Fragment extends Fragment {
         btnStatus = view.findViewById(R.id.btnStatus);
         btnStatus.setOnClickListener(onChangeMode);
 
+        globaldata.getPHP_LOGIN_SERVER();
+
 
 
 
@@ -391,6 +393,8 @@ public class DrugIn_Fragment extends Fragment {
 
 
             Toast.makeText(getContext(), item.get("message"), Toast.LENGTH_SHORT).show();
+
+
         }
 
         @Override

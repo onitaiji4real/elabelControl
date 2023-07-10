@@ -78,6 +78,15 @@ public class GlobalData extends Application {
 
     //public String PHP_SERVER = "http://10.0.0.11:8080/pda_submit.php?";
     //public String PHP_SERVER = "http://192.168.5.41/pda_submit.php?";
+    public String submit = "pda_submit.php?";
+    public String login = "pda_login.php?";
+    public String connection = "pda_connection.php?";
+    public String inventory = "pda_inventory.php?";
+    public String in = "pda_in.php?";
+    public String out = "pda_out.php?";
+    public String search = "pda_search.php?"; //選定執行的任務
+    public String SERVER = "http://192.168.5.130:8080/"; //Server IP位置
+
     public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
 
 
@@ -120,6 +129,37 @@ public class GlobalData extends Application {
     public String getPHP_SERVER() {
         return PHP_SERVER;
     }
+
+    public String getPHP_LOGIN_SERVER(){
+        String PHP_SERVER = SERVER+login;
+        //Log.d("PHP_SERVER url = ",PHP_SERVER);
+        return PHP_SERVER;
+    }
+
+    public String getPHP_IN_SERVER(){
+        String PHP_SERVER = SERVER+in;
+        return PHP_SERVER;
+    }
+
+    public String getPHP_OUT_SERVER(){
+        String PHP_SERVER = SERVER+out;
+        return PHP_SERVER;
+    }
+    public String getPHP_CONNECTION_SERVER(){
+        String PHP_SERVER = SERVER+connection;
+        return PHP_SERVER;
+    }
+
+    public String getPHP_SEARCH_SERVER(){
+        String PHP_SERVER = SERVER+search;
+        return PHP_SERVER;
+    }
+    public String getPHP_INVENTORY_SERVER(){
+        String PHP_SERVER = SERVER+inventory;
+        return PHP_SERVER;
+    }
+
+
 
     public String getAIMS_BLINK_URL() {
         return AIMS_BLINK_URL;

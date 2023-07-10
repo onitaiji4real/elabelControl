@@ -68,7 +68,6 @@ public class BFragment extends Fragment {
     List<Drugstore> Drugstores;
     List<Inventory> Inventorys;
     List<Druginfo> Druginfos;
-
     String StoreID;
     String AreaNo;
     String BlockNo;
@@ -109,7 +108,8 @@ public class BFragment extends Fragment {
         View view = inflater.inflate(R.layout.layout_b, container, false);
         globaldata = (GlobalData) getActivity().getApplicationContext();
         edtElabelNumber = view.findViewById(R.id.edtElabelNumber);
-//        btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
+
+        //btnGetDrugStore = view.findViewById(R.id.btnGetDrugStore);
         //btnGetDrugStore.setOnClickListener(onGetDrugStore);
 
         edtDrugStore = view.findViewById(R.id.edtDrugStore);
@@ -132,8 +132,8 @@ public class BFragment extends Fragment {
         txtLotNumber = view.findViewById(R.id.txtLot);
 
 
-//        edtNumBox = view.findViewById(R.id.edtInQty);
-//        edtNumRow = view.findViewById(R.id.edtNumRow);
+//      edtNumBox = view.findViewById(R.id.edtInQty);
+//      edtNumRow = view.findViewById(R.id.edtNumRow);
         edtNumPill = view.findViewById(R.id.edtNumPill);
         edtNumBox = view.findViewById(R.id.edtNumBox);
         edtNumRow = view.findViewById(R.id.edtNumRow);
@@ -206,7 +206,7 @@ public class BFragment extends Fragment {
             String numBox = edtNumBox.getText().toString();
 
             String DBoption = "INVENTORY";
-            String url = globaldata.getPHP_SERVER();
+            String url = globaldata.getPHP_INVENTORY_SERVER();
 
             try {
 //                url += URLEncoder.encode(DBoption,"UTF-8") + "&";

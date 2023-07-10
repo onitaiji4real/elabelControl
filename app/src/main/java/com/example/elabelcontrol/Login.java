@@ -123,7 +123,7 @@ public class Login extends AppCompatActivity {
         public void onClick(View v) {
             String encodePassword = PasswordEncoder.encodePassword(edtPassword.getText().toString());
             Log.d("ENCODE PASSWORD", encodePassword);
-            String url = globalData.getPHP_SERVER();
+            String url = globalData.getPHP_LOGIN_SERVER();
 
             try {
                 url += "DBoption=" + URLEncoder.encode("LOGIN", "UTF-8") + "&";
@@ -202,7 +202,7 @@ public class Login extends AppCompatActivity {
     //掃描登入的驗證
     public void scanLogin() {
         String account = edtAccount.getText().toString();
-        String url = globalData.getPHP_SERVER();
+        String url = globalData.getPHP_LOGIN_SERVER();
         try {
             url += "DBoption=" + URLEncoder.encode("SCAN_LOGIN", "UTF-8") + "&";
             url += "Account=" + URLEncoder.encode(account, "UTF-8") + "&";
@@ -321,7 +321,7 @@ public class Login extends AppCompatActivity {
             });
 
             if (NetworkConnectStatus) {
-                String url = globalData.getPHP_SERVER()+"OPtion=getConnectionStatus";
+                String url = globalData.getPHP_CONNECTION_SERVER()+"OPtion=getConnectionStatus";
 
                 sendGET(url, new VolleyCallback() {
                     @Override

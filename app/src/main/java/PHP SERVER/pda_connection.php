@@ -1,4 +1,6 @@
 <?php
+include("pda_functionClass.php");
+$func_Collect = new func_Collect();
 
 date_default_timezone_set('Asia/Taipei');
 ini_set('default_charset', 'UTF-8'); //編碼
@@ -9,11 +11,11 @@ $DB_CONNECT_STATUS = false; //給PDA判斷連線狀態
 
 $DB_HOST = '192.168.5.42'; //DB位置
 $DB_USER = 'root'; //DB的登入帳號
-$DB_NAME = 'baiguo.demo'; //DB名稱
+$DB_NAME = 'baiguo_demo'; //DB名稱
 $DB_PASSWORD = 'myt855myt855'; //DB密碼
 $AIMS_HOST = '192.168.5.130'; //AIMS 位置
 
-$func_Collect = new func_Collect();
+
 
 try {
     // 建立mysqli物件
@@ -51,6 +53,7 @@ $RESPONSE = [
 ];
 
 $getRESPONSE = $func_Collect->my_json_encode($RESPONSE);
+$func_Collect->getJSON("!@#!@#",$connection);
 
 $OPtion = isset($_GET["OPtion"]) ? $OPtion = $_GET["OPtion"] : null;
 
@@ -67,14 +70,7 @@ switch ($OPtion) {
 
 
 
-class func_Collect
-{
-    function my_json_encode($data)
-    {
-        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    }
 
-}
 
 
 

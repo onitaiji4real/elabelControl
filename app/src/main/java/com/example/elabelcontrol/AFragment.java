@@ -101,7 +101,7 @@ public class AFragment extends Fragment {
     };
 
     private void getInventory_record() {
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_INVENTORY_SERVER();
         String option = "GET_Inventory_Record";
 
         try {
