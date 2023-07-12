@@ -541,7 +541,6 @@ function blinkElabel($color, $duration, $labelCode, $aimsHost)
     }
 }
 
-
 function countTotalNumber($dataArray, $connection)
 {
 
@@ -566,8 +565,6 @@ function countTotalNumber($dataArray, $connection)
 
     return $data;
 }
-
-
 
 function getInsertOrUpdateSQL()
 {
@@ -1128,8 +1125,6 @@ function get_Store_withDrugLabel($dataArray, $connection)
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
-
-
 
 //搜尋不同的關鍵字
 function get_Store_with_DrugCode($dataArray, $connection)

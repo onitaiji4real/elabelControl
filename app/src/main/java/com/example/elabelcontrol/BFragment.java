@@ -368,7 +368,7 @@ public class BFragment extends Fragment {
 
         String ed = edtElabelNumber.getText().toString();
 
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_functionClass_Server();
         try {
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
 //            url += "DBoption=select";

@@ -324,6 +324,7 @@ public class DrugIn_Fragment extends Fragment {
 
                     Toast.makeText(getContext(), elabelnumber, Toast.LENGTH_SHORT).show();
                     String url = globaldata.getPHP_SERVER();
+
 //                    String BLINK_URL = globaldata.getPHP_SERVER();
 
 

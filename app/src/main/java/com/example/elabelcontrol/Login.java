@@ -321,7 +321,7 @@ public class Login extends AppCompatActivity {
             });
 
             if (NetworkConnectStatus) {
-                String url = globalData.getPHP_CONNECTION_SERVER()+"OPtion=getConnectionStatus";
+                String url = globalData.getPHP_CONNECTION_SERVER()+"DBoption=getConnectionStatus";
 
                 sendGET(url, new VolleyCallback() {
                     @Override

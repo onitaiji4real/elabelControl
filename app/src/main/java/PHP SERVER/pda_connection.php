@@ -53,8 +53,7 @@ $RESPONSE = [
 ];
 
 $getRESPONSE = $func_Collect->my_json_encode($RESPONSE);
-$func_Collect->getJSON("!@#!@#",$connection);
-
+ 
 $OPtion = isset($_GET["OPtion"]) ? $OPtion = $_GET["OPtion"] : null;
 
 switch ($OPtion) {
