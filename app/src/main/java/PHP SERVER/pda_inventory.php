@@ -40,7 +40,7 @@ if (isset($_GET["DBoption"])) {
                 $dataArray["numBox"] = 0;
             }
 
-            $data = countTotalNumber($dataArray, $connection);
+            $data = $func_Collect->countTotalNumber($dataArray, $connection);
             $countNum = $dataArray["numBox"] * $data["NumBox"];
             $countNum += $dataArray["numRow"] * $data["NumRow"];
 
@@ -52,8 +52,8 @@ if (isset($_GET["DBoption"])) {
 
 
 
-            $dataArray["StockQty"] = getStockQty($dataArray, $connection); // 取得當前庫存
-            $StockQty = getStockQty($dataArray, $connection); // 取得當前庫存
+            $dataArray["StockQty"] = $func_Collect->getStockQty($dataArray, $connection); // 取得當前庫存
+            $StockQty = $func_Collect->getStockQty($dataArray, $connection); // 取得當前庫存
 
             // echo "StockQTY".$StockQty;
             $AdjQty = $InventoryQty - $StockQty; // 計算盤營盤虧量 會有負數
@@ -167,9 +167,9 @@ if (isset($_GET["DBoption"])) {
                             druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                             AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
-                drugIN_record($dataArray, $record_SQL, $connection);
-                update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+                            $func_Collect->drugIN_record($dataArray, $record_SQL, $connection);
+                            $func_Collect->update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                            $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else if ($AdjQty < 0) {
 
                 if (isset($_GET["ElabelNumber"])) {
@@ -271,9 +271,9 @@ if (isset($_GET["DBoption"])) {
                             druginfo.DrugCode = '" . $dataArray["DrugCode"] . "' 
                             AND drugstock.LotNumber = '" . $dataArray["LotNumber"] . "'";
 
-                drugOUT_record($dataArray, $record_SQL, $connection);
-                update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+                            $func_Collect->drugOUT_record($dataArray, $record_SQL, $connection);
+                            $func_Collect->update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                            $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else {
 
                 isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
@@ -324,8 +324,8 @@ if (isset($_GET["DBoption"])) {
                 } else {
                     //echo "Error inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
-                update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+                $func_Collect->update_elabeldrug($ElabelNumber, $dataArray, $connection);
+                $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             }
 
         break;
@@ -340,7 +340,7 @@ if (isset($_GET["DBoption"])) {
         case "GET":
             if (isset($_GET["ElabelNumber"])) {
                 $ElabelNumber = $_GET["ElabelNumber"];
-                getJSON($ElabelNumber, $connection);
+                $func_Collect->getJSON($ElabelNumber, $connection);
             }
 
             $func_Collect->my_json_encode($_COOKIE);

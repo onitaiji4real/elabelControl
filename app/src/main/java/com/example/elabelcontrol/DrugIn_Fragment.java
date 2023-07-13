@@ -75,7 +75,10 @@ public class DrugIn_Fragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.layout_drug_in, container, false);
+//      globaldata = (GlobalData) getActivity().getApplicationContext();
+
         globaldata = (GlobalData) getActivity().getApplicationContext();
+
         edtAreaNo = view.findViewById(R.id.edtAreaNo);
         edtBlockNo = view.findViewById(R.id.edtBlockNo);
         edtBlockType = view.findViewById(R.id.edtBlockType);
@@ -287,8 +290,9 @@ public class DrugIn_Fragment extends Fragment {
             holder.txtElabelNumber.setText(elabelnumber);
 
 
-            holder.url = globaldata.getPHP_SERVER();
-            holder.BLINK_URL=globaldata.getPHP_SERVER();
+            holder.url = globaldata.getPHP_SEARCH_SERVER();
+            holder.BLINK_URL=globaldata.getPHP_functionClass_Server();
+            Log.d("TEST","get"+globaldata.getLoginUserID());
 
             try {
 
@@ -406,7 +410,7 @@ public class DrugIn_Fragment extends Fragment {
 
 
     private void get_Search_Item_BY_DrugCode() {
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_SEARCH_SERVER();
         String Search_KEY = edtDrugLabel.getText().toString();
 
         try {
@@ -472,7 +476,7 @@ public class DrugIn_Fragment extends Fragment {
     }
 
     private void get_Search_Item_BY_DrugEnglish() {
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_SEARCH_SERVER();
         //String DrugLabel = edtDrugLabel.getText().toString();
         String Search_KEY = edtDrugLabel.getText().toString();
         try {
@@ -539,63 +543,76 @@ public class DrugIn_Fragment extends Fragment {
     }
 
     private void get_Search_Item_BY_DrugName() {
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_SEARCH_SERVER();
         String BLINK_URL = globaldata.getPHP_SERVER();
         String DrugLabel = edtDrugLabel.getText().toString();
         String Search_KEY = edtDrugLabel.getText().toString();
         try {
             url += "DBoption=Search_BY_DrugName" + "&";
-            //url += "DrugLabel=" + URLEncoder.encode(DrugLabel, "UTF-8") + "&";
             url += "Search_KEY=" + URLEncoder.encode(Search_KEY, "UTF-8") + "&";
             sendGET(url, new VolleyCallback() {
                 @Override
                 public void onSuccess(JSONArray response) {
                     try {
-                        List<HashMap<String, String>> searchData = new ArrayList<>();
+                        JSONObject resultObject = response.getJSONObject(0);
+                        boolean result = resultObject.getBoolean("Result");
+                        Log.d("Search Resulut","Search Resulut = "+result);
+                        if (result) {
+                            List<HashMap<String, String>> searchData = new ArrayList<>();
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject jsonObject = response.getJSONObject(i);
+                                String message = jsonObject.getString("Response");
+                                String elabelNumber = jsonObject.getString("ElabelNumber");
+                                String storeID = jsonObject.getString("StoreID");
+                                String elabelType = jsonObject.getString("ElabelType");
+                                String drugCode = jsonObject.getString("DrugCode");
+                                String drugName = jsonObject.getString("DrugName");
+                                String StokQty = jsonObject.getString("DrugEnglish3");
+                                String areaNo = jsonObject.getString("AreaNo");
+                                String blockNo = jsonObject.getString("BlockNo");
+                                String LotNumber = jsonObject.getString("DrugCode3");
+                                String EffectDate = jsonObject.getString("DrugName3");
+                                String drugEnlglish = jsonObject.getString("DrugEnglish");
+                                String MakeDate = jsonObject.getString("MakeDate");
 
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject jsonObject = response.getJSONObject(i);
+                                HashMap<String, String> item = new HashMap<>();
+                                item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
+                                item.put("DrugStoreID", storeID);
+                                item.put("AreaNo", areaNo);
+                                item.put("BlockNo", blockNo);
+                                item.put("ElabelType", elabelType);
+                                item.put("DrugName", drugName);
+                                item.put("DrugCode", drugCode);
+                                item.put("DrugEnglish", drugEnlglish);
+                                item.put("StockNum", StokQty);
+                                item.put("LotNumber", LotNumber);
+                                item.put("elabelNumber", elabelNumber);
+                                item.put("message", message);
+                                item.put("EffectDate", EffectDate);
+                                item.put("MakeDate", MakeDate);
 
-                            String message = jsonObject.getString("Response");
-                            String elabelNumber = jsonObject.getString("ElabelNumber");
-                            String storeID = jsonObject.getString("StoreID");
-                            String elabelType = jsonObject.getString("ElabelType");
-                            String drugCode = jsonObject.getString("DrugCode");
-                            String drugName = jsonObject.getString("DrugName");
-                            String StokQty = jsonObject.getString("DrugEnglish3");
-                            String areaNo = jsonObject.getString("AreaNo");
-                            String blockNo = jsonObject.getString("BlockNo");
-                            String LotNumber = jsonObject.getString("DrugCode3");
-                            String EffectDate = jsonObject.getString("DrugName3");
-                            String drugEnlglish = jsonObject.getString("DrugEnglish");
-                            String MakeDate = jsonObject.getString("MakeDate");
-
-
-                            HashMap<String, String> item = new HashMap<>();
-                            item.put("DrugStore_SA", storeID + "-" + areaNo + "-" + blockNo + "-" + elabelType);
-                            item.put("DrugStoreID", storeID);
-                            item.put("AreaNo", areaNo);
-                            item.put("BlockNo", blockNo);
-                            item.put("ElabelType", elabelType);
-                            item.put("DrugName", drugName);
-                            item.put("DrugCode", drugCode);
-                            item.put("DrugEnglish", drugEnlglish);
-                            item.put("StockNum", StokQty);
-                            item.put("LotNumber", LotNumber);
-                            item.put("elabelNumber", elabelNumber);
-                            item.put("message", message);
-                            item.put("EffectDate", EffectDate);
-                            item.put("MakeDate", MakeDate);
-
-                            searchData.add(item);
-                        }
-
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                makeData(searchData);
+                                searchData.add(item);
                             }
-                        });
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    makeData(searchData);
+                                }
+                            });
+                        } else {
+                            String message = resultObject.getString("Response");
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                            // 处理结果为false的情况
+                            // 可以显示错误信息或采取其他操作
+                            Log.d("Search Result", "False: " + message);
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -606,8 +623,9 @@ public class DrugIn_Fragment extends Fragment {
         }
     }
 
+
     private void get_Search_Item() {
-        String url = globaldata.getPHP_SERVER();
+        String url = globaldata.getPHP_SEARCH_SERVER();
         String DrugLabel = edtDrugLabel.getText().toString().replaceAll("[\n\r]", "");
 
 

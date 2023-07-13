@@ -1,6 +1,6 @@
 <?php
-include("pda_connection.php");
-$connection = $GLOBALS['connection'];
+include("pda_functionClass.php"); //匯入資料庫連線檔案
+$func_Collect = new func_Collect();
 
 if (isset($_GET["DBoption"])) {
     $DBoption = $_GET["DBoption"];
@@ -28,9 +28,11 @@ if (isset($_GET["DBoption"])) {
                 break;
             }
         case "Search_BY_DrugEnglish": {
-                if (isset($_GET["ElabelNumber"])) {
-                    $ElabelNumber = $_GET["ElabelNumber"];
-                }
+                // if (isset($_GET["ElabelNumber"])) {
+                //     $ElabelNumber = $_GET["ElabelNumber"];
+                // }
+                isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
+                
                 $dataArray = $func_Collect->getDataArray();
                 $func_Collect->get_Store_with_DrugEnlgish($dataArray, $connection);
                 break;

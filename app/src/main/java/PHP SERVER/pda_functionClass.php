@@ -1,7 +1,7 @@
 <?php
 //其他副程式會使用到的function 都包裝在檔案
 //另外這個檔案會執行一些 比較common的switch class
-$DB_HOST = '192.168.5.42'; //DB位置
+$DB_HOST = 'localhost'; //DB位置
 $DB_USER = 'root'; //DB的登入帳號
 $DB_NAME = 'baiguo_demo'; //DB名稱
 $DB_PASSWORD = 'myt855myt855'; //DB密碼
@@ -38,6 +38,10 @@ if(isset($_GET["DBoption"])){
         case "getConnectionStatus":
             $func_Collect->getConnectionStatus();
             break;
+
+            case "ITEM_BLINK":
+                $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+                break;
         }
 }
 class func_Collect
@@ -766,8 +770,10 @@ function get_Store_with_DrugEnlgish($dataArray, $connection)
     if ($result) {
         if (mysqli_affected_rows($connection) > 0) {
             // Fetch and process each row
+            
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
+                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
@@ -786,11 +792,13 @@ function get_Store_with_DrugEnlgish($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
+            $item->Result = false;
             $item->Response = 'No rows return Search BY DrugCode.';
             $response[] = $item;
         }
     } else {
         $item = new stdClass();
+        $item->Result = false;
         $item->Response = 'Error Search table: ' . mysqli_error($connection);
         $response[] = $item;
     }
@@ -805,8 +813,6 @@ function get_Store_with_DrugName($dataArray, $connection)
     JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode = ds.DrugCode AND ed.StoreID = ds.StoreID
     WHERE ed.DrugName LIKE '%" . $dataArray["Search_KEY"] . "%'";
 
-
-
     $result = mysqli_query($connection, $SQL);
     $response = array(); // Create an empty array to store the response
 
@@ -815,6 +821,7 @@ function get_Store_with_DrugName($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
+                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
@@ -833,11 +840,13 @@ function get_Store_with_DrugName($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
+            $item->Result = false;
             $item->Response = 'No rows return Search BY DrugCode.';
             $response[] = $item;
         }
     } else {
         $item = new stdClass();
+        $item->Result = false;
         $item->Response = 'Error Search table: ' . mysqli_error($connection);
         $response[] = $item;
     }

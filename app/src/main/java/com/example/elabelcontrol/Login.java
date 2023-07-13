@@ -79,6 +79,7 @@ public class Login extends AppCompatActivity {
     private List<User> users;
     private TextView edtAccount, edtPassword, edtScannedPassword, txtNetworkConnectStatus, txtDBConnectStatus;
     private GlobalData globalData;
+
     private ProgressDialog progressDialog;
     private checkConnection_Class checkConnectionClass; // 宣告成員變數
 
@@ -226,8 +227,8 @@ public class Login extends AppCompatActivity {
                                 public void run() {
                                     globalData.setLoginUserID(edtAccount.getText().toString());
                                     Log.d("TAG", globalData.getLoginUserID());
-                                    globalData.setLoginUserName(globalData.getLoginUserName());
-                                    //Log.d("TAG", globalData.getLoginUserName());
+                                    globalData.setLoginUserName(edtAccount.getText().toString());
+                                    Log.d("TAG", globalData.getLoginUserName());
                                     startActivity(new Intent(Login.this, FragmentActivity.class));
                                     Toast.makeText(Login.this, message, Toast.LENGTH_LONG).show();
                                 }
