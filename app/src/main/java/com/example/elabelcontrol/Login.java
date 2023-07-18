@@ -74,11 +74,11 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class Login extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1000;
     private static final int PROGRESS_DIALOG_TYPE = 0;
-
+    private GlobalData globalData;
     private Button btnLogin, btnDownloadData, btnScan;
     private List<User> users;
     private TextView edtAccount, edtPassword, edtScannedPassword, txtNetworkConnectStatus, txtDBConnectStatus;
-    private GlobalData globalData;
+
 
     private ProgressDialog progressDialog;
     private checkConnection_Class checkConnectionClass; // 宣告成員變數
@@ -94,7 +94,12 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        globalData = new GlobalData(this.getApplicationContext());
+        //globalData = new GlobalData(this.getApplicationContext());
+        globalData = GlobalData.getInstance();
+
+
+//        globalData = (GlobalData)getApplicationContext();
+//        globalData.getNetworkConnectStatus();
 
         requestWriteExternalStoragePermission();
         txtNetworkConnectStatus = findViewById(R.id.txtNetworkConnectStatus);
@@ -367,6 +372,7 @@ public class Login extends AppCompatActivity {
                         SERVER_STATUS = false;
                         DB_CONNECT_STATUS = false;
                         handler.postDelayed(runnable, 10000); //Delay 10 sec.
+
                     }
                 });
             } else {

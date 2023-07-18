@@ -432,27 +432,7 @@ public class BFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
                                 updateUIWithCurrentIndex();
-
-//                                int sumQty = 0;
-//                                for (int i = 0; i < stockQtys.size(); i++) {
-//                                    sumQty += Double.parseDouble(stockQtys.get(i));
-//                                }
-
-//                                textNum.setText(stockQtys.get(0));
-//                                edtDrugStore.setText(storeIDs.get(0)); //卡位StoreID
-//                                edtAreaNo.setText(areaNos.get(0));
-//                                edtBlockNo.setText(blockNos.get(0));
-//                                edtBlockType.setText(elabelTypes.get(0));
-//                                edtDrugCode.setText(drugCodes.get(0));
-//                                edtDrugEnglish.setText(drugEnglishs.get(0));
-//
-//
-//                                txtLotNumber.setText(lotNumbers.get(0));
-//                                txtInventoryQty.setText(String.valueOf(sumQty)); //該儲區、藥代碼、所有批號之庫存總量
-
-
                             }
                         });
                     } catch (JSONException e) {

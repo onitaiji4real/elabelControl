@@ -280,9 +280,9 @@ public class DFragment extends Fragment {
     }
 
     private void lsDrugInfo() {
-        String ed = edtElabelNumber.getText().toString();
 
-        String url = globaldata.getPHP_SERVER();
+
+        String url = globaldata.getPHP_OUT_SERVER();
         try {
             url += "ElabelNumber=" + URLEncoder.encode(edtElabelNumber.getText().toString(), "UTF-8") + "&";
             url += "DBoption=GET" + "&";
@@ -417,7 +417,7 @@ public class DFragment extends Fragment {
             hideKeyboard(v.getContext());
             String labelCode = edtElabelNumber.getText().toString();
             OnLight(v, labelCode,"進行支出！"); //亮燈
-            String url = globaldata.getPHP_SERVER();
+            String url = globaldata.getPHP_OUT_SERVER();
             String CodeID = selectedId;
             Log.d("ID=",CodeID);
             try {

@@ -22,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.VolleyError;
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -318,6 +320,11 @@ public class EFragment extends Fragment {
                                     Toast.makeText(v.getContext(), drugStore_SA +"進行亮燈", Toast.LENGTH_SHORT).show();
                                 }
                             });
+
+                        }
+                        @Override
+                        public void onFailure(VolleyError error) {
+
 
                         }
                     });

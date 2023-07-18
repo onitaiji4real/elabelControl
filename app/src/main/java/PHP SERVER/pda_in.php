@@ -1,6 +1,6 @@
 <?php
-include("pda_connection.php");
-$connection = $GLOBALS['connection'];
+include("pda_functionClass.php"); //匯入資料庫連線檔案
+$func_Collect = new func_Collect();
 
 if (isset($_GET["DBoption"])) {
     $DBoption = $_GET["DBoption"];
@@ -15,7 +15,7 @@ if (isset($_GET["DBoption"])) {
             $dataArray = $func_Collect->getDataArray();
             //$remark_CodeID = "B";
             $func_Collect->drugIN($connection, $dataArray, $ElabelNumber);
-            $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
+            $func_Collect->BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
 
             break;
         }
