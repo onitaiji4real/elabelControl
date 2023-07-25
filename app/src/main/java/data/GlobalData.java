@@ -114,7 +114,7 @@ public class GlobalData extends Application {
 //
 //    }
 
-    public String Server = "http://192.168.5.77:8080/";
+
     public String AIMSServer = "http://192.168.5.137:9003/";
 
     //public String PHP_SERVER = "http://10.0.0.11:8080/pda_submit.php?";
@@ -129,7 +129,7 @@ public class GlobalData extends Application {
     public String common = "pda_functionClass.php?";
 
     public String SERVER = "http://192.168.5.130:8080/PDA/"; //Server IP位置
-    //public String SERVER = "http://192.168.5.41/";
+
 
     //public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
     public String PHP_SERVER = "http://192.168.5.130:8080/";
