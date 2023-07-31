@@ -88,9 +88,9 @@ class func_Collect
         $sql = "SELECT 
     ed.StoreID, 
     ed.ElabelType, 
-    ed.DrugCode, 
-    ed.DrugName, 
-    ed.DrugEnglish, 
+    ed.DrugCode1, 
+    ed.DrugName1, 
+    ed.DrugEnglish1, 
     ed.AreaNo, 
     ed.BlockNo, 
     ds.LotNumber,
@@ -104,9 +104,9 @@ class func_Collect
         ed.StoreID = ds.StoreID AND 
         ed.AreaNo = ds.AreaNo AND 
         ed.BlockNo = ds.BlockNo AND 
-        ed.DrugCode = ds.DrugCode
+        ed.DrugCode1 = ds.DrugCode
     INNER JOIN druginfo di ON
-        ed.DrugCode = di.DrugCode
+        ed.DrugCode1 = di.DrugCode
     WHERE ed.ElabelNumber = '$ElabelNumber'";
 
         $result = mysqli_query($connection, $sql);
@@ -118,9 +118,9 @@ class func_Collect
                 $item = array(
                     $row["StoreID"],
                     $row["ElabelType"],
-                    $row["DrugCode"],
-                    $row["DrugName"],
-                    $row["DrugEnglish"],
+                    $row["DrugCode1"],
+                    $row["DrugName1"],
+                    $row["DrugEnglish1"],
                     $row["AreaNo"],
                     $row["BlockNo"],
                     $row["StockQty"],
@@ -675,13 +675,13 @@ class func_Collect
                     DrugEnglish3 = (SELECT StockQty
                                     FROM drugstock
                                     WHERE LotNumber = '" . $dataArray["LotNumber"] . "'
-                                    AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                                    AND DrugCode1 = '" . $dataArray["DrugCode"] . "'
                                     AND StoreID = '" . $dataArray["StoreID"] . "'
                                     AND AreaNo = '" . $dataArray["AreaNo"] . "'
                                     AND BlockNo = '" . $dataArray["BlockNo"] . "')
             WHERE 
                     ElabelNumber = '$ElabelNumber' 
-                    AND DrugCode = '" . $dataArray["DrugCode"] . "'
+                    AND DrugCode1 = '" . $dataArray["DrugCode"] . "'
                     AND StoreID = '" . $dataArray["StoreID"] . "'
                     AND AreaNo = '" . $dataArray["AreaNo"] . "'
                     AND BlockNo = '" . $dataArray["BlockNo"] . "'
@@ -903,6 +903,7 @@ class func_Collect
     }
 
 }
+
 
 
 ?>

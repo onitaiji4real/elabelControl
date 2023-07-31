@@ -128,8 +128,8 @@ public class GlobalData extends Application {
     public String search = "pda_search.php?"; //選定執行的任務
     public String common = "pda_functionClass.php?";
 
-    public String SERVER = "http://192.168.5.130:8080/PDA/"; //Server IP位置
-
+    //public String SERVER = "http://192.168.5.130:8080/PDA/"; //Server IP位置
+    public String SERVER = "http://192.168.5.130:8080/PDA/pda_submit.php?"; //Server IP位置
 
     //public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
     public String PHP_SERVER = "http://192.168.5.130:8080/";
@@ -176,37 +176,44 @@ public class GlobalData extends Application {
     }
 
     public String getPHP_LOGIN_SERVER(){
-        String PHP_SERVER = SERVER+login;
+//        String PHP_SERVER = SERVER+login;
+        String PHP_SERVER = SERVER;
         //Log.d("PHP_SERVER url = ",PHP_SERVER);
         return PHP_SERVER;
     }
 
     public String getPHP_IN_SERVER(){
-        String PHP_SERVER = SERVER+in;
+//        String PHP_SERVER = SERVER+in;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
 
     public String getPHP_OUT_SERVER(){
-        String PHP_SERVER = SERVER+out;
+//        String PHP_SERVER = SERVER+out;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
 
     public String getPHP_CONNECTION_SERVER(){
-        String PHP_SERVER = SERVER+connection;
+//        String PHP_SERVER = SERVER+connection;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
 
     public String getPHP_SEARCH_SERVER(){
-        String PHP_SERVER = SERVER+search;
+//        String PHP_SERVER = SERVER+search;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
     public String getPHP_INVENTORY_SERVER(){
-        String PHP_SERVER = SERVER+inventory;
+//        String PHP_SERVER = SERVER+inventory;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
 
     public String getPHP_functionClass_Server(){
-        String PHP_SERVER = SERVER+common;
+//        String PHP_SERVER = SERVER+common;
+        String PHP_SERVER = SERVER;
         return PHP_SERVER;
     }
 

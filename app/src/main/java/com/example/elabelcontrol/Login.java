@@ -211,7 +211,7 @@ public class Login extends AppCompatActivity {
         String url = globalData.getPHP_LOGIN_SERVER();
         try {
             url += "DBoption=" + URLEncoder.encode("SCAN_LOGIN", "UTF-8") + "&";
-            url += "Account=" + URLEncoder.encode(account, "UTF-8") + "&";
+            url += "Account=" + URLEncoder.encode(account, "UTF-8");
 
 
             sendGET(url, new VolleyCallback() {
@@ -479,62 +479,6 @@ public class Login extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(((Activity) context).getWindow().getDecorView().getWindowToken(), 0);
-        }
-    }
-
-    private class DownloadFileTask extends AsyncTask<String, String, String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... fileNames) {
-            int count;
-            try {
-                for (String fileName : fileNames) {
-                    URL url = new URL(globalData.Server + fileName);
-                    URLConnection connection = url.openConnection();
-                    connection.connect();
-
-                    int lengthOfFile = connection.getContentLength();
-
-                    InputStream input = new BufferedInputStream(url.openStream(), 8192);
-                    OutputStream output = new FileOutputStream(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + "/" + fileName);
-
-                    byte data[] = new byte[1024];
-                    long total = 0;
-
-                    while ((count = input.read(data)) != -1) {
-                        total += count;
-                        publishProgress("" + (int) ((total * 100) / lengthOfFile));
-                        output.write(data, 0, count);
-                    }
-
-                    output.flush();
-                    output.close();
-                    input.close();
-                }
-
-            } catch (Exception e) {
-                Log.e("Error: ", e.getMessage());
-            }
-            try {
-                openCSVUser();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... progress) {
-            //pDialog.setProgress(Integer.parseInt(progress[0]));
-        }
-
-        @Override
-        protected void onPostExecute(String file_url) {
-            //dismissDialog(progress_bar_type);
         }
     }
 
