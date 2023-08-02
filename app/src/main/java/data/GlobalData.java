@@ -128,8 +128,8 @@ public class GlobalData extends Application {
     public String search = "pda_search.php?"; //選定執行的任務
     public String common = "pda_functionClass.php?";
 
-    //public String SERVER = "http://192.168.5.130:8080/PDA/"; //Server IP位置
-    public String SERVER = "http://192.168.5.130:8080/PDA/pda_submit.php?"; //Server IP位置
+    //public String SERVER = "http://192.168.5.130:8080/PDA/"; //Server IP位置 新
+    public String SERVER = "http://10.0.0.11:8080/PDA/pda_submit.php?"; //Server IP位置 舊
 
     //public String PHP_SERVER = "http://192.168.5.130:8080/pda_submit.php?";
     public String PHP_SERVER = "http://192.168.5.130:8080/";

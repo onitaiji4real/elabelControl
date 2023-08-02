@@ -20,10 +20,6 @@ if (isset($_GET["DBoption"])) {
 
     switch ($DBoption) {
 
-        case "getConnectionStatus":
-            getConnectionStatus($connection);
-            break;
-
         case "GET":
             if (isset($_GET["ElabelNumber"])) {
                 $ElabelNumber = $_GET["ElabelNumber"];
@@ -193,7 +189,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugIN_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else if ($AdjQty < 0) {
 
                 if (isset($_GET["ElabelNumber"])) {
@@ -297,7 +293,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             } else {
 
                 isset($_GET["ElabelNumber"]) ? $ElabelNumber = $_GET["ElabelNumber"] : null;
@@ -349,7 +345,7 @@ if (isset($_GET["DBoption"])) {
                     //echo "Error inserting into inventoryshift table: " . mysqli_error($connection) . "<br>";
                 }
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
             }
 
 
@@ -368,7 +364,7 @@ if (isset($_GET["DBoption"])) {
                 $dataArray = getDataArray();
                 //$remark_CodeID = "B";
                 drugIN($connection, $dataArray, $ElabelNumber);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
 
                 // $remark_CodeID = "B";
 
@@ -450,99 +446,7 @@ if (isset($_GET["DBoption"])) {
 
                 drugOUT_record($dataArray, $record_SQL, $connection);
                 update_elabeldrug($ElabelNumber, $dataArray, $connection);
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
-                break;
-            }
-        case "SCAN_LOGIN": {
-                if (isset($_GET["Account"])) {
-                    $account = $_GET["Account"];
-
-
-                    // 使用參數化查詢來避免 SQL 注入攻擊
-                    $stmt = $connection->prepare("SELECT UserID FROM user WHERE UserID = ?");
-                    $stmt->bind_param("s", $account);
-
-
-
-                    $stmt->execute();
-                    $stmt->store_result();
-                    $num_rows = $stmt->num_rows;
-
-
-
-
-
-                    //echo "你好" . $num_rows;
-                    // 在這裡進行密碼比對
-                    if ($num_rows == 1) {
-                        // 密碼正確
-                        $response["success"] = true;
-                        $response["message"] = $account . " 成功登入";
-                    } else {
-                        // 密碼錯誤或無此使用者
-                        if ($num_rows == 0) {
-                            // 無此使用者
-                            $response["success"] = false;
-                            $response["message"] = "無此使用者";
-
-                        } else {
-                            // 密碼錯誤
-                            $response["success"] = false;
-                            $response["message"] = "密碼錯誤";
-                        }
-                    }
-
-                    $stmt->close();
-                } else {
-                    // 未提供帳號或密碼
-                    $response["success"] = false;
-                    $response["message"] = "請再輸入一次";
-                }
-
-                // 回傳 JSON 格式的資料
-                // echo json_encode($response);
-
-                $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                echo $json;
-                break;
-            }
-        case "LOGIN": {
-                if (isset($_GET["Account"]) && isset($_GET["Password"])) {
-                    $account = $_GET["Account"];
-                    $password = $_GET["Password"];
-
-                    // 使用參數化查詢來避免 SQL 注入攻擊
-                    $stmt = $connection->prepare("SELECT Password FROM user WHERE UserID = ?");
-                    $stmt->bind_param("s", $account);
-                    $stmt->execute();
-                    $stmt->bind_result($storedPassword);
-                    $stmt->fetch();
-
-                    // 在這裡進行密碼比對
-                    if ($storedPassword === $password) {
-                        // 密碼正確
-                        $response["success"] = true;
-                        $response["message"] = $account . " 成功登入";
-
-
-                    } else {
-                        // 密碼錯誤
-                        $response["success"] = false;
-                        $response["message"] = "無此使用者或密碼錯誤";
-                    }
-
-                    $stmt->close();
-                } else {
-                    // 未提供帳號或密碼
-                    $response["success"] = false;
-                    $response["message"] = "請輸入帳號密碼";
-                }
-
-                // 回傳 JSON 格式的資料
-                // echo json_encode($response);
-
-                $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                echo $json;
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
                 break;
             }
 
@@ -592,13 +496,13 @@ if (isset($_GET["DBoption"])) {
                 if (isset($_GET["ElabelNumber"])) {
                     $ElabelNumber = $_GET["ElabelNumber"];
                 }
-                BlinkElabel("CYAN", "1", $ElabelNumber, $AIMS_HOST);
+                BlinkElabel("CYAN", "1", $ElabelNumber, $aims_host);
 
                 break;
             }
     }
 }
-//BlinkElabel("CYAN","1","05DBCD6FB69F",$AIMS_HOST);
+//BlinkElabel("CYAN","1","05DBCD6FB69F",$aims_host);
 function blinkElabel($color, $duration, $labelCode, $aimsHost)
 {
     $url = "http://{$aimsHost}/labels/contents/led";
@@ -754,7 +658,7 @@ function drugIN($connection, $dataArray, $ElabelNumber) //收入function
         //$affectedRows = $stmt->affected_rows;
         //$item -> response1 = '"drugStock收入作業資料插入成功，影響了"'. $affectedRows." 行";
         //echo "drugStock收入作業資料插入成功，影響了 {$affectedRows} 行<br>";
-        
+        echo "[{}]";
     } else {
         //$affectedRows = $stmt->affected_rows;
         //$item -> response1 = 'drugStock收入作業插入資料時發生錯誤: "' . $stmt->error;
@@ -1023,7 +927,7 @@ function getJSON($ElabelNumber, $connection)
         ed.StoreID = ds.StoreID AND 
         ed.AreaNo = ds.AreaNo AND 
         ed.BlockNo = ds.BlockNo AND 
-        ed.DrugCode1 = ds.DrugCode
+        ed.DrugCode = ds.DrugCode
     INNER JOIN druginfo di ON
         ed.DrugCode1 = di.DrugCode
     WHERE ed.ElabelNumber = '$ElabelNumber'";
@@ -1092,7 +996,7 @@ function getStockQty($dataArray, $connection)
 function getInventory_record($connection)
 {
     $SQL = "SELECT i.*, ed.ElabelType, di.DrugName
-    FROM inventory AS i
+    FROM baiguo_demo.inventory AS i
     JOIN elabeldrug AS ed ON i.DrugCode = ed.DrugCode1
     JOIN druginfo AS di ON i.DrugCode = di.DrugCode";
     $stmt = $connection->prepare($SQL);
@@ -1177,10 +1081,10 @@ function get_Store_withDrugLabel($dataArray, $connection)
     //         FROM elabeldrug
     //         WHERE DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')
     //  ";
-    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode1, ed.DrugName1, ed.DrugEnglish1, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
+    $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode, ed.DrugName, ed.DrugEnglish, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
         FROM elabeldrug ed
-        JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode1 = ds.DrugCode AND ed.StoreID = ds.StoreID
-        WHERE ed.DrugCode1 = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')";
+        JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode = ds.DrugCode AND ed.StoreID = ds.StoreID
+        WHERE ed.DrugCode = (SELECT DrugCode FROM druginfo WHERE DrugLabel = '" . $dataArray["DrugLabel"] . "')";
 
 
     $result = mysqli_query($connection, $SQL);
@@ -1191,14 +1095,13 @@ function get_Store_withDrugLabel($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
                 $item->ElabelType = $row['ElabelType'];
-                $item->DrugCode = $row['DrugCode1'];
-                $item->DrugName = $row['DrugName1'];
-                $item->DrugEnglish = $row['DrugEnglish1'];
+                $item->DrugCode = $row['DrugCode'];
+                $item->DrugName = $row['DrugName'];
+                $item->DrugEnglish = $row['DrugEnglish'];
                 $item->AreaNo = $row['AreaNo'];
                 $item->BlockNo = $row['BlockNo'];
                 $item->DrugCode3 = $row['DrugCode3'];
@@ -1210,8 +1113,7 @@ function get_Store_withDrugLabel($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
-            $item->Result = false;
-            $item->Response = '無搜尋結果。';
+            $item->Response = 'No rows return Search BY DrugLabel.';
             $response[] = $item;
         }
     } else {
@@ -1223,13 +1125,14 @@ function get_Store_withDrugLabel($dataArray, $connection)
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
+
 //搜尋不同的關鍵字
 function get_Store_with_DrugCode($dataArray, $connection)
 {
     $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode1, ed.DrugName1, ed.DrugEnglish1, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
             FROM elabeldrug ed
-            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode1 = ds.DrugCode AND ed.StoreID = ds.StoreID
-            WHERE ed.DrugCode1 LIKE '%" . $dataArray["Search_KEY"] . "%'";
+            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode = ds.DrugCode AND ed.StoreID = ds.StoreID
+            WHERE ed.DrugCode LIKE '%" . $dataArray["Search_KEY"] . "%'";
 
 
 
@@ -1241,7 +1144,6 @@ function get_Store_with_DrugCode($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
@@ -1260,8 +1162,7 @@ function get_Store_with_DrugCode($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
-            $item->Result = false;
-            $item->Response = '無搜尋結果。';
+            $item->Response = 'No rows return Search BY DrugCode.';
             $response[] = $item;
         }
     } else {
@@ -1273,11 +1174,12 @@ function get_Store_with_DrugCode($dataArray, $connection)
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
+
 function get_Store_with_DrugEnlgish($dataArray, $connection)
 {
     $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode1, ed.DrugName1, ed.DrugEnglish1, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
             FROM elabeldrug ed
-            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode1 = ds.DrugCode AND ed.StoreID = ds.StoreID
+            JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode = ds.DrugCode AND ed.StoreID = ds.StoreID
             WHERE ed.DrugEnglish1 LIKE '%" . $dataArray["Search_KEY"] . "%'";
 
 
@@ -1288,10 +1190,8 @@ function get_Store_with_DrugEnlgish($dataArray, $connection)
     if ($result) {
         if (mysqli_affected_rows($connection) > 0) {
             // Fetch and process each row
-
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
@@ -1310,13 +1210,11 @@ function get_Store_with_DrugEnlgish($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
-            $item->Result = false;
-            $item->Response = '無搜尋結果。';
+            $item->Response = 'No rows return Search BY DrugCode.';
             $response[] = $item;
         }
     } else {
         $item = new stdClass();
-        $item->Result = false;
         $item->Response = 'Error Search table: ' . mysqli_error($connection);
         $response[] = $item;
     }
@@ -1324,12 +1222,15 @@ function get_Store_with_DrugEnlgish($dataArray, $connection)
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
 }
+
 function get_Store_with_DrugName($dataArray, $connection)
 {
     $SQL = "SELECT ed.ElabelNumber, ed.StoreID, ed.ElabelType, ed.DrugCode1, ed.DrugName1, ed.DrugEnglish1, ed.AreaNo, ed.BlockNo, ed.DrugCode3, ed.DrugName3, ed.DrugEnglish3, ds.MakeDate
     FROM elabeldrug ed
-    JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode1 = ds.DrugCode AND ed.StoreID = ds.StoreID
-    WHERE ed.DrugName1 LIKE '%" . $dataArray["Search_KEY"] . "%'";
+    JOIN drugstock ds ON ed.DrugCode3 = ds.LotNumber AND ed.AreaNo = ds.AreaNo AND ed.BlockNo = ds.BlockNo AND ed.DrugCode = ds.DrugCode AND ed.StoreID = ds.StoreID
+    WHERE ed.DrugName LIKE '%" . $dataArray["Search_KEY"] . "%'";
+
+
 
     $result = mysqli_query($connection, $SQL);
     $response = array(); // Create an empty array to store the response
@@ -1339,7 +1240,6 @@ function get_Store_with_DrugName($dataArray, $connection)
             // Fetch and process each row
             while ($row = mysqli_fetch_assoc($result)) {
                 $item = new stdClass();
-                $item->Result = true;
                 $item->Response = '成功執行搜尋!!';
                 $item->ElabelNumber = $row['ElabelNumber'];
                 $item->StoreID = $row['StoreID'];
@@ -1358,39 +1258,17 @@ function get_Store_with_DrugName($dataArray, $connection)
             }
         } else {
             $item = new stdClass();
-            $item->Result = false;
-            $item->Response = '無搜尋結果。';
+            $item->Response = 'No rows return Search BY DrugCode.';
             $response[] = $item;
         }
     } else {
         $item = new stdClass();
-        $item->Result = false;
         $item->Response = 'Error Search table: ' . mysqli_error($connection);
         $response[] = $item;
     }
 
     $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     echo $json . "<br>";
-}
-
-function getConnectionStatus($connection)
-{
-    $SERVER_STATUS = true;
-    $DB_CONNECT_STATUS = $connection ? true : false;
-    $MESSAGE = $DB_CONNECT_STATUS ? "連線成功" : "連線失敗";
-
-    $response = [
-        'SERVER_STATUS' => $SERVER_STATUS,
-        'DB_CONNECT_STATUS' => $DB_CONNECT_STATUS,
-        'MESSAGE' => $MESSAGE
-    ];
-
-    $RESPONSE = my_json_encode($response);
-    echo $RESPONSE;
-}
-function my_json_encode($data)
-{
-    return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }
 
 
