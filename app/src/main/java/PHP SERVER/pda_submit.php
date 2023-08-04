@@ -1,6 +1,7 @@
 ﻿<?php
 include("pda_connection.php");
 $connection = $GLOBALS['connection'];
+$AIMS_HOST= $GLOBALS['AIMS_HOST'];
 
 date_default_timezone_set('Asia/Taipei');
 
@@ -599,7 +600,7 @@ if (isset($_GET["DBoption"])) {
     }
 }
 //BlinkElabel("CYAN","1","05DBCD6FB69F",$AIMS_HOST);
-function blinkElabel($color, $duration, $labelCode, $aimsHost)
+function BlinkElabel($color, $duration, $labelCode, $aimsHost)
 {
     $url = "http://{$aimsHost}/labels/contents/led";
     $data = array(
@@ -754,7 +755,7 @@ function drugIN($connection, $dataArray, $ElabelNumber) //收入function
         //$affectedRows = $stmt->affected_rows;
         //$item -> response1 = '"drugStock收入作業資料插入成功，影響了"'. $affectedRows." 行";
         //echo "drugStock收入作業資料插入成功，影響了 {$affectedRows} 行<br>";
-        
+        echo "[{}]";
     } else {
         //$affectedRows = $stmt->affected_rows;
         //$item -> response1 = 'drugStock收入作業插入資料時發生錯誤: "' . $stmt->error;

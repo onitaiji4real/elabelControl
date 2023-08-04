@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 date_default_timezone_set('Asia/Taipei');
 ini_set('default_charset', 'UTF-8'); //編碼
@@ -11,7 +11,7 @@ $DB_HOST = 'localhost'; //DB位置
 $DB_USER = 'root'; //DB的登入帳號
 $DB_NAME = 'baiguo.v2'; //DB名稱
 $DB_PASSWORD = 'myt855myt855'; //DB密碼
-$AIMS_HOST = '192.168.219.100'; //AIMS 位置
+$AIMS_HOST = '192.168.5.137:9003'; //AIMS 位置
 
 
 
@@ -19,7 +19,7 @@ try {
     // 建立mysqli物件
     $connection = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME);
     $GLOBALS['connection'] = $connection;
-
+    $GLOBALS['AIMS_HOST'] = $AIMS_HOST;
     $connection->set_charset("utf8");
 
     // 檢查是否成功連線
